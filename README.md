@@ -143,3 +143,19 @@ Each notebook outputs `results.json` containing:
 
 Performance metrics are reported for each of the 7 Matryoshka dimensions.
 
+## Citation
+
+If you find this work useful in your research, please consider citing:
+
+```bibtex
+@misc{huy2026mipicmatryoshkarepresentationlearning,
+      title={MIPIC: Matryoshka Representation Learning via Self-Distilled Intra-Relational and Progressive Information Chaining},
+      author={Phung Gia Huy and Hai An Vu and Minh-Phuc Truong and Thang Duc Tran and Linh Ngo Van and Thanh Hong Nguyen and Trung Le},
+      year={2026},
+      eprint={2604.24374},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL},
+      url={https://arxiv.org/abs/2604.24374}
+}
+```
+
