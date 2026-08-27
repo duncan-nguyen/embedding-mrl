@@ -47,11 +47,22 @@ What each number is for
     semantic barycenter and the teacher-weighted one, i.e. how far this anchor
     still has to travel on the sphere. It should shrink as training proceeds.
 
+``dim_*/decoder_temperature`` (Eq 24)
+    ``tau_k``, the prefix's decoder temperature. The optimal decoder
+    ``p_T(S | Z_k)`` is flatter than ``p_T(S | X)``, so a learned ``tau_k``
+    should sit *above* ``tau_T`` at low rates and approach it as ``d_k -> D``.
+
+``dim_*/norm_share``
+    ``E ||h_{1:d_k}||^2 / ||h||^2``: the fraction of the raw embedding's energy
+    that the prefix holds. With an online self-teacher ``D_k = 0`` is reached
+    just as well by the tail going inert as by the prefix learning (Sec 4.9),
+    and this is the number that tells the two apart - the share of the
+    smallest prefix climbing toward 1 means the tail is being emptied.
+
 ``full_dim_distortion``
-    ``D_K``, which must be ~0 when ``tau_S == tau_T`` because the student and
-    the teacher are then the same distribution. Any other value is an
-    irreducible floor under the objective and almost always means mismatched
-    temperatures rather than a modelling choice.
+    ``D_K`` with an online teacher: ``0`` by construction, since ``tau_K =
+    tau_T`` and the student's full width *is* the teacher. Anything else means
+    the two sides of the estimator are not seeing the same candidates.
 
 ``monotonicity_violation_rate`` (Eq 108)
     Prop 2 guarantees ``D_k <= D_{k-1}`` only for the *optimal* decoder; the
@@ -61,7 +72,7 @@ What each number is for
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 
 import torch
 import torch.nn.functional as F
@@ -89,7 +100,7 @@ def batch_knn_recall(
     the teacher's similarity *scale*; recall only moves when the actual
     neighbor ordering improves, so the two disagreeing is itself informative.
     """
-    k = max(1, min(k, teacher_logits.size(0) - 1))
+    k = max(1, min(k, teacher_logits.size(1) - 1))
     teacher_top = teacher_logits.topk(k, dim=-1).indices
     student_top = student_logits.topk(k, dim=-1).indices
 
@@ -113,17 +124,28 @@ def semantic_barycenter_gap(
     return float(((probs_student - probs_teacher) @ student_z).norm(dim=-1).mean())
 
 
+def student_logits_to_candidates(
+    prefix: torch.Tensor, prefix_extra: torch.Tensor | None
+) -> torch.Tensor:
+    """The normalised candidate rows ``z_j`` that the ``[B, N]`` logits index."""
+    if prefix_extra is None:
+        return prefix
+    return torch.cat([prefix, F.normalize(prefix_extra.float(), dim=-1)], dim=0)
+
+
 @torch.no_grad()
 def neighborhood_diagnostics(
     student_repr: torch.Tensor,
     teacher_repr: torch.Tensor,
     dims: Sequence[int],
     teacher_temperature: float = 0.05,
-    student_temperature: float = 0.05,
+    student_temperature: float | Mapping[int, float] = 0.05,
     divergence: str = "forward_kl",
     candidates: str = "all",
     top_m: int = 32,
     knn_k: int = 5,
+    student_extra: torch.Tensor | None = None,
+    teacher_extra: torch.Tensor | None = None,
 ) -> dict[str, object]:
     """Every quantity above, for one batch.
 
@@ -133,13 +155,26 @@ def neighborhood_diagnostics(
             the numbers here are comparable to the logged loss.
         dims: nested dimensions to profile; the full width is included so the
             ``D_K ~ 0`` sanity check is always available.
+        student_temperature: one ``tau`` for every prefix, or ``{d_k: tau_k}``
+            (Eq 24). A dimension missing from the mapping - the full width -
+            uses ``teacher_temperature``, which is what keeps ``D_K = 0``.
+        student_extra / teacher_extra: the memory queue the loss used, so the
+            candidate set here matches the one in the logged distortion.
     """
     batch_size = student_repr.size(0)
     if batch_size < 3:
         return {}
 
-    teacher_logits = neighborhood_logits(teacher_repr, teacher_temperature)
-    full_student_logits = neighborhood_logits(student_repr, student_temperature)
+    def tau_for(dim: int) -> float:
+        if isinstance(student_temperature, Mapping):
+            return float(student_temperature.get(int(dim), teacher_temperature))
+        return float(student_temperature)
+
+    full_dim = student_repr.size(1)
+    teacher_logits = neighborhood_logits(teacher_repr, teacher_temperature, teacher_extra)
+    full_student_logits = neighborhood_logits(
+        student_repr, tau_for(full_dim), student_extra
+    )
     mask = candidate_mask(teacher_logits, full_student_logits, candidates, top_m)
 
     log_p = _masked_log_softmax(teacher_logits, mask)
@@ -156,10 +191,14 @@ def neighborhood_diagnostics(
 
     per_dim: dict[str, dict[str, float]] = {}
     profile: dict[int, float] = {}
+    raw = student_repr.float()
+    total_energy = raw.pow(2).sum(dim=-1).clamp_min(1e-12)
 
-    for dim in sorted({int(d) for d in dims if d <= student_repr.size(1)}):
-        prefix = F.normalize(student_repr[:, :dim].float(), dim=-1)
-        student_logits = neighborhood_logits(prefix, student_temperature)
+    for dim in sorted({int(d) for d in dims if d <= full_dim}):
+        tau = tau_for(dim)
+        prefix = F.normalize(raw[:, :dim], dim=-1)
+        prefix_extra = None if student_extra is None else student_extra[:, :dim]
+        student_logits = neighborhood_logits(prefix, tau, prefix_extra)
         log_q = _masked_log_softmax(student_logits, mask)
 
         distortion = float(divergence_from_log_probs(log_p, log_q, divergence))
@@ -168,9 +207,13 @@ def neighborhood_diagnostics(
             "distortion": distortion,
             # >1 means the prefix is worse than the zero-rate uniform decoder.
             "distortion_vs_zero_rate": distortion / zero_rate if zero_rate > 0 else float("nan"),
+            "decoder_temperature": tau,
             "student_entropy": float(_entropy(log_q).mean()),
             "knn_recall": batch_knn_recall(teacher_logits, student_logits, knn_k),
-            "barycenter_gap": semantic_barycenter_gap(probs_teacher, log_q.exp(), prefix),
+            "barycenter_gap": semantic_barycenter_gap(
+                probs_teacher, log_q.exp(), student_logits_to_candidates(prefix, prefix_extra)
+            ),
+            "norm_share": float((raw[:, :dim].pow(2).sum(dim=-1) / total_energy).mean()),
         }
 
     ordered = sorted(profile)
@@ -214,7 +257,10 @@ def format_diagnostics(record: dict[str, object], knn_k: int = 5) -> str:
         f"V_mono={record['monotonicity_violation_rate']:.2f}"
     )
 
-    columns = f"{'dim':>6} | {'D_k':>8} | {'D_k/D_0':>8} | {'gain':>8} | {'eta*1e3':>8} | {'kNN@' + str(knn_k):>8} | {'H(q_k)':>7} | {'|dbary|':>8}"
+    columns = (
+        f"{'dim':>6} | {'D_k':>8} | {'D_k/D_0':>8} | {'gain':>8} | {'eta*1e3':>8} | "
+        f"{'kNN@' + str(knn_k):>8} | {'H(q_k)':>7} | {'|dbary|':>8} | {'tau_k':>6} | {'share':>6}"
+    )
     lines = [header, "", columns, "-" * len(columns)]
 
     for dim, scores in record["per_dim"].items():
@@ -226,7 +272,8 @@ def format_diagnostics(record: dict[str, object], knn_k: int = 5) -> str:
             f"{'-' if gain is None else format(gain, '.4f'):>8} | "
             f"{'-' if eta is None else format(eta * 1e3, '.3f'):>8} | "
             f"{scores['knn_recall']:>8.3f} | {scores['student_entropy']:>7.3f} | "
-            f"{scores['barycenter_gap']:>8.4f}"
+            f"{scores['barycenter_gap']:>8.4f} | {scores['decoder_temperature']:>6.3f} | "
+            f"{scores['norm_share']:>6.3f}"
         )
     return "\n".join(lines)
 
@@ -236,4 +283,5 @@ __all__ = [
     "format_diagnostics",
     "neighborhood_diagnostics",
     "semantic_barycenter_gap",
+    "student_logits_to_candidates",
 ]

@@ -56,6 +56,57 @@ def _logits_block(
 # --------------------------------------------------------------------------- #
 # Distortion-rate profile (Sec 6.1)
 # --------------------------------------------------------------------------- #
+#: Multipliers of ``tau_S`` tried when calibrating the decoder temperature.
+#: ``tau_k`` only ever needs to go *up*: a prefix that has lost information
+#: should be less certain than the teacher, never more.
+DEFAULT_TEMPERATURE_FACTORS = (1.0, 1.25, 1.6, 2.0, 2.5, 3.2, 4.0, 5.0, 6.3, 8.0, 10.0)
+
+
+@torch.no_grad()
+def _distortions_over_temperatures(
+    student: torch.Tensor,
+    teacher: torch.Tensor,
+    teacher_temperature: float,
+    student_temperatures: Sequence[float],
+    divergence: str,
+    chunk: int,
+) -> list[float]:
+    """``D_k`` at several decoder temperatures in one pass over the corpus."""
+    if student.size(0) != teacher.size(0):
+        raise ValueError(
+            f"student has {student.size(0)} rows but teacher has {teacher.size(0)}"
+        )
+    if student.size(0) < 3:
+        raise ValueError("semantic distortion needs at least 3 items")
+
+    student = _normalize(student)
+    teacher = _normalize(teacher)
+
+    totals = [0.0] * len(student_temperatures)
+    count = 0
+    for start, end in _chunks(student.size(0), chunk):
+        teacher_logits = _logits_block(
+            teacher[start:end], teacher, teacher_temperature, start
+        )
+        mask = teacher_logits > torch.finfo(teacher_logits.dtype).min
+        log_p = _masked_log_softmax(teacher_logits, mask)
+        # The cosine block is shared; only the scale changes with tau.
+        cosine = _logits_block(student[start:end], student, 1.0, start)
+        rows = end - start
+
+        for index, tau in enumerate(student_temperatures):
+            student_logits = cosine / tau
+            student_logits = student_logits.masked_fill(
+                ~mask, torch.finfo(student_logits.dtype).min
+            )
+            value = divergence_from_log_probs(
+                log_p, _masked_log_softmax(student_logits, mask), divergence
+            )
+            totals[index] += float(value) * rows
+        count += rows
+    return [total / count for total in totals]
+
+
 @torch.no_grad()
 def semantic_distortion(
     student: torch.Tensor,
@@ -71,35 +122,34 @@ def semantic_distortion(
         student: ``[N, d]`` prefix embeddings.
         teacher: ``[N, D]`` reference-teacher embeddings for the same items.
     """
-    if student.size(0) != teacher.size(0):
-        raise ValueError(
-            f"student has {student.size(0)} rows but teacher has {teacher.size(0)}"
-        )
-    if student.size(0) < 3:
-        raise ValueError("semantic distortion needs at least 3 items")
+    return _distortions_over_temperatures(
+        student, teacher, teacher_temperature, [student_temperature], divergence, chunk
+    )[0]
 
-    student = _normalize(student)
-    teacher = _normalize(teacher)
 
-    total, count = 0.0, 0
-    for start, end in _chunks(student.size(0), chunk):
-        teacher_logits = _logits_block(
-            teacher[start:end], teacher, teacher_temperature, start
-        )
-        student_logits = _logits_block(
-            student[start:end], student, student_temperature, start
-        )
-        mask = teacher_logits > torch.finfo(teacher_logits.dtype).min
+@torch.no_grad()
+def calibrated_semantic_distortion(
+    student: torch.Tensor,
+    teacher: torch.Tensor,
+    teacher_temperature: float = 0.05,
+    student_temperature: float = 0.05,
+    divergence: str = "forward_kl",
+    chunk: int = DEFAULT_CHUNK,
+    factors: Sequence[float] = DEFAULT_TEMPERATURE_FACTORS,
+) -> tuple[float, float]:
+    """``min_tau D_k(tau)`` over ``tau in student_temperature * factors`` (Eq 24).
 
-        value = divergence_from_log_probs(
-            _masked_log_softmax(teacher_logits, mask),
-            _masked_log_softmax(student_logits, mask),
-            divergence,
-        )
-        rows = end - start
-        total += float(value) * rows
-        count += rows
-    return total / count
+    The infimum over the cosine-decoder family is the tightest value of Prop 1's
+    bound the protocol can state, and it stops a model being charged for a
+    prefix that is merely less *certain* than the teacher rather than wrong
+    about the ordering. Returns ``(distortion, temperature)``.
+    """
+    temperatures = [student_temperature * float(f) for f in factors]
+    values = _distortions_over_temperatures(
+        student, teacher, teacher_temperature, temperatures, divergence, chunk
+    )
+    best = min(range(len(values)), key=lambda i: values[i])
+    return values[best], temperatures[best]
 
 
 @torch.no_grad()
@@ -149,6 +199,41 @@ def distortion_profile(
         for dim in sorted(dims)
         if dim <= student.size(1)
     }
+
+
+@torch.no_grad()
+def calibrated_distortion_profile(
+    student: torch.Tensor,
+    teacher: torch.Tensor,
+    dims: Sequence[int],
+    teacher_temperature: float = 0.05,
+    student_temperature: float = 0.05,
+    divergence: str = "forward_kl",
+    chunk: int = DEFAULT_CHUNK,
+    factors: Sequence[float] = DEFAULT_TEMPERATURE_FACTORS,
+) -> tuple[dict[int, float], dict[int, float]]:
+    """Eq 86-87 with a per-prefix decoder temperature (Eq 24).
+
+    Returns ``(profile, temperatures)``: ``D_k^ref`` at its best ``tau_k``, and
+    the ``tau_k`` that achieved it.
+    """
+    profile: dict[int, float] = {}
+    temperatures: dict[int, float] = {}
+    for dim in sorted(dims):
+        if dim > student.size(1):
+            continue
+        value, tau = calibrated_semantic_distortion(
+            student[:, :dim],
+            teacher,
+            teacher_temperature=teacher_temperature,
+            student_temperature=student_temperature,
+            divergence=divergence,
+            chunk=chunk,
+            factors=factors,
+        )
+        profile[int(dim)] = value
+        temperatures[int(dim)] = tau
+    return profile, temperatures
 
 
 def normalized_distortion(

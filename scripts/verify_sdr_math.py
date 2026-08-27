@@ -482,6 +482,133 @@ def check_rotation() -> None:
     )
 
 
+# --------------------------------------------------------------------------- #
+# 7. The decoder temperature (Eq 24) and the practical gap epsilon_k (Eq 31)
+# --------------------------------------------------------------------------- #
+def check_decoder_temperature() -> None:
+    section("Decoder temperature (Eq 24) and the practical gap (Eq 31)")
+    torch.manual_seed(6)
+    # A teacher whose semantic mass decays along the coordinates, i.e. what a
+    # trained Matryoshka code is supposed to look like.
+    teacher = torch.randn(256, 128) * torch.linspace(3.0, 0.3, 128)
+    tau_t = 0.05
+    grid = [0.05, 0.06, 0.08, 0.1, 0.13, 0.16, 0.2, 0.3, 0.4]
+
+    best = {}
+    slack = {}
+    for d in (8, 32, 96):
+        values = {
+            tau: float(semantic_neighborhood_distortion(teacher[:, :d], teacher, tau_t, tau))
+            for tau in grid
+        }
+        best[d] = min(values, key=values.get)
+        slack[d] = values[tau_t] - values[best[d]]
+
+    check(
+        "Eq 24  the optimal decoder is flatter than the teacher at low rate (tau_k > tau_T)",
+        best[8] > tau_t,
+        "argmin tau_k: " + ", ".join(f"d={d}: {t:.2f}" for d, t in best.items()),
+    )
+    check(
+        "Eq 24  tau_k* decreases toward tau_T as the prefix grows",
+        best[8] >= best[32] >= best[96],
+    )
+    check(
+        "Eq 31  tying tau_k = tau_T leaves a removable part of epsilon_k on the table",
+        slack[8] > 0.05 * max(slack[8], 1e-9) and slack[8] > 0,
+        "D(tau_T) - min_tau D: " + ", ".join(f"d={d}: {s:.4f}" for d, s in slack.items()),
+    )
+
+    # A learnable tau_k is the infimum over the decoder family: it can only go down.
+    from embedding_mrl.losses.sdr import SemanticDistortionLoss
+
+    loss = SemanticDistortionLoss([8, 32, 128], 128, tau_t, tau_t, learnable_temperature=True)
+    before = {d: float(v) for d, v in loss(teacher, teacher)["distortions"].items()}
+    optimiser = torch.optim.Adam(loss.parameters(), lr=0.05)
+    for _ in range(80):
+        optimiser.zero_grad()
+        loss(teacher, teacher)["sem_loss"].backward()
+        optimiser.step()
+    after = {d: float(v) for d, v in loss(teacher, teacher)["distortions"].items()}
+    check(
+        "Eq 32  a learnable tau_k never raises D_k above the tied value",
+        all(after[d] <= before[d] + 1e-6 for d in before),
+        "D_8: " + f"{before[8]:.4f} -> {after[8]:.4f}, tau_8 = {loss.student_temperatures[8]:.3f}",
+    )
+
+
+# --------------------------------------------------------------------------- #
+# 8. The monotonic hinge (Eq 54, Eq 69)
+# --------------------------------------------------------------------------- #
+def check_monotonic_hinge() -> None:
+    section("Monotonic refinement hinge (Eq 54, Eq 69)")
+    from embedding_mrl.losses.sdr import SemanticDistortionLoss
+
+    lower = torch.tensor(0.2, requires_grad=True)
+    upper = torch.tensor(0.5, requires_grad=True)
+    loss = SemanticDistortionLoss([4, 8, 16], 16, lambda_mono=1.0)
+    loss.monotonic_penalty({4: lower, 8: upper}).backward()
+    check(
+        "Eq 54  d hinge / d D_k = 1 on a violated edge",
+        float(upper.grad) == 1.0,
+    )
+    check(
+        "Eq 54  d hinge / d D_{k-1} = 0: the lower prefix is a stop-gradient target",
+        lower.grad is None or float(lower.grad) == 0.0,
+        "a naive hinge has -1 here and is minimised by degrading the smaller prefix",
+    )
+
+    torch.manual_seed(8)
+    teacher = torch.randn(48, 16)
+    student = teacher.clone()
+    student[:, 4:8] = 6.0 * torch.randn(48, 4)  # break the middle block -> violations
+    full = SemanticDistortionLoss([4, 8, 16], 16, lambda_mono=1.0, rate_prior_kind="inverse_dim")
+    exact = float(full(student, teacher)["mono_loss"])
+    sampled = SemanticDistortionLoss(
+        [4, 8, 16], 16, lambda_mono=1.0, rate_prior_kind="inverse_dim", stochastic_rate=True
+    )
+    expectation = sum(
+        w * float(sampled(student, teacher, rate_index=k)["mono_loss"])
+        for k, w in enumerate(sampled.rate_prior)
+    )
+    check(
+        "Eq 69  E_{k~pi}[hinge_k / pi_k] = sum_k hinge_k",
+        exact > 0 and abs(expectation - exact) < 1e-5,
+        f"sum = {exact:.5f}, E = {expectation:.5f}",
+    )
+
+
+# --------------------------------------------------------------------------- #
+# 9. What the online self-teacher does *not* rule out (Sec 4.9)
+# --------------------------------------------------------------------------- #
+def check_tail_inert_minimiser() -> None:
+    section("Online self-teacher: tail-inert minimisers (Sec 4.9)")
+    from embedding_mrl.losses.infonce import matryoshka_info_nce
+    from embedding_mrl.losses.sdr import SemanticDistortionLoss
+
+    torch.manual_seed(9)
+    batch, full = 16, 128
+    dims = [8, 16, 32, 64, 128]
+    loss = SemanticDistortionLoss(dims, full, 0.05, 0.05)
+    prefix = F.normalize(torch.randn(batch, 8), dim=-1)
+    tail = torch.randn(batch, full - 8) / (full - 8) ** 0.5
+
+    rows = []
+    for scale in (1.0, 0.3, 0.0):
+        h = torch.cat([prefix, scale * tail], dim=1)
+        view = h * (1 + 0.3 * torch.randn_like(h))  # dropout-like second view
+        task = float(matryoshka_info_nce(h, view, dims, temperature=0.05)[0])
+        sem = float(loss(h, h.detach())["sem_loss"])
+        rows.append((scale, task, sem))
+
+    check(
+        "Sec 4.9  L_sem -> 0 as the tail goes inert while L_task is already saturated",
+        rows[-1][2] < 1e-6 and rows[0][2] > rows[-1][2] and abs(rows[0][1] - rows[-1][1]) < 0.5,
+        "; ".join(f"tail x{s:g}: L_task={t:.3f}, L_sem={m:.4f}" for s, t, m in rows)
+        + "  -> use an EMA/frozen teacher or watch norm_share",
+    )
+
+
 def main() -> int:
     print(__doc__.strip().split("\n")[0])
     print("=" * 74)
@@ -492,6 +619,9 @@ def main() -> int:
     check_rate_sampling()
     check_linear_gaussian()
     check_rotation()
+    check_decoder_temperature()
+    check_monotonic_hinge()
+    check_tail_inert_minimiser()
 
     failures = [name for name, passed, _ in _RESULTS if not passed]
     print("\n" + "=" * 74)

@@ -1,7 +1,7 @@
 # Fdb version 4
-["pdflatex"] 1787823104.86999 "/home/duncan-nguyen/research/embedding-mrl/docs/latex/main.tex" "main.pdf" "main" 1787823105.76847 0
+["pdflatex"] 1787830719.42111 "/home/duncan-nguyen/research/embedding-mrl/docs/latex/main.tex" "main.pdf" "main" 1787830720.27373 0
   "/etc/texmf/web2c/texmf.cnf" 1773138757.194 475 c0e671620eb5563b2130f56340a5fde8 ""
-  "/home/duncan-nguyen/research/embedding-mrl/docs/latex/main.tex" 1787823091.89495 66365 aa2ca0fe78b06fcc67e05f48f8b56002 ""
+  "/home/duncan-nguyen/research/embedding-mrl/docs/latex/main.tex" 1787830718.13583 77742 d6af1e31af6ab753ec3199d8b11aeabf ""
   "/usr/share/texlive/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/jknappen/ec/tcrm1095.tfm" 1136768653 1536 02c06700a42be0f5a28664c7273f82e7 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex7.tfm" 1246382020 1004 54797486969f23fa377b128694d548df ""
@@ -132,9 +132,9 @@
   "/usr/share/texmf/web2c/texmf.cnf" 1707919699 40399 f2c302f7d2af602abb742093540a5834 ""
   "/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map" 1773138781.56912 5472669 54eaf61a88b6b7896ebd0dac973cb29c ""
   "/var/lib/texmf/web2c/pdftex/pdflatex.fmt" 1773138815 8213355 5c73132d1f44e382582447bfc6ff5c5e ""
-  "main.aux" 1787823105.67965 12471 7bfa8d55b5a12cad1fe5ac18add82e6f "pdflatex"
-  "main.out" 1787823105.67965 10702 7d37c7ac79420c2a1d68c49ddbf46ae6 "pdflatex"
-  "main.tex" 1787823091.89495 66365 aa2ca0fe78b06fcc67e05f48f8b56002 ""
+  "main.aux" 1787830720.17638 13772 c9bd71406e7b06b4f51878aca99c060b "pdflatex"
+  "main.out" 1787830720.17638 10958 ac5fb2d11ae4b7825cdd05218071b483 "pdflatex"
+  "main.tex" 1787830718.13583 77742 d6af1e31af6ab753ec3199d8b11aeabf ""
   (generated)
   "main.aux"
   "main.log"

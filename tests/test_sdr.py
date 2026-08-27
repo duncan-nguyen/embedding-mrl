@@ -264,6 +264,155 @@ def test_the_objective_backpropagates_into_the_student_only():
     assert teacher.grad is None, "Eq 21 makes the teacher a stop-gradient target"
 
 
+def test_the_hinge_never_pushes_the_lower_prefix_up():
+    """Eq 54 with sg(D_{k-1}): the cheapest way to satisfy [D_k - D_{k-1}]_+ must
+    not be to make the *smaller* prefix worse."""
+    loss = make_loss(lambda_mono=1.0)
+    lower = torch.tensor(0.2, requires_grad=True)
+    upper = torch.tensor(0.5, requires_grad=True)
+
+    loss.monotonic_penalty({4: lower, 8: upper}).backward()
+    assert lower.grad is None or float(lower.grad) == 0.0
+    assert float(upper.grad) == pytest.approx(1.0)
+
+
+def test_the_sampled_edge_is_unbiased_for_the_full_monotonic_sum():
+    """Eq 69: E_{k ~ pi}[ hinge_k / pi_k ] == sum_k hinge_k (Eq 54)."""
+    teacher = structured()
+    student = teacher.clone()
+    # Breaking the middle block of an otherwise perfect student makes D_8 > D_4.
+    student[:, 4:8] = 6.0 * torch.randn(B, 4)
+
+    full = make_loss(lambda_mono=1.0, rate_prior_kind="inverse_dim")
+    exact = float(full(student, teacher)["mono_loss"])
+    assert exact > 0, "the test needs at least one violated edge"
+
+    sampled = make_loss(
+        lambda_mono=1.0, rate_prior_kind="inverse_dim", stochastic_rate=True
+    )
+    expectation = sum(
+        weight * float(sampled(student, teacher, rate_index=k)["mono_loss"])
+        for k, weight in enumerate(sampled.rate_prior)
+    )
+    assert expectation == pytest.approx(exact, rel=1e-5)
+
+
+# --------------------------------------------------------------------------- #
+# Decoder temperature (Eq 24)
+# --------------------------------------------------------------------------- #
+def ordered_teacher(batch: int = 256, dim: int = 64) -> torch.Tensor:
+    """Semantic mass decays smoothly along the coordinates, like a trained Matryoshka code."""
+    return torch.randn(batch, dim) * torch.linspace(3.0, 0.3, dim)
+
+
+def best_temperature(prefix: torch.Tensor, teacher: torch.Tensor) -> float:
+    grid = [0.05, 0.07, 0.1, 0.14, 0.2, 0.3, 0.4]
+    return min(
+        grid,
+        key=lambda tau: float(semantic_neighborhood_distortion(prefix, teacher, 0.05, tau)),
+    )
+
+
+def test_the_optimal_decoder_is_flatter_the_smaller_the_prefix():
+    """The optimal decoder p_T(S | Z_k) is a posterior average, hence flatter than
+    p_T(S | X); the practical tau_k must be allowed above tau_T to express it."""
+    teacher = ordered_teacher()
+    tau_small = best_temperature(teacher[:, :4], teacher)
+    tau_large = best_temperature(teacher[:, :32], teacher)
+
+    assert tau_small > 0.05, "tied temperatures are not the optimal decoder at low rate"
+    assert tau_small >= tau_large
+
+
+def test_a_learnable_temperature_only_ever_tightens_the_bound():
+    teacher = ordered_teacher()
+    loss = make_loss(learnable_temperature=True)
+    assert any(p.requires_grad for p in loss.parameters()), "tau_k must be a parameter"
+
+    before = {d: float(v.detach()) for d, v in loss(teacher, teacher)["distortions"].items()}
+    optimiser = torch.optim.Adam(loss.parameters(), lr=0.05)
+    for _ in range(60):
+        optimiser.zero_grad()
+        loss(teacher, teacher)["sem_loss"].backward()
+        optimiser.step()
+    after = {d: float(v.detach()) for d, v in loss(teacher, teacher)["distortions"].items()}
+
+    assert all(after[d] <= before[d] + 1e-6 for d in before), (before, after)
+    assert after[4] < before[4]
+    temperatures = loss.student_temperatures
+    assert temperatures[4] > 0.05, "the smallest prefix should have warmed its decoder"
+    assert temperatures[4] >= temperatures[16] - 1e-6
+
+
+def test_a_fixed_temperature_has_no_parameters_and_stays_put():
+    loss = make_loss(learnable_temperature=False)
+    assert list(loss.parameters()) == []
+    assert loss.student_temperatures == {4: pytest.approx(0.05), 8: pytest.approx(0.05), 16: pytest.approx(0.05)}
+
+
+def test_temperatures_are_clamped_to_their_bounds():
+    loss = make_loss(learnable_temperature=True, temperature_bounds=(0.02, 0.2))
+    with torch.no_grad():
+        loss.log_tau.fill_(10.0)
+    assert all(t == pytest.approx(0.2) for t in loss.student_temperatures.values())
+    with pytest.raises(ValueError, match="temperature_bounds"):
+        make_loss(student_temperature=0.5, temperature_bounds=(0.01, 0.1))
+
+
+# --------------------------------------------------------------------------- #
+# Memory queue (Sec 4.2)
+# --------------------------------------------------------------------------- #
+def test_queue_entries_widen_the_candidate_set_and_receive_no_gradient():
+    z = structured().requires_grad_(True)
+    queue = structured(batch=40).requires_grad_(True)
+    logits = neighborhood_logits(z, 0.05, extra=queue)
+
+    assert logits.shape == (B, B + 40)
+    probs = torch.softmax(logits, dim=-1)
+    assert float(probs.detach()[torch.arange(B), torch.arange(B)].abs().max()) == 0.0
+    assert torch.allclose(probs.detach().sum(-1), torch.ones(B), atol=1e-5)
+    (probs * torch.randn_like(probs)).sum().backward()
+    assert torch.isfinite(z.grad).all()
+    assert queue.grad is None, "queue rows are candidates, never anchors"
+
+
+def test_the_full_width_still_has_zero_distortion_with_a_queue():
+    z, queue = structured(), structured(batch=40)
+    value = semantic_neighborhood_distortion(
+        z, z, 0.05, 0.05, student_extra=queue, teacher_extra=queue
+    )
+    assert abs(float(value)) < 1e-6
+
+    # The raw estimator wants queue rows at the prefix width; the loss module
+    # does that slicing itself (see the test below).
+    prefixed = semantic_neighborhood_distortion(
+        z[:, :4], z, 0.05, 0.05, student_extra=queue[:, :4], teacher_extra=queue
+    )
+    assert float(prefixed) > 0
+    with pytest.raises(ValueError, match="extra candidates must be"):
+        semantic_neighborhood_distortion(
+            z[:, :4], z, 0.05, 0.05, student_extra=queue, teacher_extra=queue
+        )
+
+
+def test_queue_sides_must_agree():
+    z = structured()
+    with pytest.raises(ValueError, match="together"):
+        semantic_neighborhood_distortion(z, z, student_extra=structured(batch=5))
+    with pytest.raises(ValueError, match="disagree"):
+        semantic_neighborhood_distortion(
+            z, z, student_extra=structured(batch=5), teacher_extra=structured(batch=6)
+        )
+
+
+def test_the_loss_module_slices_the_queue_to_each_prefix():
+    loss = make_loss()
+    z, queue = structured(), structured(batch=40)
+    outcome = loss(z, z, student_extra=queue, teacher_extra=queue)
+    assert set(outcome["distortions"]) == {4, 8, 16}
+    assert set(outcome["temperatures"]) == {4, 8, 16}
+
+
 def test_a_config_without_any_truncated_prefix_is_rejected():
     with pytest.raises(ValueError, match="no truncated prefix"):
         SemanticDistortionLoss(dims=[32], full_dim=32)
@@ -382,6 +531,44 @@ def test_diagnostics_decline_to_run_on_a_batch_too_small_to_have_neighbours():
     assert neighborhood_diagnostics(torch.randn(2, D), torch.randn(2, D), DIMS) == {}
 
 
+def test_diagnostics_report_norm_share_and_per_prefix_temperatures():
+    teacher = structured()
+    record = neighborhood_diagnostics(
+        teacher, teacher, DIMS, student_temperature={4: 0.2, 8: 0.1, 16: 0.07}
+    )
+    per_dim = record["per_dim"]
+
+    shares = [per_dim[f"dim_{d}"]["norm_share"] for d in DIMS]
+    assert shares == sorted(shares) and shares[-1] == pytest.approx(1.0)
+    assert per_dim["dim_8"]["norm_share"] > 0.7, "structured() puts its mass in 8 coords"
+
+    assert per_dim["dim_4"]["decoder_temperature"] == 0.2
+    # The full width is not in the mapping, so it decodes at tau_T and D_K = 0.
+    assert per_dim["dim_32"]["decoder_temperature"] == 0.05
+    assert abs(record["full_dim_distortion"]) < 1e-6
+
+
+def test_diagnostics_use_the_same_queue_the_loss_did():
+    teacher, queue = structured(), structured(batch=40)
+    record = neighborhood_diagnostics(
+        teacher, teacher, DIMS, student_extra=queue, teacher_extra=queue
+    )
+    assert record["candidate_support"] == pytest.approx(B - 1 + 40)
+    assert abs(record["full_dim_distortion"]) < 1e-6
+
+
+def test_calibrated_distortion_is_never_worse_than_the_tied_decoder():
+    teacher = ordered_teacher(batch=200, dim=D)
+    for dim in (4, 8):
+        tied = geometry.semantic_distortion(teacher[:, :dim], teacher)
+        best, tau = geometry.calibrated_semantic_distortion(teacher[:, :dim], teacher)
+        assert best <= tied + 1e-9
+        assert tau >= 0.05
+    profile, temperatures = geometry.calibrated_distortion_profile(teacher, teacher, DIMS)
+    assert profile[D] == pytest.approx(0.0, abs=1e-6)
+    assert temperatures[4] >= temperatures[16]
+
+
 # --------------------------------------------------------------------------- #
 # Trainer wiring
 # --------------------------------------------------------------------------- #
@@ -456,6 +643,38 @@ def test_a_frozen_teacher_needs_a_checkpoint_to_freeze():
         sdr_config(Path("unused"), teacher="frozen")
 
 
+def test_decoder_temperatures_are_optimised_by_the_trainer(tmp_path, offline_backbone):
+    trainer = build_trainer(sdr_config(tmp_path, learnable_temperature=True))
+    optimised = {id(p) for group in trainer.optimizer.param_groups for p in group["params"]}
+    assert id(trainer.sdr_loss.log_tau) in optimised
+
+    before = trainer.sdr_loss.log_tau.detach().clone()
+    trainer.train()
+    assert not torch.equal(before, trainer.sdr_loss.log_tau.detach()), "tau_k never moved"
+
+
+def test_fixed_decoder_temperatures_stay_out_of_the_optimiser(tmp_path, offline_backbone):
+    trainer = build_trainer(sdr_config(tmp_path, learnable_temperature=False))
+    optimised = {id(p) for group in trainer.optimizer.param_groups for p in group["params"]}
+    assert id(trainer.sdr_loss.log_tau) not in optimised
+    assert trainer.sdr_loss not in trainer.extra_modules
+
+
+def test_the_memory_queue_fills_and_feeds_the_loss(tmp_path, offline_backbone):
+    trainer = build_trainer(sdr_config(tmp_path, queue_size=20))
+    assert trainer.queue_extras() == (None, None)
+
+    trainer.train()  # 32 samples / batch 8 = 4 steps x 2 views = 64 rows > 20
+    student_extra, teacher_extra = trainer.queue_extras()
+    assert student_extra.shape == (20, 32) and teacher_extra.shape == (20, 32)
+    assert torch.equal(student_extra, teacher_extra), "online: the teacher is the student"
+
+
+def test_the_queue_refuses_the_cka_geometry():
+    with pytest.raises(ValueError, match="incompatible with geometry='cka'"):
+        sdr_config(Path("unused"), queue_size=8, geometry="cka")
+
+
 def test_diagnostics_are_appended_to_a_jsonl_log(tmp_path, offline_backbone):
     import json
 
@@ -504,6 +723,9 @@ def test_the_semantic_protocol_lands_in_the_report(tmp_path, offline_backbone):
     assert semantic["reference"] == "self"
     assert set(semantic["distortion"]) == {"dim_8", "dim_16", "dim_32"}
     assert abs(semantic["distortion"]["dim_32"]) < 1e-5
+    assert semantic["student_temperature_calibrated"] is True
+    assert set(semantic["student_temperatures"]) == {"dim_8", "dim_16", "dim_32"}
+    assert all(t >= 0.05 for t in semantic["student_temperatures"].values())
     assert semantic["normalized_distortion"]["dim_32"] == pytest.approx(0.0, abs=1e-6)
     assert 0.0 <= semantic["sdra"]
     assert semantic["preservation"]["dim_32"]["knn_recall"] == pytest.approx(1.0)

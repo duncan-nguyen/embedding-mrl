@@ -292,13 +292,24 @@ class MatryoshkaEvaluator:
         if teacher is None:
             teacher = student  # self-reference; flagged in the payload below
 
-        profile = geometry.distortion_profile(
-            student,
-            teacher,
-            self.dims,
-            teacher_temperature=cfg.distortion_teacher_temperature,
-            student_temperature=cfg.distortion_student_temperature,
-        )
+        if cfg.calibrate_student_temperature:
+            # Eq 24: the infimum over decoder temperatures, per prefix.
+            profile, temperatures = geometry.calibrated_distortion_profile(
+                student,
+                teacher,
+                self.dims,
+                teacher_temperature=cfg.distortion_teacher_temperature,
+                student_temperature=cfg.distortion_student_temperature,
+            )
+        else:
+            profile = geometry.distortion_profile(
+                student,
+                teacher,
+                self.dims,
+                teacher_temperature=cfg.distortion_teacher_temperature,
+                student_temperature=cfg.distortion_student_temperature,
+            )
+            temperatures = {d: cfg.distortion_student_temperature for d in profile}
         zero_rate = geometry.zero_rate_distortion(
             teacher, temperature=cfg.distortion_teacher_temperature
         )
@@ -330,6 +341,8 @@ class MatryoshkaEvaluator:
             "corpus_size": len(sentences),
             "teacher_temperature": cfg.distortion_teacher_temperature,
             "student_temperature": cfg.distortion_student_temperature,
+            "student_temperature_calibrated": bool(cfg.calibrate_student_temperature),
+            "student_temperatures": {f"dim_{d}": v for d, v in temperatures.items()},
             "zero_rate_distortion": zero_rate,
             "distortion": {f"dim_{d}": v for d, v in profile.items()},
             "normalized_distortion": {f"dim_{d}": v for d, v in normalized.items()},
