@@ -9,9 +9,19 @@ from pathlib import Path
 from typing import List, Optional
 
 from .config import ExperimentConfig
-from .utils import setup_logging
 
 LOGGER = logging.getLogger("embedding_mrl")
+
+
+def _setup_logging(level: int) -> None:
+    """Local copy so ``--print-config`` works without numpy/torch installed."""
+    logging.basicConfig(
+        level=level,
+        format="%(asctime)s | %(levelname)-7s | %(message)s",
+        datefmt="%H:%M:%S",
+    )
+    for noisy in ("httpx", "httpcore", "urllib3", "filelock", "huggingface_hub"):
+        logging.getLogger(noisy).setLevel(logging.WARNING)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -47,7 +57,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: Optional[List[str]] = None) -> int:
     args = build_parser().parse_args(argv)
-    setup_logging(logging.DEBUG if args.verbose else logging.INFO)
+    _setup_logging(logging.DEBUG if args.verbose else logging.INFO)
 
     cfg = ExperimentConfig.load(args.config, args.overrides)
     if args.output_dir:

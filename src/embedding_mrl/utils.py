@@ -24,6 +24,9 @@ def setup_logging(level: int = logging.INFO) -> None:
     # Hub/HTTP chatter drowns out the training log at INFO.
     for noisy in ("httpx", "httpcore", "urllib3", "filelock", "huggingface_hub"):
         logging.getLogger(noisy).setLevel(logging.WARNING)
+    # Hub/HTTP chatter drowns out the training log at INFO.
+    for noisy in ("httpx", "httpcore", "urllib3", "filelock", "huggingface_hub"):
+        logging.getLogger(noisy).setLevel(logging.WARNING)
 
 
 def set_seed(seed: int) -> None:

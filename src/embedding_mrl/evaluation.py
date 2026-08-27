@@ -198,7 +198,6 @@ class MatryoshkaEvaluator:
         for dim in self.dims:
             clf = LogisticRegression(
                 random_state=self.cfg.eval.logreg_seed,
-                n_jobs=1,
                 max_iter=self.cfg.eval.logreg_max_iter,
                 verbose=0,
             )
