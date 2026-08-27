@@ -29,6 +29,7 @@ src/embedding_mrl/
 scripts/train.py    run without installing the package
 scripts/run_all.sh  run every experiment in sequence
 scripts/verify_sdr_math.py  check the SDR-MRL code against the paper's proofs
+notebooks/colab/     run_experiment.ipynb — one experiment on Colab, GPU included
 Dockerfile          self-contained training image (code + data + models)
 docker/             build/push scripts, model baking, docker docs
 tests/              173 tests, fully offline (no model downloads)
@@ -42,6 +43,23 @@ pip install -e .            # or: pip install -r requirements.txt
 ```
 
 ## Usage
+
+### On Colab
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/duncan-nguyen/embedding-mrl/blob/main/notebooks/colab/run_experiment.ipynb)
+
+`notebooks/colab/run_experiment.ipynb` clones this repo, installs what Colab is
+missing, and runs one experiment end to end. Method, backbone and every training
+and SDR-MRL setting are a form at the top of the notebook — pick them, then
+*Runtime → Run all*. The training corpus and all evaluation CSVs ship in the
+repo, so the only runtime download is the backbone itself. It finishes with the
+results table, the quality- and distortion-rate curves, and the training
+diagnostics.
+
+BERT-base and TinyBERT-6L fit a free T4; BGE-M3 and Qwen3-0.6B need
+`BATCH_SIZE` around 4–8.
+
+### Locally
 
 ```bash
 # train + evaluate

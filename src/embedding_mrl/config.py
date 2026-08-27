@@ -7,6 +7,7 @@ that configs can be loaded and validated without a GPU stack installed.
 from __future__ import annotations
 
 import copy
+import re
 from collections.abc import Sequence
 from dataclasses import dataclass, field, fields, is_dataclass
 from pathlib import Path
@@ -110,6 +111,32 @@ class TrainConfig:
     #: Free the CUDA cache every N steps. 0 disables (the notebooks did it every
     #: step, which is very slow; 0 or a large value is usually better).
     empty_cache_every: int = 0
+
+    def __post_init__(self) -> None:
+        # A quoted "2e-5" in a YAML file, or any other string that slips into a
+        # numeric field, otherwise travels all the way into the optimiser and
+        # fails there with a TypeError that says nothing about the config.
+        for name in ("lr", "weight_decay", "warmup_ratio", "min_lr"):
+            value = getattr(self, name)
+            if not isinstance(value, (int, float)) or isinstance(value, bool):
+                raise TypeError(
+                    f"train.{name} must be a number, got {value!r} "
+                    f"({type(value).__name__})"
+                )
+        for name in ("epochs", "batch_size", "seed", "empty_cache_every"):
+            value = getattr(self, name)
+            if not isinstance(value, int) or isinstance(value, bool):
+                raise TypeError(
+                    f"train.{name} must be an integer, got {value!r} "
+                    f"({type(value).__name__})"
+                )
+        if self.max_grad_norm is not None and not isinstance(
+            self.max_grad_norm, (int, float)
+        ):
+            raise TypeError(
+                f"train.max_grad_norm must be a number or null, "
+                f"got {self.max_grad_norm!r}"
+            )
 
 
 @dataclass
@@ -496,6 +523,26 @@ def _deep_merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any
     return out
 
 
+#: Scientific notation that PyYAML refuses to read as a float (see below).
+_SCIENTIFIC = re.compile(r"^[-+]?(?:[0-9]+\.?[0-9]*|\.[0-9]+)[eE][-+]?[0-9]+$")
+
+
+def _parse_override_value(text: str) -> Any:
+    """Parse one ``--set`` value.
+
+    ``yaml.safe_load`` implements YAML 1.1, whose float resolver demands *both*
+    a decimal point and a signed exponent. So ``2e-5`` - the obvious thing to
+    type for a learning rate - comes back as the **string** ``"2e-5"`` and
+    silently poisons a numeric field, surfacing much later as a confusing
+    ``TypeError`` inside the optimiser. Close exactly that gap and leave every
+    other YAML behaviour alone.
+    """
+    value = yaml.safe_load(text)
+    if isinstance(value, str) and _SCIENTIFIC.match(value.strip()):
+        return float(value)
+    return value
+
+
 def _apply_override(raw: dict[str, Any], override: str) -> None:
     """Apply a ``dotted.key=value`` override in place (value parsed as YAML)."""
     if "=" not in override:
@@ -507,7 +554,7 @@ def _apply_override(raw: dict[str, Any], override: str) -> None:
         node = node.setdefault(part, {})
         if not isinstance(node, dict):
             raise ValueError(f"cannot descend into non-mapping while setting {key!r}")
-    node[parts[-1]] = yaml.safe_load(value)
+    node[parts[-1]] = _parse_override_value(value)
 
 
 def _build(cls: type, raw: Any) -> Any:

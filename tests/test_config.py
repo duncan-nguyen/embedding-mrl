@@ -125,3 +125,61 @@ def test_gamma_schedule_must_match_the_truncated_prefixes():
         ExperimentConfig.from_dict(
             {"method": "mipic", "mipic": {"gamma_schedule": [0.2, 0.3]}}
         )
+
+
+# --------------------------------------------------------------------------- #
+# CLI override parsing
+# --------------------------------------------------------------------------- #
+@pytest.mark.parametrize(
+    "text,expected",
+    [
+        ("2e-5", 2e-5),      # PyYAML 1.1 reads this as a *string* on its own
+        ("2e-05", 2e-5),
+        ("2E-5", 2e-5),
+        ("2.0e-5", 2e-5),    # the form YAML does accept
+        ("1e10", 1e10),
+        ("0.05", 0.05),
+    ],
+)
+def test_scientific_notation_overrides_parse_as_numbers(text, expected):
+    """`--set train.lr=2e-5` must not silently arrive as a string."""
+    from embedding_mrl.config import _parse_override_value
+
+    value = _parse_override_value(text)
+    assert isinstance(value, float)
+    assert value == pytest.approx(expected)
+
+
+@pytest.mark.parametrize(
+    "text,expected",
+    [
+        ("16", 16),
+        ("true", True),
+        ("null", None),
+        ("[16, 32]", [16, 32]),
+        ("cosine_with_min_lr", "cosine_with_min_lr"),
+        ("google-bert/bert-base-uncased", "google-bert/bert-base-uncased"),
+        ("e5-large", "e5-large"),  # a model name, not a number
+    ],
+)
+def test_other_override_values_keep_their_yaml_meaning(text, expected):
+    from embedding_mrl.config import _parse_override_value
+
+    assert _parse_override_value(text) == expected
+
+
+def test_a_learning_rate_override_survives_a_full_config_load():
+    cfg = ExperimentConfig.load(
+        REPO_ROOT / "configs" / "mipic" / "bert.yaml", ["train.lr=2e-5"]
+    )
+    assert cfg.train.lr == pytest.approx(2e-5)
+    # This is the multiplication that used to raise TypeError.
+    assert cfg.train.lr * cfg.mipic.module_lr_scale == pytest.approx(4e-5)
+
+
+def test_a_string_in_a_numeric_field_is_rejected_at_config_time():
+    """The failure must name the field, not surface later inside the optimiser."""
+    with pytest.raises(TypeError, match="train.lr must be a number"):
+        ExperimentConfig.from_dict({"train": {"lr": "2e-5"}})
+    with pytest.raises(TypeError, match="train.epochs must be an integer"):
+        ExperimentConfig.from_dict({"train": {"epochs": 1.5}})
