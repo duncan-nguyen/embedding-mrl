@@ -5,7 +5,7 @@ at full width and then truncated per dimension - mathematically identical to the
 notebooks' per-dimension re-encoding, but ``len(dims)`` times cheaper.
 
 Setting ``eval.semantic_distortion`` adds the SDR-MRL measurement protocol
-(``docs/SDR-MRL.pdf`` Sec 6): the fixed-teacher distortion-rate profile, the
+(``docs/latex/main.pdf`` Sec 6): the fixed-teacher distortion-rate profile, the
 normalised distortion area, and neighborhood preservation. It runs for every
 method, which is the point - the proposal's central claim is a comparison of
 *where in the code* MRL, ESE, MIPIC and SDR-MRL place semantic information.

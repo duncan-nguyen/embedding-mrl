@@ -194,7 +194,7 @@ L_MIPIC = α·L_MRL + (1 − α)·(L_SIA + L_PIC)
 
 ### SDR-MRL (proposal) — `losses/sdr.py`
 
-[docs/SDR-MRL.pdf](docs/SDR-MRL.pdf). The other three methods ask *how similar
+[docs/latex/main.pdf](docs/latex/main.pdf). The other three methods ask *how similar
 is the truncated representation to the full one*. SDR-MRL asks a different
 question: **at a given storage rate, how much of the teacher's semantic
 neighborhood is still recoverable?**

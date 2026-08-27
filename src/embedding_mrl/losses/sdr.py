@@ -1,7 +1,7 @@
 """SDR-MRL: semantic distortion-rate objectives for Matryoshka representations.
 
 Equation numbers refer to *Beyond Representation Alignment: Semantic
-Distortion-Rate Learning for Matryoshka Representations* (``docs/SDR-MRL.pdf``).
+Distortion-Rate Learning for Matryoshka Representations* (``docs/latex/main.pdf``).
 
 The method treats every Matryoshka prefix ``Z_k`` as a representation available
 at one deployment rate ``R_k = b d_k`` (Eq 18) and asks how much of the

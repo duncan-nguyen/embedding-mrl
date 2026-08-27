@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Check the SDR-MRL implementation against the derivations it claims to follow.
 
-``docs/SDR-MRL.pdf`` states its case as a chain of propositions rather than as a
+``docs/latex/main.pdf`` states its case as a chain of propositions rather than as a
 loss formula, so the useful debugging question is not "does the loss go down"
 but "does the code compute the object the proofs are about". Each check below
 recomputes one equation from an independent construction and reports the

@@ -157,7 +157,7 @@ class EvalConfig:
     )
     pair_tasks: list[str] = field(default_factory=lambda: ["mrpc", "scitail", "wic"])
 
-    # -- SDR-MRL semantic distortion-rate protocol (docs/SDR-MRL.pdf Sec 6) --- #
+    # -- SDR-MRL semantic distortion-rate protocol (docs/latex/main.pdf Sec 6) --- #
     #: Measure the distortion-rate profile, SDRA and neighborhood preservation.
     #: Applies to every method, so MRL/ESE/MIPIC/SDR curves are comparable.
     semantic_distortion: bool = False
@@ -280,7 +280,7 @@ class MIPICConfig:
 
 @dataclass
 class SDRConfig:
-    """SDR-MRL: semantic distortion-rate learning (``docs/SDR-MRL.pdf``).
+    """SDR-MRL: semantic distortion-rate learning (``docs/latex/main.pdf``).
 
     Eq 55 is the whole objective::
 
