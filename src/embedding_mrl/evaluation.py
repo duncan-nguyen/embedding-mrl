@@ -401,20 +401,35 @@ class MatryoshkaEvaluator:
 
 
 def summarize(results: dict[str, dict[str, object]]) -> dict[str, dict[str, float]]:
-    """Average the headline metric of each family across tasks, per dimension."""
+    """Average each family's metrics across tasks, per dimension.
+
+    ``classification`` / ``sts`` / ``pair`` keep their historical meaning
+    (accuracy, Spearman, accuracy). The ``*_f1`` entries are carried alongside
+    because the MIPIC tables (``docs/MIPIC.pdf`` Tables 1-2) report **macro-F1**
+    for the classification tasks: on a skewed label set the two diverge sharply
+    - Emotion here reads 50.8 as accuracy and 28.0 as macro-F1 - so a number put
+    next to that table has to be the same statistic.
+    """
     summary: dict[str, dict[str, float]] = {}
 
-    def collect(family: str, extract) -> None:
+    def collect(family: str, label: str, extract) -> None:
         per_dim: dict[str, list[float]] = {}
         for task_scores in results.get(family, {}).values():
             for dim, value in task_scores.items():
-                per_dim.setdefault(dim, []).append(extract(value))
+                score = extract(value)
+                if score is not None:
+                    per_dim.setdefault(dim, []).append(score)
         if per_dim:
-            summary[family] = {
+            summary[label] = {
                 dim: float(np.mean(vals)) for dim, vals in per_dim.items()
             }
 
-    collect("classification", lambda v: v["accuracy"])
-    collect("sts", lambda v: v)
-    collect("pair", lambda v: v["accuracy"])
+    def metric(name: str):
+        return lambda v: float(v[name]) if isinstance(v, dict) and name in v else None
+
+    collect("classification", "classification", metric("accuracy"))
+    collect("classification", "classification_f1", metric("f1"))
+    collect("sts", "sts", lambda v: None if v is None else float(v))
+    collect("pair", "pair", metric("accuracy"))
+    collect("pair", "pair_f1", metric("f1"))
     return summary

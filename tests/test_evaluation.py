@@ -47,3 +47,42 @@ def test_summary_averages_each_family_per_dimension():
 
 def test_summary_of_an_empty_run_is_empty():
     assert summarize({"classification": {}, "sts": {}, "pair": {}}) == {}
+
+
+# --------------------------------------------------------------------------- #
+# Macro-F1 alongside accuracy (docs/MIPIC.pdf Tables 1-2 report macro-F1)
+# --------------------------------------------------------------------------- #
+def test_summary_carries_macro_f1_next_to_accuracy():
+    """On a skewed label set the two diverge, so both have to be reported."""
+    results = {
+        "classification": {
+            "emotion": {
+                "dim_16": {"accuracy": 0.5076, "f1": 0.2800},
+                "dim_32": {"accuracy": 0.5342, "f1": 0.3342},
+            }
+        },
+        "pair": {
+            "mrpc": {
+                "dim_16": {"accuracy": 0.70, "f1": 0.66},
+                "dim_32": {"accuracy": 0.72, "f1": 0.68},
+            }
+        },
+        "sts": {"stsb": {"dim_16": 0.58, "dim_32": 0.60}},
+    }
+    summary = summarize(results)
+
+    # The historical keys keep their historical meaning.
+    assert summary["classification"]["dim_16"] == pytest.approx(0.5076)
+    assert summary["pair"]["dim_16"] == pytest.approx(0.70)
+    assert summary["sts"]["dim_16"] == pytest.approx(0.58)
+
+    assert summary["classification_f1"]["dim_16"] == pytest.approx(0.2800)
+    assert summary["classification_f1"]["dim_32"] == pytest.approx(0.3342)
+    assert summary["pair_f1"]["dim_32"] == pytest.approx(0.68)
+
+
+def test_a_family_without_f1_scores_gets_no_f1_entry():
+    summary = summarize({"classification": {"x": {"dim_16": {"accuracy": 0.5}}}})
+    assert summary["classification"] == {"dim_16": pytest.approx(0.5)}
+    assert "classification_f1" not in summary
+    assert "sts" not in summary

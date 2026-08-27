@@ -108,8 +108,10 @@ disk. Artifacts land in `train.output_dir`:
   "sts":            { "stsb":      { "dim_16": 0.71, ... }, ... },
   "pair":           { "mrpc":      { "dim_16": {"accuracy": ..., "f1": ..., "average_precision": ...}, ... }, ... },
 
-  "summary": { "classification": {"dim_16": ...}, "sts": {...}, "pair": {...} },
-  "table":   { "dim_16": {"classification/banking77": ..., "mean/sts": ..., ...}, ... }
+  "summary": { "classification": {...}, "classification_f1": {...},
+                "sts": {...}, "pair": {...}, "pair_f1": {...} },
+  "table":   { "dim_16": {"classification/banking77": ...,
+                          "classification/banking77:f1": ..., "mean/sts": ..., ...}, ... }
 }
 ```
 
@@ -341,6 +343,15 @@ Every task is scored at all seven Matryoshka dimensions.
 Switch `eval.split` between `test` and `validation`. `data.py` also registers
 RTE and QNLI, which ship in `data/test/` but were not part of the notebooks'
 default suite — add them to `eval.pair_tasks` to use them.
+
+**Accuracy and macro-F1 are both reported**, and which one you read matters.
+`summary` carries `classification` / `pair` (accuracy) alongside
+`classification_f1` / `pair_f1`; in the flat table the bare column is accuracy
+and the `:f1`-suffixed one is macro-F1. On a skewed label set the two come apart
+badly — Emotion (6 classes, 33% majority) reads **50.8 as accuracy and 28.0 as
+macro-F1** on the same embeddings. The MIPIC tables
+([docs/MIPIC.pdf](docs/MIPIC.pdf) Tables 1–2) report macro-F1, so lining an
+accuracy column up against them silently shifts that task by ~20 points.
 
 ### Semantic distortion-rate protocol
 

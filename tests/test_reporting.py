@@ -120,3 +120,26 @@ def test_format_summary_lists_every_dimension(cfg):
 
 def test_format_summary_handles_no_results(cfg):
     assert format_summary(build_report(cfg, {}, [])) == "no evaluation results"
+
+
+def test_the_table_carries_macro_f1_in_its_own_column():
+    """Accuracy keeps the bare column name; macro-F1 gets a ``:f1`` suffix."""
+    table = build_dimension_table(RESULTS)
+
+    assert table["dim_16"]["classification/emotion"] == pytest.approx(0.40)
+    assert table["dim_16"]["classification/emotion:f1"] == pytest.approx(0.31)
+    assert table["dim_32"]["pair/mrpc"] == pytest.approx(0.72)
+    assert table["dim_32"]["pair/mrpc:f1"] == pytest.approx(0.68)
+    # STS scores are bare floats, so there is no second metric to carry.
+    assert not any(c.startswith("sts/") and ":" in c for c in table["dim_16"])
+
+
+def test_f1_columns_reach_the_csv(tmp_path, cfg):
+    report = build_report(cfg, RESULTS, HISTORY)
+    write_report(report, tmp_path)
+
+    with (tmp_path / "results.csv").open(encoding="utf-8") as handle:
+        rows = list(csv.DictReader(handle))
+
+    assert float(rows[0]["classification/emotion:f1"]) == pytest.approx(0.31)
+    assert float(rows[1]["pair/mrpc:f1"]) == pytest.approx(0.68)

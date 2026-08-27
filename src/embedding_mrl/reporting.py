@@ -15,16 +15,20 @@ from typing import Any, Dict, List, Optional
 from .config import ExperimentConfig
 from .utils import save_json
 
-#: Headline metric per family, and the column name it gets in the flat table.
-HEADLINE = {
-    "classification": ("accuracy", "classification_accuracy"),
-    "sts": (None, "sts_spearman"),  # STS scores are bare floats
-    "pair": ("accuracy", "pair_accuracy"),
+#: Metrics lifted into the flat per-dimension table, per family. The **first**
+#: entry keeps the historical bare column name (``classification/emotion``);
+#: later ones get a ``:metric`` suffix. Macro-F1 travels next to accuracy
+#: because ``docs/MIPIC.pdf`` Tables 1-2 report macro-F1 for the classification
+#: tasks - on a skewed label set the two differ by ~20 points, so lining an
+#: accuracy column up against that table silently compares different statistics.
+FAMILY_METRICS: Dict[str, tuple] = {
+    "classification": ("accuracy", "f1"),
+    "sts": (None,),  # STS scores are bare floats
+    "pair": ("accuracy", "f1"),
 }
 
 
-def _headline_value(family: str, score: Any) -> Optional[float]:
-    key = HEADLINE[family][0]
+def _metric_value(score: Any, key: Optional[str]) -> Optional[float]:
     if key is None:
         return None if score is None else float(score)
     if isinstance(score, dict) and key in score:
@@ -35,12 +39,15 @@ def _headline_value(family: str, score: Any) -> Optional[float]:
 def build_dimension_table(results: Dict[str, Any]) -> Dict[str, Dict[str, float]]:
     """``dim -> {task: headline metric}`` across every family, for quick reading."""
     table: Dict[str, Dict[str, float]] = {}
-    for family in ("classification", "sts", "pair"):
+    for family, metrics in FAMILY_METRICS.items():
         for task, per_dim in results.get(family, {}).items():
             for dim, score in per_dim.items():
-                value = _headline_value(family, score)
-                if value is not None:
-                    table.setdefault(dim, {})[f"{family}/{task}"] = value
+                for index, key in enumerate(metrics):
+                    value = _metric_value(score, key)
+                    if value is None:
+                        continue
+                    column = f"{family}/{task}" if index == 0 else f"{family}/{task}:{key}"
+                    table.setdefault(dim, {})[column] = value
 
     # SDR-MRL Sec 6: distortion sits next to quality so the two can be read off
     # the same row - that comparison is RQ4 (Eq 121).
@@ -156,9 +163,10 @@ def format_summary(report: Dict[str, Any]) -> str:
     if not families:
         return "no evaluation results"
 
-    header = f"{'dim':>6} | " + " | ".join(f"{f.split('/')[1]:>14}" for f in families)
+    width = max(14, *(len(f.split("/")[1]) for f in families))
+    header = f"{'dim':>6} | " + " | ".join(f"{f.split('/')[1]:>{width}}" for f in families)
     lines = [header, "-" * len(header)]
     for dim, row in table.items():
-        cells = " | ".join(f"{row.get(f, float('nan')):>14.4f}" for f in families)
+        cells = " | ".join(f"{row.get(f, float('nan')):>{width}.4f}" for f in families)
         lines.append(f"{dim.split('_')[1]:>6} | {cells}")
     return "\n".join(lines)

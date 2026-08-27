@@ -195,7 +195,9 @@ def test_evaluation_suite_reports_every_task_at_every_dimension(
     assert set(results["classification"]["emotion"]) == dims
     assert set(results["sts"]["stsb"]) == dims
     assert set(results["pair"]["mrpc"]) == dims
-    assert set(results["summary"]) == {"classification", "sts", "pair"}
+    assert set(results["summary"]) == {
+        "classification", "classification_f1", "sts", "pair", "pair_f1",
+    }
 
     metrics = results["pair"]["mrpc"]["dim_32"]
     assert {
