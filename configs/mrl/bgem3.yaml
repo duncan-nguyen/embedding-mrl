@@ -1,0 +1,12 @@
+_base_: ../base.yaml
+name: mrl_bgem3
+method: mrl
+model:
+  name_or_path: BAAI/bge-m3
+  hidden_dim: 1024
+  pooling: cls
+matryoshka:
+  dims: [16, 32, 64, 128, 256, 512, 1024]
+train:
+  epochs: 5
+  output_dir: outputs/mrl_bgem3

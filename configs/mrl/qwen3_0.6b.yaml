@@ -1,0 +1,15 @@
+_base_: ../base.yaml
+name: mrl_qwen3_0.6b
+method: mrl
+model:
+  name_or_path: Qwen/Qwen3-Embedding-0.6B
+  hidden_dim: 1024
+  # The notebooks used `cls` here too. `last` is the correct pooling for a causal
+  # encoder - switch with `--set model.pooling=last` to try it.
+  pooling: cls
+  trust_remote_code: true
+matryoshka:
+  dims: [16, 32, 64, 128, 256, 512, 1024]
+train:
+  epochs: 5
+  output_dir: outputs/mrl_qwen3_0.6b

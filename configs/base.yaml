@@ -1,0 +1,47 @@
+# Shared defaults. Every concrete config inherits from this via `_base_`.
+name: base
+method: mrl
+
+model:
+  name_or_path: google-bert/bert-base-uncased
+  hidden_dim: 768
+  pooling: cls
+  trust_remote_code: false
+
+data:
+  root: data
+  train_file: train/final_data.csv
+  test_dir: test
+  text_column: text
+  max_length: 256
+  num_workers: 2
+
+train:
+  epochs: 5
+  batch_size: 16
+  lr: 2.0e-5
+  weight_decay: 0.01
+  warmup_ratio: 0.1
+  min_lr: 2.0e-6
+  scheduler: cosine_with_min_lr
+  max_grad_norm: null
+  seed: 42
+  fp16: true
+  save_model: true
+  empty_cache_every: 0
+
+matryoshka:
+  dims: [16, 32, 64, 128, 256, 512, 768]
+  temperature: 0.07
+
+eval:
+  enabled: true
+  split: test
+  batch_size: 64
+  sts_max_length: 128
+  cls_max_length: 512
+  logreg_max_iter: 200
+  every_epoch: true
+  cls_tasks: [banking77, emotion, tweet]
+  sts_tasks: [sick, sts12, stsb, sick_r, sts13, sts14, sts15, sts16]
+  pair_tasks: [mrpc, scitail, wic]

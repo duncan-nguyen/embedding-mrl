@@ -1,0 +1,19 @@
+_base_: ../base.yaml
+name: ese_tinybert_6l
+method: ese
+model:
+  name_or_path: huawei-noah/TinyBERT_General_6L_768D
+  hidden_dim: 768
+  # ESE pools with the attention-masked mean, both in the loss and at eval time.
+  pooling: mean
+  trust_remote_code: false
+matryoshka:
+  dims: [16, 32, 64, 128, 256, 512, 768]
+ese:
+  temperature: 0.07
+  n_layers_per_step: 1
+  use_intermediate_layers: true
+  use_layer_weight: true
+train:
+  epochs: 5
+  output_dir: outputs/ese_tinybert_6l

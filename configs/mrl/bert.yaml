@@ -1,0 +1,12 @@
+_base_: ../base.yaml
+name: mrl_bert
+method: mrl
+model:
+  name_or_path: google-bert/bert-base-uncased
+  hidden_dim: 768
+  pooling: cls
+matryoshka:
+  dims: [16, 32, 64, 128, 256, 512, 768]
+train:
+  epochs: 5
+  output_dir: outputs/mrl_bert
