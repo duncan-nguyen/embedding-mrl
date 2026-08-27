@@ -1,7 +1,13 @@
 import pytest
 import torch
 
-from embedding_mrl.pooling import cls_pooling, get_pooler, last_token_pooling, mean_pooling, pool
+from embedding_mrl.pooling import (
+    cls_pooling,
+    get_pooler,
+    last_token_pooling,
+    mean_pooling,
+    pool,
+)
 
 B, L, D = 4, 6, 8
 
@@ -15,12 +21,16 @@ def test_mean_pooling_ignores_padding():
     hidden = torch.randn(B, L, D)
     mask = torch.ones(B, L, dtype=torch.long)
     mask[:, 3:] = 0
-    assert torch.allclose(mean_pooling(hidden, mask), hidden[:, :3, :].mean(dim=1), atol=1e-6)
+    assert torch.allclose(
+        mean_pooling(hidden, mask), hidden[:, :3, :].mean(dim=1), atol=1e-6
+    )
 
 
 def test_mean_pooling_survives_an_all_padding_row():
     hidden = torch.randn(B, L, D)
-    assert torch.isfinite(mean_pooling(hidden, torch.zeros(B, L, dtype=torch.long))).all()
+    assert torch.isfinite(
+        mean_pooling(hidden, torch.zeros(B, L, dtype=torch.long))
+    ).all()
 
 
 def test_last_token_pooling_picks_the_final_real_token():
@@ -41,4 +51,15 @@ def test_unknown_pooling_is_rejected():
 
 @pytest.mark.parametrize("mode", ["cls", "mean", "last"])
 def test_pool_dispatch_returns_two_dimensional_output(mode):
-    assert pool(torch.randn(B, L, D), torch.ones(B, L, dtype=torch.long), mode).shape == (B, D)
+    assert pool(
+        torch.randn(B, L, D), torch.ones(B, L, dtype=torch.long), mode
+    ).shape == (B, D)
+
+
+def test_mean_pooling_accumulates_in_float32():
+    """Under autocast the hidden states are fp16; summing them there loses precision."""
+    hidden = torch.randn(2, 400, 16, dtype=torch.float16)
+    mask = torch.ones(2, 400, dtype=torch.long)
+    pooled = mean_pooling(hidden, mask)
+    assert pooled.dtype == torch.float32
+    assert torch.allclose(pooled, hidden.float().mean(dim=1), atol=1e-3)

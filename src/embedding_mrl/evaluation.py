@@ -76,6 +76,7 @@ class MatryoshkaEvaluator:
         outputs = model(
             input_ids=input_ids.to(self.device),
             attention_mask=attention_mask.to(self.device),
+            output_hidden_states=False,
             return_dict=True,
         )
         return pool(

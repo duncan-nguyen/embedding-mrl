@@ -22,9 +22,9 @@ def mean_pooling(
     Returns:
         ``[B, D]``
     """
-    mask = (
-        attention_mask.unsqueeze(-1).expand(hidden_state.size()).to(hidden_state.dtype)
-    )
+    # A float32 mask promotes the reduction out of fp16 under autocast; summing
+    # hundreds of tokens in fp16 would lose precision.
+    mask = attention_mask.unsqueeze(-1).expand(hidden_state.size()).float()
     summed = torch.sum(hidden_state * mask, dim=1)
     counts = torch.clamp(mask.sum(dim=1), min=1e-9)
     return summed / counts

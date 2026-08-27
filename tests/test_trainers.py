@@ -149,7 +149,10 @@ def _write_tiny_eval_corpus(root: Path) -> None:
 
     cls_frame = pd.DataFrame(
         {
-            "text": [f"utterance {i} about topic {i % 3} with filler {i * 7 % 11}" for i in range(24)],
+            "text": [
+                f"utterance {i} about topic {i % 3} with filler {i * 7 % 11}"
+                for i in range(24)
+            ],
             "label": [i % 3 for i in range(24)],
         }
     )
@@ -170,7 +173,9 @@ def _write_tiny_eval_corpus(root: Path) -> None:
     pair_frame.to_csv(test_dir / "mrpc_test.csv", index=False)
 
 
-def test_evaluation_suite_reports_every_task_at_every_dimension(tmp_path, offline_backbone):
+def test_evaluation_suite_reports_every_task_at_every_dimension(
+    tmp_path, offline_backbone
+):
     data_root = tmp_path / "data"
     _write_tiny_eval_corpus(data_root)
 
@@ -193,7 +198,14 @@ def test_evaluation_suite_reports_every_task_at_every_dimension(tmp_path, offlin
     assert set(results["summary"]) == {"classification", "sts", "pair"}
 
     metrics = results["pair"]["mrpc"]["dim_32"]
-    assert {"accuracy", "f1", "precision", "recall", "average_precision", "best_threshold"} <= set(metrics)
+    assert {
+        "accuracy",
+        "f1",
+        "precision",
+        "recall",
+        "average_precision",
+        "best_threshold",
+    } <= set(metrics)
     assert 0.0 <= metrics["accuracy"] <= 1.0
 
     for family, scores in results["summary"].items():
@@ -218,3 +230,18 @@ def test_evaluation_leaves_the_model_in_training_mode(tmp_path, offline_backbone
     trainer.model.train()
     trainer.evaluator.evaluate(trainer.model)
     assert trainer.model.training
+
+
+@pytest.mark.parametrize("method", METHODS)
+def test_gradient_clipping_path_runs_with_a_disabled_scaler(
+    method, tmp_path, offline_backbone
+):
+    """fp16 is off on CPU, so the GradScaler is disabled - unscale_ must still be safe."""
+    cfg = make_config(method, tmp_path)
+    cfg.train.max_grad_norm = 1.0
+    trainer = build_trainer(cfg)
+    trainer.train()
+
+    for param in trainer.model.parameters():
+        if param.grad is not None:
+            assert torch.isfinite(param.grad).all()
