@@ -1,0 +1,1501 @@
+split,sentence1,sentence2,score
+test,"there exist a number of different possible events that may happen in the future. in most cases , there is an agent involved who has to consider which of the possible events will or should occur. a salient _ entity which is deeply involved in the event may also be mentioned .",doing as one pleases or chooses ;,0.6
+test,"this frame contians lus which are like those of the desirability frame except the evaluee incorporates the parameter as "" associated with a percieved place in a social heirarchy "" for all lus. lus are not restricted to positive or negative implications .",being or characteristic of or appropriate to everyday language ;,0.8
+test,"a recipient starts off without the theme in their possession , and then comes to possess it. although the source from which the theme came is logically necessary , the recipient and its changing relationship to the theme is profiled .",win something through one 's efforts ;,0.8
+test,this frame concerns a specific subset of instances of a type which are evaluated in terms of their similarity to a conceptual prototype of the type. the judgment of exemplariness may be made along a certain domain .,a standard or typical example ;,1.2
+test,this frame contains words that describe an item 's static position on a scale with respect to some property variable .,"lacking in specific resources , qualities or substances ;",0.4
+test,"this frames describes a perceiver who fails to keep sight of a theme. the focus of this frame is the perceiver , which appears in subject position. this frame contrasts with the opposing perspective in losing _ track _ of _ perceiver , where the perceiver is the object and the theme is the subject .",place ( something ) where one cannot find it again ;,1.8
+test,"a person takes leave from his or her routine activity ( such as work or school ) for a duration of time. the duration can be any length of time , as long as the absence is temporary .",failure to be present,2.2
+test,a trigger elicits a response. the response may either be some kind of action meant to address the trigger event or an expressed judgment of the trigger event .,meet by design ; be present at the arrival of ;,0.0
+test,"a text is an entity that contains linguistic , symbolic information on a topic , created by an author at the time _ of _ creation. it may be a physical entity that is made of a certain material etc. it may be constructed for an honoree .",an account of the series of events making up a person 's life,1.6
+test,"an offerer indicates that he or she is able and willing to give a theme to a potential _ recipient. in the absence of further qualifications , it is often understood that the potential _ recipient accepts the theme .",provide ( usually but not necessarily food ) ;,0.8
+test,"this frame covers words that name locations as defined politically , or administratively .",territory over which rule or control is exercised ;,1.2
+test,an agent actively ( yet not always with success ) attempts to keep an event from taking place. this event is ( usually ) an urge which encourages the action that the agent wishes to prevent .,abstain from doing ; always used with a negative ;,2.4
+test,lus in this frame denote a scenario in which a client arranges to retain the services of an organization at a later date .,engage for a performance ;,0.0
+test,"the words in this frame describe a period of time , as opposed to a point in time .",the period during which something is functional ( as between birth and death ) ;,2.2
+test,"an agent has attempted to achieve a goal , and the actual outcome of the agent 's action has been resolved , so that it either specifically matches the agent 's intent ( e.g. success ) or does not match it ( e.g. failure ) .",having succeeded or being marked by a favorable outcome ;,2.0
+test,"a cognizer has a judgment of an evaluee , expressing how high or low their regard for the evaluee is .","come to believe on the basis of emotion , intuitions , or indefinite grounds ;",0.4
+test,"a controlling _ entity is in conscious control over a dependent _ entity , dependent _ situation , or dependent _ variable .",discipline in personal and social activities ;,0.2
+test,this is the primary frame evoked by the cardinal numbers .,a concept of quantity involving zero and units ;,1.6
+test,"this frame has to do with people ( the residents ) residing in locations , sometimes with a co-resident .",inhabit or live in ; be an inhabitant of ;,2.8
+test,"a speaker realizes a sign , usually a linguistic one , in some formal _ realization. the formal _ realization may be described as correct or incorrect in a judgment expression , or it may be partially indicated as a part _ of _ form. manner may be used as a more general indication of the formal _ realization",( phonetics ) an individual sound unit of speech without concern as to whether or not it is a phoneme of some language,1.2
+test,"a living entity intends a tool to be able to fulfill a generic purpose. the material from which the tool is created can be something natural or something manmade , including another tool .",what something is used for ;,2.4
+test,this frame describes a sufferer who experiences the loss of someone through death. the lus in this frame imply a strong emotional connection between the sufferer and the deceased .,suffer the loss of a person through death or removal ;,2.0
+test,"this frame contains ( transparent ) nouns that are units of measurement for time. the frame elements are count , unit and process. in this frame , we will not annotate deictic , calendric uses of nouns like week , month , etc. as in "" next week , this month , in the 21st century "" .",a period of time considered as a resource under your control and sufficient to accomplish something ;,0.8
+test,"while in motion , an impactor makes sudden , forcible contact with the impactee , or two impactors both move , mutually making forcible contact .",hit against ; come into sudden contact with ;,4.0
+test,a customer requests an entity from a supplier. the customer can order the entity himself or via a medium .,"a request for something to be made , supplied , or served ;",2.4
+test,this frame concerns people being in an altered mental state that is induced by an intoxicant .,slightly and pleasantly intoxicated from alcohol or a drug ( especially marijuana ),2.4
+test,"in this frame a group of individuals intentionally come together to form a group. alternatively , a grammatically more prominent party _ 1 assembles with a party _ 2 , expressed as an oblique phrase. if this asymmetric construal is chosen , purpose only relates to party _ 1 .",satisfy a condition or restriction ;,0.0
+test,this frame contains nouns denoting aggregates of individuals. the aggregates may be described by an aggregateproperty .,a group of people ( often temporary ) having a common purpose ;,2.6
+test,"there is a gradable amount of light in a particular location. in some cases the source of light may be indicated instead of the location. the negetive lus in this frame can be used metaphorically to describe time periods which can be characterized as bad or lacking in awareness , as shown in the following examples",devoid of or deficient in light or brightness ; shadowed or black ;,1.8
+test,a customer requests an entity from a supplier. the customer can order the entity himself or via a medium .,a commercial document used to request someone to supply something in return for payment and providing specifications and quantities ;,2.8
+test,a recordable sequence of events is associated with a given topic .,the continuum of events occurring in succession leading from the past to the present and even into the future ;,3.8
+test,"an entity is in a specified state. when not explicitly specified , the state usually concerns the entity 's health , repair of functioning. the state is also often assessed with an evaluation and it may be specified to apply only to a particular parameter of the entity .",the way something is with respect to its main attributes ;,1.6
+test,this frame contains words that describe how potent a chemical is .,having a strong physiological or chemical effect ;,2.2
+test,"this frame describes intentionally formed human social groups ( here termed organizations ) with some definite structure and members. they may be relatively informal , consisting only of a group of individuals who are aware of who is and who is not a fellow member , or they may be complex and long-lasting , such as the roman catholic church or the conservative party .",a committee having supervisory powers ;,1.2
+test,this frame contains words that describe an item 's static position on a scale with respect to some property variable .,greater than normal in degree or intensity or amount ;,0.0
+test,"a benefactor confers a beneficial _ situation to a beneficiary. unlike in commerce _ scenario , the recipient is not necessarily required to pay for the good or service that they receive. therefore , the element of benevolence is profiled. dual fe-layer annotation",financial assistance in time of need,1.4
+test,"an entity is considered worthy of mention for their ability or influence among some type of similar entities. the entity need not be well-known or famous , though if it is , it may be stated by its name only. their worth may be restricted to a time or place .",of major significance or importance ;,1.6
+test,"these are words referring to control by a leader over a particular entity ( the governed ) or an activity. the frame contains both nouns referring to a title or position ( e.g. director , king , president ) , and verbs describing the action of leadership ( e.g. rule , reign ) . with verbs , it is possible to mention the role played by the leader ( often a name of a leading position , e.g. , king )",exercise authority over ; as of nations ;,1.4
+test,"an object theme moves in the direction of a goal. the goal may be expressed or it may be understood from context , but its is always implied by the verb itself .",succeed in reaching ; arrive at ;,1.5
+test,"this frame contains words that describe a set of individuals which possess some commonality , generally a common attribute .",belonging to or participated in by a community as a whole ; public ;,3.2
+test,"an employee has a position doing work in a particular field , or doing work on a particular task , for which an employer gives compensation to the employee .",the occupation for which you are paid ;,2.6
+test,a current _ instance of a certain type is under discussion. this instance is evaluated as being the same instance or a different instance from a previous _ instance encountered in a previous _ context .,unlike in nature or quality or form or degree ;,1.0
+test,"this frame contains words that denote kinship relations. in annotating the directional uses of these words , we use the standard terms from anthropology , ego and alter. matilde is gilberto 's cousin once removed",a social unit living together ;,0.2
+test,the entity interacts with the theme with the effect of moving of the theme .,( physiology ) regulation or maintenance of a function or action or reflex etc ;,0.6
+test,"a theme traverses a trajectory. this trajectory consists of a source , path , and goal. if the theme is sentient , the anticipated trajectory will usually be equivalent to the planned trajectory. if the the theme is non-sentient the anticipated trajectory will usually be the result of various forces acting upon the theme .",a line leading to a place or point ;,1.8
+test,"this frame contains verbs and nouns that communicate the act of a speaker to address a message to some addressee using language. a number of the words can be used performatively , such as declare and insist .","make a proposal , declare a plan for something ;",1.6
+test,an entity changes from a prior _ state to a post _ state in a sequence leading to improvement .,a process in which something passes by degrees to a different stage ( especially a more advanced or mature stage ) ;,3.0
+test,"an experiencer actualizes a certain pattern of behavior , a lifestyle , which persists for a significant period of time in the experiencer 's life and is recognized as part of his character or normal routine. the lifestyle is not necessarily realized intentionally , and may just be the result of circumstance .",lead a certain kind of life ; live in a certain style ;,2.0
+test,a certain idiosyncrasy belongs to an entity distinguishing it from other entities .,unique or specific to a person or thing or category ;,2.6
+test,this frame describes a particular instance of an event .,an instance or single occasion for some event ;,3.4
+test,"an entity has a temperature characterized by the target. the temperature is a value of the temperature attribute. note that in this frame , the entity does not experience the temperature , but is merely described as being in a certain externally verifiable state. is not in frame but rather in subjective _ temperature",having or producing a comfortable and agreeable degree of heat or imparting or maintaining heat ;,1.0
+test,this frame contains nouns denoting aggregates of individuals. the aggregates may be described by an aggregateproperty .,a collection of things sharing a common attribute ;,2.6
+test,an agent occupies a role in some institution. this roleis ( usually ) temporary and can be occupied by other entities at different periods of time. it is common for a duration of the role to be mentionned .,do duty or hold offices ; serve in a specific function ;,1.4
+test,"a figure is located relative to a ground location. the location of the figure may be further specified by its distance from a reference location ( generally , the deictic center ) and the direction in which the figure lies from a reference location ( generally , the deictic center ) .",be adjacent or come together ;,0.4
+test,"this frames describes a social event where there may or may not be a permanent or semi-permanent relationship between participants. additionally , participants in this frame are expressed in one representative fe , attendees. note the difference between this frame and social _ event _ individuals , where participants are grammatically separated .",a participant in a date ;,2.8
+test,"this frame contains items which , when manipulated , alter the funtion of some device , internal or external .",a mechanism that controls the operation of a machine ;,1.6
+test,this frame describes a general situation in which an owner either increases or decreases their amount of a possession. the increase or decrease may either be physical or metaphorical .,"fail to keep or to maintain ; cease to have , either physically or in an abstract sense ;",1.8
+test,an entity is integrated into a vehicle as a part of a ( possibly unexpressed ) whole which may refer to the whole vehicle or merely to a sub-part of the vehicle .,a transparent opening in a vehicle that allow vision out of the sides or back ; usually is capable of being opened,1.4
+test,this frame contains words that describe specific aspects of a color. the degree to which the color being discussed deviates from the prototype may be marked. the description may also target a specific aspect of color .,( used of color ) having a dark hue ;,1.2
+test,a record that contains a permanent account of data. this record may be maintained by a recorder for a certain entity .,a record in which commercial accounts are recorded ;,2.8
+test,"this frame covers words for body _ part ( s ) ( bp ) belonging to a possessor ( poss ) , which may be characterized by a descriptor ( desc ) . the location of the bp may be identified in terms of its attachment or its orientational _ location. a subregion of a bp may also be indicated .",the front of the human head from the forehead to the chin and ear to ear ;,1.0
+test,"an agent performs a response action in consequence of a trigger event. in many cases , a non-agentive responding _ entity causes the response after the trigger occurs .","contend against an opponent in a sport , game , or battle ;",0.0
+test,"a protagonist is in the dynamic , maintained state of being alive or has exited this state .",the condition of living or the state of being alive ;,2.6
+test,"an agent acts so as to be the strongest force , or most important causal factor in some situation , to the exclusion of other competing actors .","be larger in number , quantity , power , status or importance ;",2.4
+test,"an entity aids in the successful completion of a purpose. its degree of utility may also be expressed. some of the lexical units in this frame ( e.g. great , good ) can only express permanent , generic states of the entity .",of good quality and condition ; solidly built ;,1.2
+test,"an agent causes an impactor to make sudden , forcible contact with an impactee , or manipulates two ( or more ) impactors so that they make mutual forcible contact .",drive something violently into a location ;,0.8
+test,an experiencer senses different degrees of warmth that may or may not be related to the ambient temperature. the level of warmth is usually compared against the experiencer 's subjective standard of comfort .,having or producing a comfortable and agreeable degree of heat or imparting or maintaining heat ;,1.2
+test,"a protagonist is in the dynamic , maintained state of being alive or has exited this state .","have life , be alive ;",1.4
+test,a prisoner is punished for committing a crime by being confined to a prison for a specified period of time .,spend time in prison or in a labor camp ;,2.0
+test,"in this frame a speaker asks an addressee for something , or to carry out some action .",give instructions to or direct somebody to do something with authority ;,2.6
+test,"the temperature in a certain environment , determined by time and place , is specified .",having or producing a comfortable and agreeable degree of heat or imparting or maintaining heat ;,1.0
+test,"a state _ of _ affairs is evaluated as good ( or bad ) , against a background assumption that previously , the state _ of _ affairs was thought to be unlikely to occur. the state _ of _ affairs holds for a particular protagonist .",deserving or inciting pity ;,0.0
+test,an agent makes use of a means ( either an action or a ( system of ) entities standing in for the action ) in order to achieve a purpose . ( this frame may be broadened to include non-agentive intermediate actions . ),how a result is obtained or an end is achieved ;,2.2
+test,"an developer develops a product , in some cases for a company .",act of improving by expanding or enlarging or refining ;,0.4
+test,"a text is an entity that contains linguistic , symbolic information on a topic , created by an author at the time _ of _ creation. it may be a physical entity that is made of a certain material etc. it may be constructed for an honoree .",a record or narrative description of past events ;,0.8
+test,"an influencing _ variable , an influencing _ situation , or an influencing _ entity has an influence on a dependent _ entity , dependent _ variable , or a dependent _ situation. compare to subjective _ influence. words in objective _ influence are used to make claims about correlations in the world , where words in subjective _ influence are used to explain emotional impacts made on cognizers .",the effect of one thing ( or person ) on another ;,2.4
+test,an entity is able to exert a force of the magnitude specified by the target .,having little impact ;,0.2
+test,"this frame is concerned with transparent nouns denoting a piece of a substance. also present is piece _ prop which is a property of the piece , e.g. relating to its size .",a printed circuit that can be inserted into expansion slots in a computer to increase the computer 's capabilities,0.0
+test,"a speaker addresses an audience on a particular topic. the audience is generally passive , although for many types of address ( including academic talks and press conferences ) , a discussion or question-answer period is virtually always required .",narrate or give a detailed account of ;,1.6
+test,the word ( s ) in this frame detail a particular moment in time.these often occur with demonstratives such as this and that .,the specified day of the month ;,0.8
+test,"this frame is concerned with nouns denoting a part or parts of a whole entity . the part is not defined relative to the whole 's orientation , center , or edge and is not ordered. we also annotate properties of the part , e.g. relating to its size .",( music ) the section of a composition or movement ( especially in sonata form ) where the major musical themes are developed and elaborated,0.0
+test,an entity is designed for or exists to perform an activity or fulfill a role .,"serve a purpose , role , or function ;",2.2
+test,a place defined by an owner .,the land on which real estate is located ;,2.0
+test,"a law regulates activities or states of affairs within a jurisdiction , dictating what required states should be the case and what forbidden states should not. often it also indicates negative consequences for individuals that violate it , and these negative consequences are generally enforced by some official authority. they may or may not be created by some official legislative body .",a body of rules followed by an assembly,2.2
+test,the authorities put a prisoner in prison as punishment for an offense .,the period of time a prisoner is imprisoned ;,1.6
+test,"ambient conditions of temperature , precipitation , windiness , and sunniness pertain at a certain place and time. further specification of the conditions that pertain may also be indicated .",free of clouds or rain ;,1.0
+test,"an individual or group ( practitioner ) or a part of their work life ( work ) is defined professionally by the activity that they typically engage in. alternatively , the activity may be indicated by a salient _ entity conventionally associated with it .",the discipline that records and interprets past events involving human beings ;,1.2
+test,a particular piece of information is evaluated for its accuracy. the degree of correctness may also be expressed. the source of information may also metonymically stand in for the information .,consistent with fact or reality ; not false ;,1.6
+test,"this frame contains adjectives and nouns that describe the truth or sincerity of communication. these words , analogously to behaver-evaluating words , can apply either to speakers or to the messages they produce. they can occur with about-pps expressing topic .",worthy of being depended on ;,0.0
+test,"this frame is for objects , physical or otherwise , which are used to grant access to some location or function .",a sequence of numbers or letters that opens a combination lock ;,0.8
+test,an entity has the ability to contain a theme .,be used by ; as of a utility ;,0.0
+test,"this frame contains words that denote kinship relations. in annotating the directional uses of these words , we use the standard terms from anthropology , ego and alter. matilde is gilberto 's cousin once removed",family based on male descent ;,0.8
+test,"two individuals , the subordinate and the superior have a relationship such that the subordinate generally follows orders given by the superior and has the best interests of the superior in mind .",work for or be a servant to ;,2.0
+test,lus in this frame denote a period of time in which an enabled _ action becomes possible. the duration of this time period can be both exact and inexact. an agent who performs the enabled _ action may be mentioned as well .,the time period that is considered best for starting or finishing something ;,2.4
+test,this frame is concerned with words that describe a person based on a salient part of their body .,( used of hair or skin ) pale or light-colored ; ;,0.4
+test,"in this frame , there is a part of a whole in which the part is defined with respect to the canonical or inherent orientation of the whole. in cases where the target is an adjective , it has a special relationship with the noun that it modifies such that a phrase which is a syntactic argument of the noun is semantically available to fill the argument structure of the adjective , as in",the striking or working surface of an implement,0.0
+test,an event takes place at a place and time .,a recent event that has some relevance for the present situation ;,1.0
+test,"there is a certain physical distance within which some other entity can participate in an event ( typically perception or manipulation ) with the participant. alternatively , the event may be indicated metonymically by a instrument . [ note the connection with * distance , sufficiency , and capability. words in this frame can generally be paraphrased "" close enough to be able to "" . ]",a range of mental vision ;,0.0
+test,in this frame a part is part of a larger whole comprised of parts that are ordered. the parts can be ordered temporally ( first to last and vice versa ) or vertically ( down to up and vice versa ) . the part can be modified by the part _ prop or the number of the part can be given by ordinality .,a major division of a long written composition ;,0.8
+test,a competitor claims a prize as a result of the outcome of their participation in a competition .,be the winner in a contest or competition ; be victorious ;,2.2
+test,an entity is able to exert a force of the magnitude specified by the target .,having strength or power greater than average or expected ;,1.4
+test,"an artifact is deliberately made or modified by an intelligent entity to be put to a certain kind of use. various properties of the artifact may be specified , such as its creator , time _ of _ creation , name , type , and the material of which it is composed. the artifact may or may not be a physical entity .",a stout length of sawn timber ; made in a wide variety of sizes and used for many purposes,0.2
+test,a helper benefits a benefited _ party by enabling the culmination of a goal that the benefited _ party has. a focal _ entity that is involved in reaching the goal may stand in for it .,give help or assistance ; be of service ;,1.5
+test,"a speaker realizes a sign , usually a linguistic one , in some formal _ realization. the formal _ realization may be described as correct or incorrect in a judgment expression , or it may be partially indicated as a part _ of _ form. manner may be used as a more general indication of the formal _ realization","speak , pronounce , or utter in a certain way ;",0.6
+test,"this frame covers words that name locations as defined politically , or administratively .",the territory occupied by a nation ;,3.4
+test,"the support , a phenomenon or fact , lends support to a claim or proposed course of action , the proposition , where the domain _ of _ relevance may also be expressed. some of the words in this frame ( e.g. argue ) are communication words used in a non-communicative , epistemic sense .","establish the validity of something , as by an example , explanation or experiment ;",1.6
+test,the authorities put a prisoner in prison as punishment for an offense .,a prison term lasting as long as the prisoner lives ;,1.0
+test,an agent manipulates an instrument in order to achieve a purpose .,put into service ; make work or employ for a particular purpose or for its inherent or natural purpose ;,1.4
+test,this frame concerns a cognizer 's certainty about the correctness of beliefs or expectations. it only includes uses where a cognizer is expressed .,be aware of the truth of something ; have a belief or faith in something ; regard as true beyond any doubt ;,1.8
+test,"the words in this frame describe situations in which an agent or a cause injures a victim. the body _ part of the victim which is most directly affected may also be mentioned in the place of the victim. in such cases , the victim is often indicated as a genitive modifier of the body _ part , in which case the victim fe is indicated on a second fe layer .","deliver a sharp blow , as with the hand , fist , or weapon ;",0.8
+test,"a useful _ location is accessible to some ( possibly generic ) theme despite a potential barrier , or is not accessible because of the barrier .",having skin rich in melanin pigments ;,0.0
+test,"in a text , a source _ of _ information is given that provides a reader of the text with further information relevant to the text. in this frame the author and reader are completely deprofiled , with the source _ of _ information made salient .",seek information from ;,1.6
+test,"a speaker interprets a written text and speaks the contents , usually to an addressee. the contents may be the text verbatim or a representation of the text .","look at , interpret , and say out loud something that is written or printed ;",3.4
+test,"words in this frame have to do with a cognizer being aware ( or not being aware ) of the difference between two phenomena , which may be expressed jointly or disjointly .","be able to distinguish , recognize as being different ;",2.0
+test,"the support , a phenomenon or fact , lends support to a claim or proposed course of action , the proposition , where the domain _ of _ relevance may also be expressed. some of the words in this frame ( e.g. argue ) are communication words used in a non-communicative , epistemic sense .",imply as a possibility ;,0.8
+test,"this frame describes intentionally formed human social groups ( here termed organizations ) with some definite structure and members. they may be relatively informal , consisting only of a group of individuals who are aware of who is and who is not a fellow member , or they may be complex and long-lasting , such as the roman catholic church or the conservative party .",a formal association of people with similar interests ;,2.25
+test,in this frame an evaluee is described by a ( usually implicit ) judge with respect to the morality or rightness of his or her behavior .,stemming from evil characteristics or forces ; wicked or dishonorable ; -thomas hardy,0.6
+test,"an author creates a text , either written , such as a letter , or spoken , such as a speech , that contains meaningful linguistic tokens , and may have a particular addressee in mind. the text may include information about its topic , although the latter is not an fe in this frame .",recite or repeat a fixed text ;,1.33333333333333
+test,"a controlling _ entity , controlling _ situation , or controlling _ variable control a dependent _ entity , dependent _ situation , or dependent _ variable. the latter , dependent , element or some aspect of it is not just influenced , but determined by the controlling element .",power to direct or determine ;,2.6
+test,this frame describes a situation in which an owner loses his or her possession. the owner may have failed to keep ownership of their possession ( i.e. robbery or gambling ) or may have unintentionally misplaced their possession .,"fail to keep or to maintain ; cease to have , either physically or in an abstract sense ;",2.2
+test,"these adjectives describe the degree of strictness or tolerance of an agent , usually with regard to another person ( the controllee ) and often with regard to a particular issue. the strictness / lenience with respect to the issue may be manifested in ( expressed by ) an agent or by some medium ( e.g. , laws ) , or by some behavior of the agent , i.e. , the controlling _ act .",unsparing and uncompromising in discipline or judgment ;,1.6
+test,some stimulus causes a cognizer to think of a prior phenomenon due to its perceived similarity .,suggest the necessity of an intervention ; in medicine ;,0.0
+test,"an artifact is deliberately made or modified by an intelligent entity to be put to a certain kind of use. various properties of the artifact may be specified , such as its creator , time _ of _ creation , name , type , and the material of which it is composed. the artifact may or may not be a physical entity .",a flat portable surface ( usually rectangular ) designed for board games ;,0.0
+test,"authorities charge a suspect , who is under suspicion of having committed a crime ( the charges ) , and take him / her into custody.the police arrested harry on charges of manslaughter .",record a charge in a police register ;,0.8
+test,the reader attends to a text to process its information. sometimes a particular kind of phenomenon is sought in the text .,interpret something that is written or printed ;,1.8
+test,this frame contains nouns denoting a rank or level within an established hierarchy .,( usually plural ) the status or rank or office of a christian clergyman in an ecclesiastical hierarchy ;,1.6
+test,"a text is an entity that contains linguistic , symbolic information on a topic , created by an author at the time _ of _ creation. it may be a physical entity that is made of a certain material etc. it may be constructed for an honoree .",a written work or composition that has been published ( printed on pages bound together ) ;,3.0
+test,an insulator is judged for its potential to increase the body temperature of an experiencer. the activity that the experiencer engages in to experience the heat and the circumstances in which the insulator is judged may also be provided .,having or producing a comfortable and agreeable degree of heat or imparting or maintaining heat ;,1.4
+test,"an entity exists at a particular location , at a particular time , as observed by an implicit observer. a depictive and / or duration phrase is often found. this frame differs from existence in that the location is profiled as a ground where an observer is conceived of as confirming the entity 's existence. in some cases , the location may be recoverable from phrases that primarily express peripheral information",the state of being absent ;,0.4
+test,an entity undergoes some change ( the event ) that is ( or is construed as ) punctual . ( this frame exists mainly to allow common fes to be inherited . ),"affect or afflict suddenly , usually adversely ;",0.6
+test,"the locale is a geographical location as defined by shape. this frame includes natural geographic features , including land / ice forms and bodies of water .",a narrow channel of the sea joining two larger bodies of water,0.8
+test,an entity is judged to be sensually pleasing or intellectually interesting to a ( generally implicit ) judge .,very pleasing to the eye ;,3.2
+test,"the words in this frame describe a period of time , as opposed to a point in time .",an indefinite period ( usually marked by specific attributes or activities ) ;,2.0
+test,"an agent or entity becomes sufficient enough to meet a standard. alternatively , an action or occurrence can be thought of as event that fulfills a standard. in this frame , the agent , entity , or event can be conceptualized as being on a scale where a change of value or circumstances brings it in line with the position of the standard on the scale .",fill or meet a want or need,1.2
+test,an entity stands out perceptually in comparison to other members of its type .,characterized by an absence or near absence of agitation or activity ;,0.4
+test,"the answer to one open question , the outcome , is dictated ( partially or completely ) by the answer to another open question , the determinant , i.e. if the answer to the determinant is known , the answer to the outcome can be predicted. the degree of predictive power and the circumstances under which the dependency holds can also be expressed .",a relation such that one thing is dependent on another ;,2.4
+test,this frame describes the attributes of a thermodynamic phase of matter .,( chemistry ) the three traditional states of matter are solids ( fixed shape and volume ) and liquids ( fixed volume and shaped by the container ) and gases ( filling the container ) ;,1.2
+test,"these words describe the size of message that a speaker is judged by a ( usually unexpressed ) judge to give , either in a specific occasion or topic or in general. as in other communication frames , medium may also be expressed .",free of noise or uproar ; or making little if any sound ;,1.0
+test,"an entity is presented as having been seen or experienced by a ( typically generic and backgrounded ) cognizer on a certain number of occasions , causing the entity to have a certain degree of recognizability for the cognizer .",be familiar or acquainted with a person or an object ;,2.6
+test,"words in this frame describe the status of an action with respect to a code of laws or rules. an object may also be in violation or compliance of the code by virtue of its existence , location or possession .",( of a baseball ) hit between the foul lines ;,0.2
+test,"these words refer to parts merging to form a whole . ( the parts may also be encoded as part _ 1 and part _ 2 . ) there is a symmetrical relationship between the components that undergo the process , and afterwards the parts are consumed and are no longer distinct entities that are easily discernable or separable in the whole .",a collection of things that have been combined ; an assemblage of separate parts or qualities,3.0
+test,"a man-made artifact , digital or physical , which is used to display information presented via the object .",a vertical surface on which information can be displayed to public view,2.0
+test,"words in this frame have to do with a cognizer believing that some phenomenon will take place in the future. some words in the frame ( e.g. foresee.v ) indicate that the phenomenon is asserted also to be true , while others do not .",look forward to the probable occurrence of ;,2.2
+test,a helper benefits a benefited _ party by enabling the culmination of a goal that the benefited _ party has. a focal _ entity that is involved in reaching the goal may stand in for it .,help to some food ; help with food or drink ;,2.0
+test,an entity is integrated into a building as a part of a ( possibly unexpressed ) whole which may refer to the whole building or merely to a sub-part of the building .,a pane of glass in a window ;,0.6
+test,the words in this frame refer to facial expressions and the possessors of those expressions .,the feelings expressed on a person 's face ;,3.4
+test,geography as defined by its use .,a district that has been developed to serve some purpose ;,2.4
+test,"a phenomenon is portrayed with respect to the degree of likelihood that it will be perceived and known , given the ( usually implicit ) evidence , perceiver , and the circumstances in which it is considered. for several of the lus , such as visible , audible , etc . , the type of the evidence is fixed by the targets themselves being a perceptual experience .",be or become visible or noticeable ;,3.2
+test,this frame concerns a specific subset of instances of a type which are evaluated in terms of their similarity to a conceptual prototype of the type. the judgment of exemplariness may be made along a certain domain .,devoted ( sometimes fanatically ) to a cause or concept or truth ;,0.0
+test,an entity can bear a great outer force so as to resist destruction and damage .,immune to attack ; incapable of being tampered with ;,2.2
+test,lus in this frame modify a gradable attribute and describe intensities at the extreme positions on a scale .,surpassing what is common or usual or expected ;,0.8
+test,an authority with the power to make decisions hands down a finding over a question presented in a formal or informal case .,decide with authority ;,2.8
+test,"this frame covers words that name locations as defined politically , or administratively .",the territory occupied by one of the constituent administrative districts of a nation ;,3.2
+test,a speaker characterizes the intensity of an attribute of an entity by a degree .,intensely or extremely bad or unpleasant in degree or quality ;,1.8
+test,"an agent expends effort towards achieving a goal. alternatively , a salient _ entity involved in the goal can be expressed in place of a goal expression .",activity directed toward making or doing something ;,1.2
+test,this frame has to do with scientific taxonomy. the lexical units in this frame include the seven major classifications in which organisms are grouped based on common biological characteristics. these classifications are labeled rank in this frame. the members or subtype of the rank is often expressed with the use of the target-denoting noun .,( biology ) taxonomic group containing one or more families,2.8
+test,this frame contains words referring to items of food .,a particular day specified as the time something happens ;,0.0
+test,"a person or institution is being described in terms of their wealthiness , in other words the amount of money in their possession .",having little money or few possessions ;,0.8
+test,an experimenter conducts an experiment based on a hypothesis. this experiment contains a control _ group or controlled _ individual which is compared with a treatment _ group or treated _ individual in order to determine the result .,a standard against which other conditions can be compared in a scientific experiment ;,2.6
+test,a speaker characterizes the intensity of an attribute of an entity by a degree .,not faint or feeble ;,0.0
+test,"this lus in this frame refer to biological entities labeled by the fe organism. an organism is described as something that can be alive , or have naturally occuring biological processes and functions , however the concept of life is often used metaphorically for non-organic entities which resemble or act as if they have organic life .",living things collectively ;,1.6
+test,this frame contains nouns denoting aggregates of individuals. the aggregates may be described by an aggregateproperty .,a number of sheets ( ticket or stamps etc . ) bound together on one edge ;,0.2
+test,this frame has to do with the repetition ( and especially the frequency of repetition ) of an event. many of the adjectives and adverbs in this frame are based on nouns in the calendric _ unit frame .,having no special distinction or quality ; widely known or commonly encountered ; average or ordinary or usual ;,0.0
+test,"this frame contains transparent nouns ( and some adjectives ) denoting quantities of a mass or of individuals. as opposed to aggregate words such as group , set , these quantity do not have a status as wholes on their own. initially , at least , we annotate both quantity of masses and of individuals in this frame , though we may split the frame along these lines later on .",not excessive or extreme ;,0.0
+test,the size of an entity is assessed in terms of the degree by which it deviates from the norm. the size refers to the amount of three-dimensional space that is occupied by the entity .,relatively large in size or number or extent ; larger than others of its kind ;,1.8
+test,an agent or cause makes a new _ member part of group. the group may be represented by an individual existing _ member if it implies the existence of a set of members .,"make an addition ( to ) ; join or combine or unite with others ; increase the quality , quantity , size or scope of ;",1.6
+test,lus in this frame denote that the instance of a type is contextually notable. this frame typically requires dual fe layer annotation ; see below .,separate and distinct from others of the same group or category ;,0.4
+test,"in this frame , which is a part of the trial sequence , a judge gives a finding with respect to the charges against the defendant in a particular case .",decide on and make a declaration about ;,0.8
+test,this frame concerns entities conventionally being referred to by particular names .,a language unit by which a person or thing is known ;,2.0
+test,"the lexical units in this frame have to do with an entity being in a state of order or disorder. often the entity is unexpressed in this frame and is , therefore , marked as a null instantiation .",established customary state ( especially of society ) ;,0.6
+test,"the lexical units in this frame are descriptions of a cognizer 's attitude about or outlook on a state _ of _ affairs. the state _ of _ affairs can be expressed without a cognizer in many cases , as shown in the following",showing a brooding ill humor ;,0.0
+test,a salient subevent has a pattern of recurrence within a larger process .,rhythm as given by division into parts of equal duration,0.0
+test,a cognizer introduces a new _ idea into society .,"make a discovery , make a new finding ;",2.6
+test,"an experiencer actualizes a certain pattern of behavior , a lifestyle , which persists for a significant period of time in the experiencer 's life and is recognized as part of his character or normal routine. the lifestyle is not necessarily realized intentionally , and may just be the result of circumstance .",a characteristic state or mode of living ;,2.6
+test,"a person has a particular mental state and the ability to engage in an activity with enthusiasm , energy , and positivity .",animation and energy in action or expression ;,2.66666666666667
+test,this frame contains lus that express the form which a piece of artwork represents. the form may also represent the entire body of an artist 's work. the form may be further characterized by the time of some artwork 's creation or other descriptors .,( architecture ) one of original three styles of greek architecture distinguished by the type of column and entablature used or a style developed from the original three by the romans,0.6
+test,geography as defined by its use .,a place where work is done ;,0.2
+test,an entity meets the pre-conditions for participating in an event. a degree modifier may be included to indicate by how much the entity exceeds or falls short of the minimum requirements .,( usually followed by `to ' ) having the necessary means or skill or know-how or authority to do something ;,0.4
+test,"a person ( the cognizer ) comes to believe something ( the content ) , sometimes after a process of reasoning. this change in belief is usually initiated by a person or piece of evidence. occasionally words in this domain are accompanied by phrases expressing topic , i.e. that which the mental content is about .","establish after a calculation , investigation , experiment , survey , or study ;",2.0
+test,"this frame contains verbs and nouns that communicate the act of a speaker to address a message to some addressee using language. a number of the words can be used performatively , such as declare and insist .",state or say further ;,1.0
+test,"this frame is concerned with the likelihood of a hypothetical _ event occurring. the hypothetical _ event is its only core frame element. notice that in the case where a noun phrase is the subject of the support verb , that np is also tagged as hypothetical _ event .",involving substantial risk ;,0.0
+test,in this frame an ingestor takes a substance into his or her body. the delivery _ device can appear as a direct object .,take or consume ( regularly or habitually ) ;,1.8
+test,"the hearer receives a message or communication on a particular topic. words in this frame denote events of verbal communication , but express the hearer rather than the speaker as an external argument .",to hear and understand ;,2.6
+test,"the locale is a geographical location as defined by shape. this frame includes natural geographic features , including land / ice forms and bodies of water .",material in the top layer of the surface of the earth in which plants can grow ( especially with reference to its quality or use ) ;,0.8
+test,this frame has to do with scientific taxonomy. the lexical units in this frame include the seven major classifications in which organisms are grouped based on common biological characteristics. these classifications are labeled rank in this frame. the members or subtype of the rank is often expressed with the use of the target-denoting noun .,( biology ) a taxonomic group containing one or more genera ;,2.8
+test,a perceiver determines the location of a sought _ entity within a ground .,come upon after searching ; find the location of something that was missed or lost ;,2.4
+test,"in this frame a speaker asks an addressee for something , or to carry out some action .","( often plural ) a command given by a superior ( e.g. , a military or law enforcement officer ) that must be obeyed ;",2.0
+test,"a piece of evidence indicates that an event occured , or metonymically , entity had formerly existed , in a location .",an indication that something has been present ;,3.2
+test,"a competition comes to an end , with a competitor tying , winning , or losing against an opponent ( or opponents ) according to their score . ( in the symmetrical situation of a tie , the competitor and opponent may be jointly mentioned as competitors . ) according to the score that the competitor and opponent have achieved , they may receive a rank or a prize. the margin may also be mentioned .",finish third or better in a horse or dog race ;,1.2
+test,drug lord captured by marines in mexico,suspected drug lord known as ‘ el taliban ’ held in mexico,2.6
+test,sc dismisses govt 's review plea in vodafone tax case,sc dismisses govt 's review petition on vodafone tax verdict,4.4
+test,explosion hits oil pipeline in syria 's homs,explosion hits pipeline as assad attacks cities,2.6
+test,nato soldier killed in afghan attack,nato soldier killed in s. afghanistan,3.8
+test,castro celebrates 86th birthday monday,fidel castro celebrates 86th birthday,4.2
+test,israel ex-spy warns against ' messianic ' iran war,israeli ex-spy boss : no trust in leadership over iran – video,3.0
+test,eye opener : supreme court rules on arizona immigration law,u.s. supreme court issues split ruling on arizona immigration law,3.8
+test,nato traces path out of afghanistan,nato leaders commit to afghanistan transition,3.2
+test,syria says suicide bomber kills 10 in damascus,damascus ' suicide bombing ' kills 10,4.0
+test,"sachin tendulkar says i 'm not god , i 'm sachin",sachin tendulkar scores cricket 's first 100th century,0.8
+test,tropical storm heads for pass along honduras coast,tropical storm warnings for southeast coast,1.4
+test,australian pm gillard set to win leadership challenge,australian pm defiant under pressure over leadership,2.4
+test,obama backs philippines over south china sea,obama says clear rules needed to calm south china sea,2.4
+test,"teenager in china kills 8 , wounds 5 in knife attack",teenager kills 8 in knife attack,3.2
+test,syrian rebels move command from turkey to syria,free syrian army moves headquarters from turkey to syria,3.8
+test,knesset speaker : obama reelection bad for israel,7 states sue over obama administration 's birth control rule,0.4
+test,netanyahu set to call early vote,israel 's netanyahu set to call early vote,4.4
+test,greece bond exchange the largest debt restructuring in history,greece secures biggest debt deal in history,2.8
+test,putin ' wins russian presidential election',polls open in russian presidential election,1.0
+test,suicide bomber kills 12 in nigeria church,suicide bomber kills 21 in nw pakistan,0.75
+test,indian finance minister quits to run for president,julian assange plans to run for australian senate,0.2
+test,jerry sandusky found guilty in child sex abuse trial,sandusky found guilty in child sex abuse trial,3.8
+test,three tibetans self-immolate in western china : report,7 tibetans self-immolate in china,2.4
+test,white house in damage control over obama supreme court remarks,fact check : obama 's supreme court remarks,3.6
+test,annan warns talks of syria risks,"putin , annan meet on syria crisis",2.0
+test,"quartet calls on israelis , palestinians to end irritants",occupation to confiscate 30 dunums of palestinian land in deir estia,1.4
+test,saudis to permit women to compete in olympics,saudi women allowed to compete at olympics,4.8
+test,nigeria university mass attacked by gunmen,nigeria : university bombed in north,2.2
+test,us says ready to help blind chinese activist,u.s. ready to help chinese activist : official,3.4
+test,china 's cabinet promises to boost economy,china 's wen promises job creation,3.2
+test,"annan , un chief call on security council to act on syria","russia , china veto un security council resolution on syria",1.8
+test,green lantern to be reintroduced as gay by dc comics,green lantern to be relaunched as gay superhero,4.0
+test,military plane crashes in south france : authorities,"military plane crashes in southeastern turkey , 1 dead",1.0
+test,tropical storm isaac boosts jobless claims,"tropical storm joyce forms , stays in open atlantic",1.0
+test,gazans fire 2 rockets into israel ; no injuries,2 gaza rockets hit israel ; no injuries,4.8
+test,freddie starr arrested in savile abuse probe,third man arrested in savile sex abuse probe,3.2
+test,romney announces paul ryan as running mate,romney names ryan as running mate,5.0
+test,"stocks rise early after greek deal , then flatten",stocks edge higher after greek debt deal,3.6
+test,suicide bombing rocks elite yemen military camp,suicide bombers attack yemen military posts,4.0
+test,nato : 2 international troops killed in afghanistan,three nato troops killed in one day in afghanistan,2.2
+test,moscow protesters demand vladimir putin 's resignation,moscow protest against vladimir putin smaller and quieter,1.8
+test,saudi gas truck blast kills at least 22,nigeria church blast kills at least 12,0.6
+test,french election turnout higher than expected,french presidential election : first round - live updates,1.0
+test,australia to establish the world 's largest marine reserve,australia creates world 's largest marine reserves,4.4
+test,"two u.s. soldiers shot , killed by afghan soldier",two british soldiers killed by afghan policeman,1.6
+test,italy soldiers die in afghanistan,two uk soldiers killed in afghanistan,1.4
+test,abbas to lead palestinian unity government,abbas proposed as pm in interim unity government,4.0
+test,egypt ’ s coptic church names new pope,egypt 's coptic church prepares to choose pope,2.8
+test,malawi officially confirms president 's death,malawi confirms president mutharika 's death,3.6
+test,mali 's tuareg rebels declare independence,mali rebels declare independent ' azawad',3.8
+test,lance armstrong stripped of tour de france titles,lance armstrong plots strategy after loss of titles,1.4
+test,egypt votes on final day of presidential election,polls open in france for presidential election,1.0
+test,berri says ready to help launch national unity government,the perception of spain has changed dramatically with this government,0.4
+test,is madeleine mccann still alive ?,"reopen madeleine case , police urge",0.6
+test,13 dead in iraq bomb attacks,16 killed in north iraq attacks,1.8
+test,aussie surfers find stricken asylum seekers,mayday : fears for asylum seekers,1.4
+test,isaf : 4 coalition troops killed in attack involving afghan police,"nato says four troops killed in "" insider "" attack in afghan south",3.0
+test,coty launches $ 10 billion bid for rival avon,coty bids $ 10 billion for avon,4.6
+test,un security council unanimous vote on syria,un security council to vote on up to 300 syria monitors,3.2
+test,gunman kills 6 in shooting at wisconsin sikh temple,gunman kills six in shooting at sikh temple in wisconsin,5.0
+test,audi to buy motorcycle maker ducati,probe into motor insurance market,0.6
+test,hurricane isaac moves inland after landfall,hurricane isaac batters us coast near new orleans,2.4
+test,china news agency : still hope for syria peace,china state news agency : there 's still hope for syria peace,4.2
+test,22 dead in suicide attack on yemen police academy,au forces intensify attack on somali rebels,0.4
+test,south korea orders immediate shutdown of 2 nuclear reactors,south korea to boost nuclear power ?,1.2
+test,nigeria mourns over 193 people killed in plane crash,nigeria opens probe into deadly air crash,1.6
+test,"us , allies to set demands for iran nuclear talks",'iran won 't accept pre-conditions to nuclear talks',1.6
+test,aol says to sell 800 patents to microsoft for $ 1.0 bn,aol to sell 800 patents to microsoft for $ 1 billion,4.8
+test,thousands of troops to march for jubilee,thousands flock to amsterdam for queen 's day,1.2
+test,middle east : israel : hamas leader convicted,middle east : iraq : 17 prisoners escape in kirkuk,0.8
+test,navy jet crashes into apartment building,us navy jet crashes into apartment block,4.2
+test,woman dies after abortion refusal,woman dies after cliff collapses in dorset,0.6
+test,greece votes in crucial election,greece looks set for repeat election,1.8
+test,u.s. and turkey weigh no-fly zones for syria,u.s. and turkey tighten coordination on syria,2.2
+test,death toll rises to 236 after brazzaville blasts,rep. of congo : 236 dead after arms depot blasts,3.6
+test,i 'll have another retired to stud,i 'll have another wins preakness,1.0
+test,syria journalists rescue bid fails,journalists smuggled out of homs,0.6
+test,new sex claim hits secret service,new rules for us secret service,1.8
+test,iran warns moscow nuclear talks could stall,iranians “ confess ” to nuclear scientist murders,1.2
+test,mohamed morsi sworn in as eygptian president,mohamed morsi sworn in as egypt 's president,4.6
+test,rimsha masih released on bail,mandela released from hospital,0.0
+test,1 person killed in sectarian clashes in lebanon,180 killed in iran earthquake,0.0
+test,icc jails congolese warlord for 14 years over child soldiers,congolese warlord sentenced to 14 years in landmark case - video,3.2
+test,gains in financial stocks push up european equities,british christians take complaints to european court,0.0
+test,turkey raises alarm over syrian refugees,turkey seeks to relocate some syrian refugees,1.6
+test,1 person killed in sectarian clashes in lebanon,nine killed in syrian-linked clashes in lebanon,1.4
+test,suspected al-qaeda financier arrested in france,three al qaeda suspects arrested in spain,1.6
+test,"no damage , tsunami after 6.6 quake hits off indonesia 's sumatra",5.9 quake hits indonesia s sumatra : usgs,1.6
+test,iaf strike gaza terror hubs,iaf strikes gaza terror cell ; 1 dead,3.2
+test,israeli air strikes kill 16 in gaza,israel air strikes kill 4 in gaza ; death toll now at 38,2.2
+test,"18 killed , 108 wounded in wave of bombings in iraq","9 killed , 31 wounded in car bombs in iraq 's kirkuk",1.4
+test,palestinian prisoner ending hunger strike after deal,israel to free palestinian hunger striker,2.0
+test,hezbollah confirms it sent drone downed over israel,hezbollah says it sent drone over israel,3.4
+test,rebel fighters ' capture ' syrian soldiers,free syrian army captures syrian officers,3.2
+test,colorado shooting suspect was under psychiatrist 's care,doctor treating aurora shooting suspect had medical reprimand,2.4
+test,6.6 quake rocks indonesia 's papua : usgs,6.6 quake rocks indonesia 's papua : us geological survey,4.8
+test,us senators penalize pakistan for jailing doctor who aided cia,us decries pakistan doctor 's fate,2.8
+test,what time is andy murray v roger federer in the wimbledon men 's final ? all you need to know about the big game,what time is the paralympic opening ceremony ? everything you need to know about the big curtain-raiser,0.4
+test,new jersey school bans hugging,us school bans hugging,3.6
+test,iran ( islamic republic of ) : iran steps up relief efforts after quakes kill 227,iran steps up relief efforts after quakes kill 227,4.6
+test,tsunami warning issued for southern alaska,tsunami warning after canada quake,2.4
+test,'no evidence ' in afghanistan massacre case,"us toll in afghanistan hits 2,000",0.8
+test,"cash-rich apple to pay dividend , buy back shares","apple to pay $ 2.65 / share dividend , buy back $ 10b stock",3.8
+test,"7 soldiers killed , 56 injured in pkk attack in eastern turkey","3 killed , 14 injured in attacks in iraq",0.4
+test,two reported dead in shooting at empire state building in ny,2 dead in shooting outside empire state building,4.6
+test,australian unemployment up to 5.1 percent,french unemployment rate rises to 10 percent,1.0
+test,shares move higher on wall street,sandy strengthens as nears coast ; wall street shut,0.4
+test,halliburton 1q income rises 23 pct,halliburton q1 profits rise on strong north america sales,2.6
+test,syrian envoy to cyprus defects to qatar,syria deploys more troops despite peace deal,0.8
+test,4 killed in shrine bombing in northwest pakistan,12 killed in u.s. drone strike in nw pakistan,0.8
+test,china stocks close mixed friday,china stocks open lower friday,1.6
+test,india bans bulk texts after riots,tunisia lifts curfew after riots,0.8
+test,un monitors yet to reach site of syrian ' massacre ' – video,un monitors shot at on way to syrian massacre site,2.4
+test,yorkshire soldier killed in afghan bomb blast,soldier killed in afghanistan blast,3.6
+test,radical islamists in mali enlist new militia,local militia bolsters islamist militants in mali,3.75
+test,olympics opening ceremony a hit around globe,opening ceremony gives olympics a rocking start,4.2
+test,schiphol airport partly evacuated after bomb threat,schiphol airport evacuated due to bomb threat,4.0
+test,man killed in french terror raid,man dies in french ' anti-terror operation',4.8
+test,dali painting stolen from gallery,salvador dali painting snatched from new york gallery,3.8
+test,capello quits as england manager,capello resigns as england manager,5.0
+test,one dead in ohio school shooting,"1 dead , 4 wounded in ohio school shooting",3.2
+test,2 palestinians killed in israeli airstrikes,four palestinians killed in iaf strike,2.4
+test,pakistan condemns u.s. drone strikes,pakistan convoy heads to protest us drone strikes,3.2
+test,massive hurricane sandy bears down on u.s. east coast,"hurricane sandy gains speed , batters us east coast",4.0
+test,sarkozy to file complaint in gadhafi funding claim,sarkozy to sue after gaddafi cash claim bursts into campaign,3.6
+test,"the note 's must reads for wednesday july 4 , 2012","the note 's must-reads for wednesday , may 30 , 2012",2.0
+test,'iran will attack tel aviv if israel strikes',senior cleric : iran will attack tel aviv if israel strikes,4.4
+test,"annan urges end to syria violence , minister defects",annan urges end to syrian violence,3.8
+test,gusmao consolidates power in east timor elections,supreme court possibilities if romney wins election,0.0
+test,pena nieto wins mexico presidential vote : exit polls,poll : putin to win russia presidential vote,0.6
+test,syria tells russia some troops have pulled out of homs,syria says troops have begun pullout – video,3.4
+test,nigeria plane crash : no survivors,4 chinese among nigeria plane crash victims,2.6
+test,mier ups 2012 growth forecast to 4.2pc,cmie cuts 2012-13 growth forecast to 6.3 %,0.8
+test,explosion at venezuela refinery kills at least 39,venezuela mourns oil refinery blast deaths,2.8
+test,strong earthquake hits mexico,strong earthquake strikes near acapulco,3.6
+test,"russia , china veto un resolution on syria killings","russia , china in double veto of un syria resolution",3.8
+test,colorado shooting suspect was in therapy,lawyers : colo. shooting suspect is mentally ill,4.2
+test,suicide bomber kills 4 near nato 's afghan hq,suicide bomber kills 23 at afghan wedding,1.6
+test,pakistani plane crashes with 127 on board,pakistani plane crashes with 130 people on board,2.6
+test,un security council orders global sanctions against haqqani network in afghanistan,un orders global sanctions against haqqani network,4.4
+test,erdogan and putin talked in raised voice,foreign militants killed in somalia in strike on car,0.0
+test,saudi arabia arrests suspected militants with al-qaeda links,"saudi arabia arrests suspected militants , state media reports",4.0
+test,hurricane sandy closes in on us east coast,hurricane sandy takes aim at us east coast,4.8
+test,"chicago teachers strike : vacations for students , for good or ill",chicago teacher strike poses test for unions,2.2
+test,panetta says afghanistan role to shift from combat in 2013,panetta : afghanistan tops nato conference topics,1.6
+test,four men admit london stock exchange bomb plot,four men admit london bombs plot,4.0
+test,"pm in tehran , asks nam to take clear stand on syria","manmohan in tehran , asks nam to take a stand on syria",3.8
+test,israel threatens action against gaza aid ship,israel attacks in gaza strip after rocket fire,1.6
+test,bodies found at russian jet crash in indonesia,12 bodies found at russian jet crash in indonesia,3.8
+test,senators can return to playoffs with victory,messi scores 4 to send guardiola off with victory,1.4
+test,syria urges refugees to return,syria 's tenuous truce takes hold,1.0
+test,us soldier kills up to 16 civilians in afghanistan,us soldier kills up to 16 afghan civilians in shooting spree,4.2
+test,rupert murdoch : i was the victim of a cover up,rupert murdoch set for second day of grilling,1.2
+test,barack obama 's bodyguards sent back to us after prostitution scandal,barclays boss falls to rate fixing scandal,0.4
+test,china 's yuan rises to new high against usd wednesday,china 's yuan advances to 6.3103 against usd wednesday,3.8
+test,south africa train crash kills at least 19,south africa train crash kills 26,3.6
+test,nissan to sell steer-by-wire cars,nissan to offer steer-by-wire systems in some infiniti cars,4.0
+test,tibetan monk dies after setting himself on fire in protest against chinese rule,teenage tibetan monk dies after setting himself on fire in china,3.8
+test,mumbai is 2nd costliest indian city to live in,tech capital bangalore costliest indian city to live in : survey,1.0
+test,"man , 19 , quizzed over teen murder",man quizzed over megan-leigh murder,3.8
+test,"israel kills hamas commander , bombs gaza targets","israel airstrikes kill hamas commander , 5 others",3.4
+test,civilians bear brunt of afghan attacks,taliban launch coordinated afghan attacks,1.8
+test,gusmao consolidates power in east timor elections,gusmao powers on in east timor,3.6
+test,un monitors yet to reach site of syrian ' massacre ' – video,un monitors unable to reach site of syria killings,4.4
+test,"russia , china veto un resolution on syria endorsing","russia , china veto u.n. draft backing arab plan for syria ( reuters )",3.8
+test,nato condemns syria 's downing of turkish military jet,nato strongly condemns syria 's downing of turkish jet,4.8
+test,activists : syrian troops storm damascus suburb,activist says syrian citizen cameraman killed in homs,1.4
+test,syria rebels attack lebanese post near border : army,turkish army stages tank exercises near syria border,0.8
+test,five killed in china building collapse,at least 20 killed in syria saturday,0.2
+test,syrian forces launch new attacks,syria forces launch aleppo attack,3.4
+test,syrians trade blame over blasts,israel braces for arab protests,0.2
+test,gazans fire 2 rockets into israel ; no injuries,gazans fire 89 rockets ; cabinet approves reserve call-up,1.4
+test,former nazi death camp guard demjanjuk dead at 91,"john demjanjuk , convicted nazi death camp guard , dies aged 91",4.6
+test,boris johnson re-elected london mayor,johnson re-elected london mayor,3.8
+test,breivik drops far-right salute in court,breivik gets 21-year sentence,1.0
+test,second teenager charged with murder,brother of eastenders actress gemma mccluskie is charged with her murder,1.4
+test,french fear new serial killer after murders,jersey murder trial : killer ' hearing voices',0.8
+test,us : madoff brother to plead guilty in ny in fraud,madoff 's brother to plead guilty to fraud,4.2
+test,hollande defeats sarkozy in french presidency vote,polls open across france in presidential election,1.8
+test,libyan government retakes tripoli airport,libyan militia takes control of tripoli airport,3.2
+test,clinton warns kenya of cost of election violence,clinton warns kenya on cost of election unrest,4.6
+test,arkansas supreme court strikes down execution law,arkansas justices strike down death penalty,4.6
+test,s. africa 's former president mandela discharged from hospital,mandela discharged from hospital,4.2
+test,un envoy in turkey for talks on syria,nz to increase exports to china,0.2
+test,islamist morsi wins egypt 's presidential election,al-shater to run in presidential election in egypt,1.0
+test,"donna summer , the queen of disco","donna summer , queen of disco , dies at 63",1.6
+test,"bangladesh muslims torch buddhist shrines , police say",muslims torch buddhist temples,3.6
+test,u.s. drone kills five militants in pakistan,six police officers killed in attacks in dagestan,0.4
+test,mali future interim president readies to take office,pope rips into dissident priests on celibacy,0.0
+test,"9 killed , 168 injured in latest cairo clashes","10 killed , 12 injured in e. afghan airport suicide blast",1.2
+test,tehran : eu sanctions won 't force iran into nuclear talks,low expectations for iran nuclear talks,1.8
+test,portugal drownings : uk girl and grandad named,british girl and grandad drown in portugal,2.2
+test,romney wins maine republican caucuses,"romney , in comeback , has narrow maine caucus win",3.8
+test,court in bahrain rejects medics ' last rally appeal,bahrain rejects activists ' appeal,3.8
+test,hurricane sandy powers toward eastern seaboard,hurricane sandy moves towards us,3.6
+test,clinton calls for friends of syria to unite,plastic artist calls for greater support for new talents,0.0
+test,jk rowling launches her first adult novel,syria launches ground assault in aleppo,0.0
+test,algerian government parties dominate elections,algerian national turnout of parliamentary vote reaches 44.38 pct,2.4
+test,security official killed in yemen,security personnel killed in pakistan raid,0.6
+test,us stocks fall as greek talks lumber ; apple falls,us stocks slip on wall street as greek talks drag on,3.2
+test,romney picks ryan as vice presidential running mate : source,romney to tap ryan as vice presidential running mate,5.0
+test,nato sticks to transition roadmap in afghanistan : rasmussen,nato helicopter makes hard landing in e. afghanistan,1.0
+test,mubarak faces verdict in murder trial,mubarak 's sons face new charges of insider trading,1.4
+test,no blocks to investment,india allows pakistan investment,2.0
+test,blast kills 11 in northwestern pakistan,bomb kills 19 in northwest pakistan,2.6
+test,5 aid workers freed in operation in afghanistan,suicide bomber kills 37 at mosque in afghanistan,0.8
+test,two nato soldiers killed in afghanistan,nato soldier killed in afghan blast,3.6
+test,nadal tumbles into french open final,nadal through to seventh french open final,4.0
+test,russian tv reports foiled attempt on putin,"russia , ukraine foiled plot to kill putin , report says",3.2
+test,putin claims victory in russia 's presidential election,putin wins disputed russian presidential election,4.4
+test,israeli leader puts off evicting settlers from hebron house,israeli army orders settlers out of hebron house,1.6
+test,government promises action on heathrow queues,finance minister promises no new taxes,0.4
+test,remains of 167 bodies found in mexican cave,remains of 167 people found in mexico cave,5.0
+test,orphaned alps massacre girl returns to uk,alps attack : girl returns to uk,4.0
+test,obama team raises debate stakes,obama takes offensive against romney in debate,2.8
+test,two kenyan ministers among 6 killed in plane crash,poland honors president killed in 2010 plane crash,0.8
+test,"iran , powers set for high-stakes nuclear talks","u.s. , iran prepare for istanbul nuclear talks",3.2
+test,thousands gather for new russian anti-putin rally,thousands gather in moscow for rival rallies,2.8
+test,syrian forces kill teen in aleppo protests,syrian forces kill 3 protesters in damascus-activists,1.2
+test,google names new motorola mobility ceo,google appoints dennis woodside to run motorola mobility,3.8
+test,massive hurricane sandy bears down on u.s. east coast,hurricane sandy takes aim at us east coast,4.4
+test,egyptian president moves into mubarak 's old office,egypt 's president-elect morsi starts to form government,2.33333333333333
+test,another rocket hits eshkol ; no injuries,2 rockets hit eshkol ; none injured,3.4
+test,japan falls silent to mark 311 tragedy,japan thanks taiwan for quake aid,0.4
+test,thousands more syrian refugees flee to turkey overnight,"8,000 syrian refugees flee to turkey overnight",3.8
+test,assange appeals extradition to uk 's top court,assange to appeal extradition to uk 's top court,4.0
+test,strong quake jolts most parts of pakistan,strong quake hits eastern indonesia,2.0
+test,lebanese gunmen clash over syria crisis,syrians hold solution to syria crisis,1.0
+test,syrian troops kill 35 in damascus suburb,activists : syrian troops kill dozens near damascus,3.6
+test,mob kills man for burning quran,pakistani mob kills man ' for burning koran',4.0
+test,us drone strike kills four in north waziristan,u.s. drone strike kills 10 in northwest pakistan : officials,1.8
+test,salvador dali painting snatched from new york gallery,salvador dali painting snatched in nyc,4.6
+test,putin claims victory in russia 's presidential election,will putin 's election victory in russia be greeted with protests ?,1.8
+test,sarkozy announces re-election bid,france 's nicolas sarkozy makes his reelection bid official,4.2
+test,"us , uk in pact to release emergency oil stocks","us , uk set to agree emergency oil stocks release",4.6
+test,suspicious object found in tel aviv not explosive device,police treat suspicious object at tel aviv bus station,3.4
+test,eurozone unemployment stays at record 11 percent,eurozone unemployment at record high in june,3.0
+test,french socialist party wins parliament victory,french socialists win absolute parliament majority,3.8
+test,"salafi islamists , police clash in tunis - witnesses",second islamist hunger striker dies in a tunisian prison,0.6
+test,strauss-kahn investigated in french prostitution ring,dominique strauss-kahn faces questions over french prostitution ring,3.8
+test,romney wins florida republican primary,romney eyes us republican primary endgame,1.8
+test,us drone strike kills four in north waziristan,suspected drone strike kills 4 in pakistan,2.6
+test,at least 15 killed in nigeria church attack,at least 12 killed in nigeria church bombing,2.6
+test,2 traffic accidents leave 47 dead in china,3 traffic accidents leave 56 dead in china,2.4
+test,head of cia resigns over affair,hall of fame beckons for capriati,0.0
+test,france 's strauss-kahn charged with involvement in prostitution vice ring,strauss-kahn charged in prostitution vice ring,4.0
+test,sony reports record annual loss,sony forecasts record annual loss of $ 6.4bn,3.6
+test,12 killed in gaza in israeli airstrikes,"ictu , ibec in move on airline strike",0.4
+test,9 killed in attacks after deadly iraq day,19 killed in iraq attacks ahead of ramadan end,1.4
+test,barclays hit by fresh u.s. investigations,barclays hit by fresh us probe,4.4
+test,us closes embassy in syria ( ap ),closed roads in armenia,0.4
+test,"jaguar to create 1,100 jobs in uk","royal mail to create 1,000 jobs",1.25
+test,eu heaps new sanctions on syria,eu imposes new sanctions on syrian regime,4.4
+test,us drone strike kills 8 militants,us drone strike kills four in nwa : officials,2.2
+test,russians rally against putin 's rule,tens of thousands rally against putin 's rule ( ap ),3.4
+test,bahrain grand prix underway amid protests,bahrain race goes ahead amid unrest,4.0
+test,china stocks open flat monday,chinese stocks open mixed wednesday,1.4
+test,sheryl crow says has benign brain tumor,sheryl crow has a benign brain tumor,4.6
+test,obama endorses same-sex marriage,obama 's delicate dance on same-sex marriage,2.6
+test,iraq searches syria bound iran plane : officials,iraq searches syrian-bound iranian plane,4.2
+test,afghan parliament approves u.s.-afghan security pact,afghan parliament approves u.s. partnership,3.8
+test,"two german tourists , two pilots killed in kenya air crash",senator reid involved in las vegas car crash : cnn,0.6
+test,"israeli , palestinian negotiators quietly meet","israeli , palestinian negotiators meet in jordan",3.6
+test,us astronaut neil armstrong dead at 82,us astronaut neil armstrong dies,3.6
+test,amnesty : syria rebels also committing abuses,amnesty investigator : syria rebels also committing abuses,4.2
+test,mitt romney wins republican primary in indiana,romney wins florida republican primary,1.6
+test,east german rights activist gauck elected president,joachim gauck elected as german president,4.0
+test,south africa starts investigating mine violence,south africa hosts ' peace talks ' in mine standoff,2.4
+test,syria fighting rages as russia urges western re-think,"syria fighting rages in capital , russia pressed",2.6
+test,"3 dead , 27 injured in sw china accident",35 dead and 165 missing in india boat accident,0.4
+test,erdogan 's party submits plan for turkish presidency,erdogan 's party aims for turkish presidency,3.6
+test,santorum romping to minnesota victory,santorum wins kansas caucuses,1.0
+test,jordan opens first tent camp for syrian refugees,jordan opens first refugee camp for syrians,4.8
+test,space legend neil armstrong dies,first man on moon neil armstrong dies at 82,4.0
+test,u.s. and turkey weigh no-fly zones for syria,"turkey , us weigh no-fly zones for syria",4.8
+test,man arrested over double murder,wa man arrested in police drug raid,0.8
+test,florida counties extend early voting,fla . democrats want extended early voting hours,2.8
+test,warship sets sail for falklands,british warship sets sail for falklands,3.8
+test,"newcastle 2-0 liverpool : match report , pictures & video highlights","qpr 1-2 west ham : match report , pictures & video highlights",1.0
+test,palestinian prisoners to end hunger strike,progress reported in palestinian prisoner hunger strike talks,2.8
+test,police : four killed in german hostage taking incident,palestinians : 12 killed in idf strike in northern strip,1.0
+test,egypt lets mubarak pm back in presidential race,egypt confirms mubarak 's pm back in presidency race,4.25
+test,syrian journalists killed in capital,us marines killed in base attack,0.6
+test,gop candidate romney to call to arm syrian rebels,us helping get arms to syria rebels,2.4
+test,u.n. observer patrol arrives at syria massacre site,un observers reach syria massacre village,4.4
+test,publisher acquitted in privacy case,pbs publishes new guidelines on impartiality,0.4
+test,american airlines and pilots agree on a new contract,romney pledges to ' stand with israel ' on iran threat,0.0
+test,greek pm to announce new election,greek pm calls for may 6 general election,2.8
+test,government of canada supports montréal women leading change,government of canada supports women 's safety in regina,1.6
+test,no problem if mulayam forms third front : congress,no problem if mulayam forms third front : digvijay,3.2
+test,bradley triumphs at firestone as furyk fades,bahrain court upholds sentences against uprising leaders,0.0
+test,samsung overtakes nokia in phones,charges over dog attack on police,0.0
+test,plane crash in ghana kills at least 10,plane crash in ghana : how the international media reported it,2.2
+test,gu kailai murder trial ends in china,gu kailai 's murder trial ends in china,5.0
+test,eurozone backs greek bailout,eurozone agrees greece bail-out,4.8
+test,six us troops killed in afghan bomb attack,6 nato troops killed in afghanistan,1.8
+test,syria forces launch aleppo attack,syrian forces kill 54 ahead of annan peace mission,1.6
+test,"romney , obama fight for edge on medicare","obama , romney compete for undecideds , stoke base",1.0
+test,two blasts hit syria capital,two blasts rock syrian capital,4.8
+test,bbc director general resigns over ' shoddy journalism',bbc director general resigns amid newsnight scandal,3.6
+test,rick santorum wins kansas caucuses,rick santorum notches a victory in kansas caucuses,4.8
+test,"in islamist-led egypt , coptic church names new pope",egyptian christians choose new pope,3.2
+test,us pledge to rebuild haiti not being met,us pledge to rebuild haiti not being met,5.0
+test,chinese stocks close higher thursday,chinese stocks open mixed wednesday,1.0
+test,greece to vote on 2013 budget ; protesters gather,greece to vote on 2013 budget,3.6
+test,not ' hiding the ball ' on russia : obama,obama says he 's not ' hiding the ball ' on russia,4.4
+test,"u.s. , eu cautiously welcome iran 's proposal to restart nuclear talks","u.s. , eu welcome iran 's offer to restart nuclear talks",4.0
+test,barack obama 's personal evolution on same-sex marriage,obama backs same-sex marriage,2.6
+test,clinton warns kenya of cost of election violence,clinton warns kenya on repeat of 2007 vote chaos,2.8
+test,england captain andrew strauss retires from professional cricket,england captain strauss retires from cricket,4.8
+test,anti-american protests over film expand to nearly 20 countries,anti-american fury sweeps middle east over film,3.8
+test,journalists hail london olympics opening,israeli delegation marches in 2012 olympics opener,1.0
+test,aust stocks open lower,tokyo stocks open lower,1.5
+test,wikileaks begins publishing two million syria emails,wikileaks releasing trove of syria documents,3.4
+test,palestinians : 2 gaza militants killed in israeli airstrike on coastal strip,officials : gaza man killed in israeli airstrike ( ap ),3.0
+test,mali 's president hands in resignation,mali 's president formally resigns,4.6
+test,china backs sri lanka on un resolution,war crimes : china backs lanka on un resolution,3.6
+test,three killed in nigeria suicide bombers attack,60 killed in nigeria cattle market attack,1.4
+test,"factbox-security developments in iraq , february 1","factbox-security developments in pakistan , march 13",1.6
+test,hrw : jordan biased against palestinians from syria,jordan biased over palestinians from syria,4.2
+test,israel among top arms exporters in world : report,israel among top arms exporters and importers,3.8
+test,egyptians to vote for new president,somali mps to elect new president,0.8
+test,federer wins 7th wimbledon title,federer captures 7th wimbledon title,5.0
+test,qaida leader calls for kidnap of westerners in egypt,al-qaida leader urges kidnapping of westerners,3.6
+test,china stocks close mixed friday,chinese stocks close higher midday friday,2.6
+test,ton up : tendulkar reaches 100th international hundred,sachin tendulkar 's reaches 100 centuries - in pictures,3.8
+test,police disperse protest in east sudan - witnesses,police disperse east china chemical plant protesters,1.6
+test,43 killed in bus crash,15 killed in crash in india,1.6
+test,putin sworn in as russian president,putin sworn in as russia 's president for 6 years,4.0
+test,china trade returns to surplus in march,tense calm returns to south tel aviv,0.0
+test,highlights of the vice presidential debate,five things to watch in the presidential debate,2.2
+test,2 pro-palestinian activists arrested at b-g airport,dozens of ' flytilla ' activists protest at paris airport,2.2
+test,"full episode : nightline 6 / 29 : katie holmes , tom cruise to divorce","custody , images at stake in cruise-holmes divorce",1.4
+test,syrian regime denies role in houla massacre,syria blames rebels for houla massacre of over 100,3.0
+test,south sudan accuses sudan of bombings ahead of talks,s. sudan accuses sudan of bombing in blow to talks,4.4
+test,conspiracy against me - lance,day begins amid panic,0.2
+test,spanish jobless rate soars past 25 per cent,"us jobless rate seen rising , offering obama no relief",1.0
+test,nine killed in gun attack in pakistan,five million citizens get unofficial salary in ukraine,0.0
+test,"syria demands guarantees , rebels say peace plan doomed",syria demands written guarantee for troop pullback,3.2
+test,minn. terminal reopens after evacuation,minn . terminal reopens after bag causes evacuation,3.8
+test,golf : westwood takes lead in dubai desert classic,westwood in front a dubai desert classic,4.0
+test,sudan blocks youtube over anti-islam film,pakistan 's pm orders youtube halt over anti-islam film,2.8
+test,polls open in russian presidential election,polls close in senegal 's presidential election,1.4
+test,chavez leaves again for cuba for radiotherapy,chavez set for more radiotherapy in cuba,4.4
+test,romanian president declared victory,chinese president concludes state visit to denmark,0.6
+test,russians rally support for orthodox church over pussy riot controversy,russian orthodox church rallies faithful after criticism,3.6
+test,clinton lands in india to breathe life into ties,clinton warns against undermining grameen bank,1.4
+test,mali interim leader takes office,mali 's interim president sworn into office,4.2
+test,putin declares victory in russian presidential vote,putin ' wins ' russia 's presidential election,3.8
+test,al renews condemnation on syria 's violence,u.s. closes embassy in damascus due to syria violence,1.6
+test,eu slaps sanctions on assad family,eu sanctions assad 's wife ; mortars hit homs,3.4
+test,air force instructor faces sentencing for rape,women testify at air force instructor 's sentencing,1.8
+test,more than 30 striking miners killed,more than 30 striking miners killed in south africa,3.8
+test,israeli pm makes case on iran to us voters,israel blames iran for attacks on its diplomats,1.2
+test,music industry pays tribute to whitney houston,music industry mourns whitney houston,3.4
+test,iron dome intercepts 17 rockets,iron dome intercepts two rockets fired at beersheba,2.6
+test,mali islamists destroying ' more timbuktu shrines',mali islamists destroy more holy timbuktu sites,4.5
+test,china stocks end higher on pmi at midday,chinese stocks open higher thursday,1.8
+test,scientists resurrect flowers from prehistoric seeds,"nintendo trims red ink , lowers forecast for year",0.0
+test,man convicted in vatican leaks case,"butler to be tried in "" vatileaks "" case",2.6
+test,"romney , paul vie for maine caucus win",romney has narrow maine caucus win,2.8
+test,sectarian clashes rock lebanese city of tripoli,"sectarian clashes rock lebanese city , 3 killed",3.8
+test,repsol blasts argentina over nationalization of ypf,repsol blasts argentina over oil nationalization,3.4
+test,"several dead , 550 injured in argentina train crash",49 feared dead in buenos aires train crash,1.4
+test,aung san suu kyi to address british mps,burma 's aung san suu kyi to address parliament on june visit,4.0
+test,sheriff : man recovers stolen car 42 years later,us man recovers car 42 years after theft,4.0
+test,"google ceo says android important , not critical","larry page says android important , not critical",4.0
+test,"mursi takes oath of office , becomes egyptian president",morsi to take oath as first egypt civilian president,3.8
+test,iran may cut oil exports to more eu states,iran mps say ready to ban oil exports to some eu states,3.6
+test,factory fires kill at least 260 in pakistan,at least six dead in pakistan gunfight,0.8
+test,australian among four on plane missing in indonesia,iranian painter mansoureh hosseini dies,0.0
+test,romney vows to restore ' promise of america',romney promises to ' restore america',3.8
+test,santorum 's 3-year-old daughter hospitalized,'kony 2012 ' director hospitalized,0.6
+test,syrian opposition pleads for criminal court action,syrian opposition leader criticizes u.s .,2.2
+test,mandela released from hospital,israeli president released from hospital,1.2
+test,sunderland 2-2 bolton : davies double gets trotters a point but they stay in bottom three,sunderland 2-2 bolton : davies in at the double,4.0
+test,jaya prada all set to join bjp,"jaya prada likely to join bjp , amar singh to decide for her",3.8
+test,five dead in pakistan suicide blast,over 120 dead in pakistan factory blaze,0.6
+test,hezbollah 's nasrallah warns us over anti-islam film,hezbollah calls for more anti-islam film protests,2.8
+test,"syrian forces shell towns , clash with rebels",syrian forces and rebels clash in coastal province,2.6
+test,nadal tops djokovic for 7th french open title,tennis : nadal defeats djokovic for monte carlo title,3.2
+test,childcare costs rise by nearly 6 %,"childcare ' costing £ 15,000 a year'",3.0
+test,obama urges decisive action on europe debt crisis,obama urges europe to act quickly on crisis,3.4
+test,beef burger mix recalled over salmonella concerns,choc powder recalled over salmonella concerns,1.0
+test,"obama , romney prepare for first debate","obama , romney prepare to debate",4.2
+test,first significant gas found offshore kenya,raiders kill 38 in latest land clashes in kenya,0.8
+test,red cross worker killed in pakistan,kidnapped uk aid worker killed in pakistan,2.2
+test,"at cpac , mitt romney stresses conservative credentials",cpac 2012 : mitt romney struggles to connect with conservative base,3.2
+test,8 rockets fired from gaza into southern israel ; none hurt,ten rockets from gaza land in southern israel ; none hurt,3.4
+test,glorious triple-gold night for britain,britain savors golden night on track,3.2
+test,bahraini protesters and police clash after funeral,"greek protesters , police clash as bailout deal in limbo",0.6
+test,u.s. soldier killed in shooting incident in s. afghanistan,five nato soldiers killed in afghanistan,1.6
+test,polls close in egyptian presidential election,press releases : yemeni presidential election,0.8
+test,police ' did not link ' savile claims,bbc faces questions for pulling savile case,1.2
+test,eurozone unemployment stays at record 11 percent,eurozone unemployment hits record high,3.4
+test,james murdoch quits bskyb,james murdoch quits role at bskyb,4.2
+test,iconic science fiction writer ray bradbury dies at 91,science fiction legend ray bradbury dead at 91,4.8
+test,egypt presidential election may 23-24,us presidential election 2012,0.6
+test,four french soldiers killed in afghan suicide blast,four foreign soldiers killed in afghan east,3.4
+test,un observers find traces of syrian massacre,un team investigates syrian massacre,4.0
+test,ap poll : majority in us have prejudice against blacks,ap poll : majority harbor prejudice against blacks,3.6
+test,ap source : redskins to trade for no. 2 pick,redskins trade for no. 2 pick,4.2
+test,china says defense budget to rise 11.2 % in 2012,china 's defence spending to rise 11.2 %,4.0
+test,string of iraq blasts kills at least 32,strong italy quake kills at least six,0.0
+test,ecuador president correa says no decision made on assange asylum,ecuador yet to decide on assange 's asylum,3.8
+test,apple buying security firm authentec for $ 356 million,news summary : apple buying authentec for $ 356m,4.4
+test,us offers us $ 10 mil. for pakistan militant,us offers $ 10 million for pakistani militant chief,3.8
+test,6 nato troops killed in afghanistan ied attack,6 nato troops killed in afghanistan,3.8
+test,osama bin laden wives to be jailed,osama bin laden movie to be filmed in india,0.8
+test,egyptians vote in landmark presidential election,egyptians go to polls in historic election,4.0
+test,"jetblue pilot who disrupted flight declared insane , not guilty",jetblue pilot who caused disruption on flight not guilty,3.8
+test,tsunami warning : no need for sa to panic,tsunami warning after aceh quake,2.2
+test,us hands over bagram prison to afghan authorities,u.s. transfers bagram prison to afghan control,4.8
+test,jeremy hunt distances himself from adviser who ' overstepped the mark',jeremy hunt clings on as spad quits over news corp emails,2.0
+test,obama praises u.s.-latin america trade ties,obama secret service agents sent home,0.4
+test,blitzbokke ousted by fiji,blitzbokke beaten by nz,2.0
+test,obama and romney focus on swing-states,team anna yet to decide on contesting state polls,0.4
+test,trade newspaper variety up for sale,hollywood trade publication variety put up for sale,4.0
+test,'grenade attack ' kills one and injures at least 11,sex attack on woman investigated,0.2
+test,toulouse siege : police surround flat of ' islamic warrior ' suspected of being serial killer,toulouse shooting : france was on the highest level of security of security alert,1.8
+test,'scores of bodies ' found in syria,eight more bodies found on ship,1.4
+test,shooter charged with murder of us black teen,thoughts on race relations under a black president,0.8
+test,jonny bairstow and eoin morgan shine for england in mumbai,bairstow hits ton in india tour match,1.8
+test,australians flee homes amid floods,australian speaker steps aside,0.8
+test,how wind farm developers ' use camera tricks to make turbines look smaller than they really are',wind farm developers using ' tricks ' to make turbines look smaller,4.4
+test,us drone kills six militants in pakistan : officials,us missiles kill 15 in pakistan : officials,2.4
+test,"wigan 3-2 wolves : match report , pictures & video highlights","arsenal 0-0 chelsea : match report , pictures & video highlights",1.2
+test,uk spends £ 3m on foreign prisons,us spends $ 50m on carp invasion,1.6
+test,nigeria : nigerian troops swarm after 40 killed in student massacre,nigeria police make arrests after college massacre,2.6
+test,nerves calmed -- for now : markets jump on relief over spanish bank bailout,focus shifts to greece after spain secures bank bailout,2.2
+test,heavy fighting reported in syria 's aleppo,heavy fighting reported in damascus,1.4
+test,france says greece must show credibility for eurozone,france 's hollande backs greece but urges credible reform,1.8
+test,avengers sets box office record,the hunger games breaks us box office record,1.2
+test,4 french soldiers reported killed in afghanistan,british soldier killed in afghanistan,1.0
+test,spanish bailout dilemma gets more acute,spanish dilemma gets more acute,3.4
+test,nato soldier dies in afghanistan,two aust soldiers wounded in afghanistan,0.6
+test,chinese stocks open lower wednesday,china stocks open lower friday,2.4
+test,palestinian leadership condemn israeli fm call to oust abbas,palestinian leadership backs fatah-hamas doha deal,1.0
+test,mitt romney wins maryland gop primary,romney wins maryland republican primary,4.8
+test,man finds car on ebay 42 years after it was stolen,texas man finds his car 42 years after it was stolen,3.6
+test,sylvester stallone 's son found dead in hollywood,"sylvester stalloneâ € ™ s son , sage stallone , found dead in hol",3.4
+test,nato : 4 aid workers rescued from afghan insurgents,5 aid workers freed in operation in afghanistan,2.8
+test,russia jails pussy riot protest punks for two years,russian court to rule in pussy riot trial,1.8
+test,germany dodges recession with growth in first quarter,"eurozone avoids recession in q1 , thanks to germany",2.0
+test,israel bars german writer grass from visiting over poem,israel bars german author grass over poem,4.4
+test,"the note 's must-reads for august 1 , 2012","the note 's must reads for wednesday july 4 , 2012",1.8
+test,nato us troop detained over shooting of afghan civilians,u.s. says saddened by shooting on afghan civilians,2.4
+test,hollande wins french presidential election,east timor votes in presidential election,1.6
+test,lance armstrong drops fight against doping charges,lance armstrong calls it quits in fight against doping charges,4.8
+test,military : syria chemical stocks threaten israel,russia tells syria chemical arms threat is unacceptable,1.8
+test,fitch upgrades ford to investment grade,fitch restores ford credit to investment grade,3.6
+test,"syria peace plan conditions “ unacceptable , ” opposition says",syria peace dashed as deadline passes,2.0
+test,asian stocks rise after greek vote eases fears,oil rises after greek election result,1.4
+test,clashes as greeks protest against more cutbacks,clashes erupt as greek vote nears,2.4
+test,"9 dead , 11 hurt , 4 missing in mont blanc avalanche","6 dead , several missing in mont blanc avalanche",2.4
+test,"taliban pose as ' attractive women , on facebook for spying",taliban soldiers posing as pretty women on facebook to get troops ' secrets,4.6
+test,china activist chen lands in us,chinese activist renews call to fight injustice,1.2
+test,city room : empire state building shooting,2 dead in shooting outside empire state building,3.2
+test,mohamed morsi sworn in as eygptian president,mursi sworn in as egyptian president,4.4
+test,british soldier killed in southern afghanistan,two british soldiers killed in afghanistan,3.0
+test,attack on nato base in afghanistan kills 15,aid workers freed in afghanistan raid,1.0
+test,"yemen suicide blast , drone attack kill at least 30",spate of iraq attacks kill at least six,1.0
+test,torres moving on after olympic bid fails,"torres finishes 4th , misses out on sixth olympics",3.0
+test,obama silent on china dissident,obama to visit korean dmz,0.6
+test,pakistan begins demolition of bin laden compound,pakistan demolishes osama bin laden hideout,2.8
+test,sudan blames israel for khartoum arms fire,sudan accuses israel of airstrike on arms factory,3.6
+test,house-senate deal reached on payroll tax measure,negotiators reach deal on congress payroll tax cut bill,3.8
+test,prince philip hospitalised in london,"britain 's prince philip hospitalised , to miss jubilee",3.6
+test,"tropical storm isaac drenches haiti , swipes cuba",tropical storm isaac threatens dam,1.4
+test,'desperate housewives ' actress kathryn joosten dies,'housewives ' actress kathryn joosten dies at 72,3.8
+test,gaza rockets lands in ashkelon coast area ; none hurt,rocket fired from gaza damages home in sderot ; none hurt,3.0
+test,foreign pro-palestinian activists seek to enter west bank,100 pro-palestinians seek to enter israel at allenby,2.2
+test,suicide bomber kills 6 in afghan capital,suicide bomber kills 37 at mosque in afghanistan,2.0
+test,"world stocks rise on hopes for eu , us stimulus",stocks rise on hopes for a fed stimulus,3.0
+test,"gore vidal dead at 86 : legendary author , playwright , and politician dies","gore vidal , celebrated author , playwright , dies at 86",4.0
+test,egypt 's coptic pope shenuda iii dies,egypt prepares to bury coptic pope shenuda iii,3.6
+test,world stocks fall before greek debt deal deadline,asia stocks fall ahead of greek debt deal deadline,2.4
+test,south africa police shot dead 30 miners,south africa police say they killed 30 + miners,4.2
+test,"isaac drenches haiti , heads toward cuba , florida",isaac nears haiti with homeless quake population,2.4
+test,britain reaches out to syria opposition,who cares about the syrian people ?,1.2
+test,denver shooting : police to detonate devices in suspect 's home,police to detonate devices in colorado shooting suspect 's home,4.6
+test,obama relaxes deportation rules for young immigrants,u.s. relaxes deportation rules for young people : napolitano,4.0
+test,microsoft 's surface a big bet on future : analysts,"microsoft 's surface tablet promising , but questions remain",3.8
+test,'whitey ' bulger 's girlfriend gets 8 years,"mobster "" whitey "" bulger 's girlfriend gets 8 years",3.6
+test,mauritanian president shot by army unit,mauritanian president shot at,3.8
+test,syria hands over bodies of journalists,syria tv says govt troops free captive journalists,1.4
+test,man sets himself on fire at breivik trial,man sets self afire outside breivik trial,4.6
+test,u.s. drone strike kills 10 in northwest pakistan,us drone in pakistan kills 10 suspected militants,3.8
+test,"9,000 u.s. marines to leave okinawa","9,000 u.s. marines to move out of okinawa : statement",5.0
+test,toys r us waives fee for layaway program,wal-mart lowers fee for holiday layaway program,1.8
+test,eu set for new sanctions on iran,eu plans major new sanctions against iran,4.4
+test,iran expands nuclear enrichment activities : iaea report,iran steps up sensitive nuclear work - iaea,3.0
+test,"donna summer , queen of disco , dies at 63","donna summer , the queen of disco",3.0
+test,assad meets with red cross officials in syria,assad makes red cross pledge,2.0
+test,"iraqi attacks kill general , four police",attacks in iraq kill general and 4 others,4.0
+test,at least 80 dead in northwest iran quakes,"180 dead , 1,300 injured in northwest iran earthquakes",2.6
+test,brazil 's ' pop-star priest ' gets mammoth new stage,brazil 's ' pop-star priest ' gets mammoth new stage,5.0
+test,washington : more than 100 are charged in medicare fraud sweep,washington : court upholds voting rights act in alabama case,0.6
+test,putin claims victory in russia 's presidential election,putin claims victory in presidential vote,4.2
+test,clinton ready to fight for obama,clinton a tough act for obama to follow,1.0
+test,romney announces paul ryan as running mate,romney chooses ryan as gop running mate,4.4
+test,european markets rise on greek bailout hopes,european ministers are poised to approve greek rescue,2.2
+test,"edwards acquitted on 1 count , mistrial on others",edwards found not guilty on one count ; mistrial on others,4.6
+test,ukrainian weightlifter gets four-year doping ban,ukraine 's korobka gets four-year doping ban,4.2
+test,gunman may have filmed school massacre,killer may have filmed france school shooting,3.0
+test,hong kong stocks close down 0.28 %,hong kong stocks open 0.62 pct higher,1.6
+test,coroner : whitney houston died in bathtub,coroner confirms whitney houston found in bathtub,4.5
+test,suicide bomber attacks algerian security base,suicide bomber targets nigerian church,0.8
+test,thailand : iranians planned to attack israelis,malaysia to extradite iranian for attack on israelis,1.0
+test,israeli military court rejects appeal of palestinian hunger striker,israel reaches deal with palestinian hunger strikers,1.2
+test,japan suffers severe flooding - in pictures,oklahoma wildfires destroy homes - in pictures,0.8
+test,avengers sets box office record,'hunger games ' sets box office records,1.6
+test,putin ' wins russian presidential election',putin ' wins ' russia 's presidential election,4.2
+test,japan to deport chinese held over island landing,german court weighs delay to euro fund ruling,0.0
+test,putin casts ballot as russians vote,putin to win russia 's presidential election,1.4
+test,"un chief finds his voice , remains cautious on china","insight : u.n. chief finds his voice , but remains cautious on china",4.8
+test,some syria violence amounts to civil war-red cross,some syria violence qualifies as civil war -red cross,4.4
+test,libyans begin handing in weapons,libyans transfer weapons to army,3.2
+test,british archbishop of canterbury changes career to cambridge,archbishop of canterbury to step down amid rifts,2.4
+test,"punjab mail derails near rohtak , 19 injured","punjab mail derails near rohtak in haryana , 19 injured",4.2
+test,george zimmerman ' to be charged ' with killing trayvon martin,"george zimmerman to be charged in trayvon martin case , official says",4.0
+test,indian maoist rebels offer talks to free italian hostages,india : maoist rebels in talks on freeing italians,3.8
+test,two reported dead in shooting at empire state building in ny,city room : empire state building shooting,2.8
+test,five dead in pakistan suicide blast,at least 63 dead in pakistan factory blaze,1.0
+test,penn state football players react to sanctions,penn state football slammed with ncaa sanctions,2.4
+test,israel must release or try palestinian on prolonged hunger strike,israeli minister wants palestinian leader 's ouster,0.5
+test,un report says both sides in syria abuse rights,nato leader plays down risk of turkey-syria clash,1.0
+test,girl accused of burning koran goes into hiding,girl accused of burning koran bailed,3.2
+test,manchester united slashes price for us ipo,manchester united reveal share price details,2.4
+test,romney wins nevada caucus,romney shifts focus to santorum ahead caucuses,1.0
+test,soggy solstice : stonehenge gets soaking,summer solstice celebrated at stonehenge despite rain,3.2
+test,france warns syria over chemical weapons use,u.n. concerned at possible syria chemical weapons,2.2
+test,life-threatening midwest storms feared,'life-threatening ' storms feared for midwest,4.4
+test,chicago teacher strike nears end with ' framework ' agreement in place,"general strike ends : histadrut , treasury reach agreement",0.8
+test,indonesian president to visit uk,indonesian president to visit australia,1.4
+test,icc lawyer detained in libya on security concerns,icc lawyer held in libya faces 45-day detention,3.4
+test,storm delays start of republican convention,"storm lashes florida , delaying republican convention",4.4
+test,"freight train derails , catches fire in columbus , ohio","freight train derailment , explosion prompts evacuation",2.8
+test,at least two nato killed in afghanistan helicopter crash : military,at least 18 killed in afghan bomb attacks : officials,0.8
+test,president mills must quit - lecturer,president john evans atta-mills must resign now -npp germany,2.6
+test,miami heat wins nba finals,miami heat clinches nba championship,5.0
+test,japan closes last nuclear reactor,japan switches off last nuclear power plant this weekend,4.2
+test,ryanair in new bid for aer lingus,ryanair chief hails report findings,1.2
+test,russian air force celebrates 100th anniversary,russian air force 's 100th anniversary,4.4
+test,6 nato troops killed in afghanistan,nato soldier killed in afghanistan,2.2
+test,china yuan weakens to 6.3282 against usd monday,china 's yuan weakens against usd for third day,3.2
+test,apple ipad mini makes debut,apple ipad mini makes debut in asia,3.4
+test,not so super tuesday for mitt romney,romney leads santorum in gop super tuesday contests,1.6
+test,putin sworn in as russian growth falters,putin sworn in as russia 's president for 6 years,2.4
+test,"arqule , daiichi stop lung cancer trial , shares tank",arqule stock plunges as lung cancer study shelved,3.4
+test,teenager and father killed in crash,three killed in horror crash are named,1.6
+test,6.1-magnitude quake strikes indonesia,"6.1-magnitude quake hits papua , indonesia -- usgs",4.2
+test,2 americans killed as afghan unrest enters fifth day,two american officers murdered as afghan unrest continues,4.2
+test,breivik complains of ' ridicule',breivik : jail term ' ridiculous',1.8
+test,officials : romney to get secret service protection,obama addresses secret service scandal,0.6
+test,japan pm calls for quicker tsunami waste processing,japan marks one year since quake and tsunami disaster,1.0
+test,syrian fighter pilot defects to jordan,syrian pm defects to jordan,1.4
+test,syrian arab republic ( the ) : syrian arab republic : syrian refugees ( as of 28 june 2012 ),syrian arab republic ( the ) : more than 70 killed in syria ahead of annan return,1.2
+test,suicide bomber kills 16 in afghanistan,suicide bomber kills 12 in nigeria church,1.2
+test,hamas hangs three gaza prisoners,myanmar announces release of prisoners,0.6
+test,airlines cancel ' flytilla ' activists ' tickets to ta,uk airline cancels ' flytilla ' tickets on israel objections,3.2
+test,spain asks for bank rescue,spaniard on trial for cuban dissident ’ s death,0.2
+test,east timor votes in presidential election,venezuelans urged to vote in presidential election,1.0
+test,the murky waters of the south china sea,peace lies over the south china sea,1.4
+test,sri lanka seek one-day revival against pakistan,senior journalist killed in pakistan,0.6
+test,"spacex docks with international space station : up next , public travel ?",spacex dragon docks with international space station,3.8
+test,romney rocked by secret video,romney taped at secret donor talk,2.8
+test,'million muppet march ' to defend obama backing of pbs,million muppet march planned to defend u.s. backing for pbs,4.0
+test,syrian opposition in reconciliation talks,syrian opposition council to establish envoy in france,1.4
+test,sensex down 193 points on budget blues,romney won 't volunteer budget differences,1.0
+test,facebook boosts size of ipo by 25pc to raise $ 15bn,facebook boosts size of ipo by 25 percent,3.6
+test,iran 's parliament questions a dismissive ahmadinejad,iran 's parliament questions president ahmadinejad,4.0
+test,yemen suicide attack kills 7 soldiers : officials,afghan suicide car bomb kills at least seven : officials,1.6
+test,sunday times journalist marie colvin killed in syria,"sunday times journalist , french photographer ' killed in syria'",2.8
+test,kl shares higher at mid-afternoon,kl shares lower at mid-morning,1.6
+test,chicago teachers strike in bitter contract dispute,chicago teachers union delegates could end strike,2.4
+test,presidential vote polarises egyptians,gop presidential hopefuls clash in southern races,0.8
+test,three more us soldiers killed in afghanistan,nato soldier killed in afghanistan,1.8
+test,police raise death toll in bus accident to 8,rodney king death ruled accidental,0.4
+test,four foreign soldiers killed in afghan east,2 british soldiers killed in afghan insider attack,0.8
+test,eurozone agrees to lend spain up to $ 125 billion,eurozone to lend spain up to 100 bil. euros,3.4
+test,red cross worker killed in pakistan,british red cross doctor kidnapped in pakistan found beheaded,3.6
+test,"afghan , us govts sign deal on controversial night raid","afghans , us sign deal on night raids",3.8
+test,china mine accident kills 10,china truck accident kills 20,1.6
+test,australia can eclipse england in windies,australian pm defiant under pressure over leadership,0.4
+test,protests at pussy riot verdict,pussy riot verdict greeted with defiance,3.4
+test,secret service sees its ' biggest scandal ' over prostitutes,secret service sex scandal ' regret',2.2
+test,kuwait : activists storm syrian embassy ; two injured,activists storm syria embassy in kuwait,3.4
+test,details of aung san suu kyi 's visit to ireland,rapturous welcome for aung san suu kyi 's historic trip,3.4
+test,key says marae visit a lost opportunity,key wants waitangi marae visit to stay,2.2
+test,norway marks anniversary of massacre,norway marks anniversary of breivik 's massacre,3.8
+test,south korean economic growth falls to 3-year low,s. korean economic growth falls to near 3-year low,4.6
+test,woman killed by falling debris,when an ally declines,0.0
+test,aust shares up 1 % after interest rate cut,rba delivers another rate cut,1.0
+test,germany warns greece : no more money without reforms,euro zone to greece : no rescue without reforms,2.6
+test,israel to free palestinian hunger striker,israel asks us for arms that could aid iran strike,0.8
+test,obama to meet families of shooting victims,obama to meet batman gun victims,3.2
+test,obama widens lead over romney despite jobs data : reuters / ipsos poll,"romney takes lead over obama with convention "" bounce "" : reuters / ipsos poll",1.0
+test,"russia , china veto un resolution on syria","russia , china veto un resolution on syria killings",3.8
+test,"two killed , 19 injured in toronto shooting","two dead , 7 injured in finland shooting",1.4
+test,what the pope 's butler saw – aide arrested over vatican leaks,pope ’ s butler arrested in scandal over vatican leaks,3.4
+test,anti-putin protesters form human chain in moscow,anti-putin protesters form human chain,3.8
+test,juror : sandusky appeared to accept his fate,jerry sandusky convicted of child sexual abuse,1.6
+test,washington 's acts of congress sells for $ 9.8m,george washington 's copy of us constitution sells for $ 9.8m,2.6
+test,lakers fire coach mike brown after 1-4 start,lakers fire mike brown after 1-4 start,4.4
+test,canadian muslims issue fatwa against ' honor killing',"us , canadian imams issue fatwa against honour killings",3.4
+test,u.n. to take up syria resolution,un assembly to vote on syria resolution,3.6
+test,soldier ' can 't recall ' massacre,us soldier ‘ doesn ’ t recall massacre ’,4.4
+test,not a good beginning : hollande 's plane hit by lightning en route to berlin,french president francois hollande 's plane hit by lightning en route to berlin,4.4
+test,libya pm names new cabinet after protests over original,"libyan assembly rejects new cabinet , dismisses pm",1.2
+test,4 foreign soldiers killed in afghan east,4 french soldiers reported killed in afghanistan,3.8
+test,syrian forces storm central town,"syrian forces bombard homs , russia warns of civil war",2.5
+test,pak : 20 dead in anti-islam film protests,"25 injured in anti-islam film protest in islamabad , pakistan",2.2
+test,cause of whitney houston 's death could take weeks,investigators seek answers to whitney houston 's death,1.8
+test,n korea warns of retaliation for south korea drill,north warns of retaliation for seoul 's naval drill plan,3.6
+test,a tale of two passes : how the new york giants won the super bowl,lesser of two evils triumphs in super bowl,1.4
+test,one dead in new israeli strike on gaza,two killed in new israeli strike on gaza : medics,3.6
+test,germany likely to press russia on syrian crisis,what is russia thinking on syria ? a brief guide,1.0
+test,four seriously injured in m23 motorway crash,four injured in motorway crash,3.6
+test,un aid chief amos enters baba amr with red crescent,"syria 's besieged baba amr is deserted , red cross says",2.0
+test,dozens killed in nigerian riots,dozens killed in kenyan clashes,1.0
+test,profiles of egypt 's main presidential candidates,second day of egyptian presidential election,1.2
+test,actor gazzara dead at 81,actor ben gazzara dies at 81,4.4
+test,british gold rush silences gripes over cost,2 british soldiers killed in afghan insider attack,0.6
+test,avalanche buries at least 100 pakistani soldiers,avalanche buries over 100 pakistani soldiers,4.6
+test,inflation falls to 15-month low : what the analysts say,inflation falls to 15-month low,4.6
+test,komen won 't cut planned parenthood funding,susan g komen in u-turn over planned parenthood funding cut,3.0
+test,forex & amp ; gold 25 august 2012,forex & gold 19 july 2012,2.2
+test,afghan parliament votes to oust key ministers,afghan parliament votes to remove key ministers,4.8
+test,iran says un nuclear talks will continue,iran says nuclear talks with un ' constructive',2.8
+test,agribusiness : mad cow disease found in california,usda confirms case of mad cow disease in california,4.2
+test,bp sells some gulf of mexico assets for $ 5.55 bil,bp sells gulf of mexico assets to plains for $ 5.55 bn,3.6
+test,300 potential jimmy savile victims : police,uk : 300 potential savile abuse victims emerge,3.6
+test,"romney leads rivals , not obama , in fundraising",romney : i left all management of bain in 1999,0.8
+test,armstrong steps down from livestrong,armstrong standing down from livestrong,4.6
+test,us drone strike kills 5 militants in pakistan,u.s. drone strikes kill 16 suspected militants in yemen,1.8
+test,9 / 11 defendants ignore judge at guantanamo hearing,sept . 11 defendants enrage families at hearing,1.0
+test,syrian govt wont stop attacks,syrian opposition reports ' massacre',1.0
+test,chinese stocks close higher midday friday,chinese stocks higher at midday friday,4.6
+test,myanmar : opposition claims suu kyi win,voters in myanmar hopeful as suu kyi 's party claims win,3.2
+test,obama 's poll rating drops in boost for republican rivals,obama 's big hispanic win worries republicans,1.0
+test,two aust soldiers wounded in afghanistan,4 foreign soldiers killed in afghan east,1.2
+test,attacker in afghan uniform kills 2 nato troops,man in afghan army uniform kills nato soldier,3.4
+test,new syria opposition chief wants no-strings aid,syria opposition unites as israel fires warning shots,1.0
+test,cheap generics no panacea for india ’ s poorest,cheap cancer drugs no cure for india 's poorest,3.8
+test,egyptians vote to pick president for first time,egyptians wait for key presidential vote results,2.6
+test,south africa mine clash kills at least 30,south africa train crash kills 26,0.8
+test,"syrian forces bombard homs , russia warns of civil war","syrian forces bombard homs , lavrov arrives for talks",2.6
+test,egypt presidential election results delayed,egyptian election result delayed,4.2
+test,deadline passes with no new iran sanctions,eu moves closer to new iran sanctions,1.6
+test,arrested russian killer denies ties to pussy riot,dozens arrested in russian tv tower protest,0.8
+test,norway memorial honours 77 massacre victims,norway marks anniversary of massacre,2.8
+test,us afghanistan general linked to petraeus scandal,senior us general linked to petraeus scandal,3.8
+test,'arrest warrant ' for maldives ex-president,maldives court issues arrest warrant for former president,4.5
+test,chinese stocks fall after rrr cut - may 14,chinese stocks gain at midday monday,2.0
+test,hrw : jordan turning away palestinian refugees from syria,report : jordan biased over palestinians from syria,2.2
+test,"nkorea makes "" significant "" nuclear reactor progress - iaea",n. korea vows to expand nuclear deterrent,2.8
+test,"maldives president quits after police mutiny , protests",maldives president quits after weeks of protest,3.4
+test,nato strike ' kills civilians ' in afghanistan,two nato soldiers killed in afghanistan,0.8
+test,al-qaida says it captures 70 yemeni soldiers in abyan 's battle,"al qaeda clashes , blasts kill 35 soldiers in yemen",1.4
+test,"navy jet crashes into us apartments , pilots eject",u.s. navy jet crashes into virginia apartment buildings,3.4
+test,china stocks open higher wednesday,us stocks open higher despite gdp miss,0.8
+test,idf to deploy iron dome in central israel,major snowstorm barrels down on central plains,0.0
+test,4 killed in us drone strike in pakistan,u.s. drone strike kills 3 in pakistan,3.0
+test,us teen held in chicago ' jihad ' car bomb plot,chicago teen arrested in chicago car bomb plot,3.4
+test,pc david rathband : twin brother 's fears for his ' bestest mate',david miliband : my brother and a return to old labour,0.2
+test,syrian forces move to retake aleppo,syrian regime bids to retake city of aleppo,4.4
+test,"20-member parliamentary , trade team leaves for india",commerce secretary to take leave of absence,0.0
+test,sly stallone 's sone sage found dead in la,sylvester stallone 's son found dead at home,4.2
+test,wall street opens lower,wall street ends mixed,2.0
+test,"clinton : us , europe must do more against tyrants","clinton : us , europe must work to defeat tyrants",4.4
+test,europe shares bounce as more china stimulus seen,oil prices rise on hopes for stimulus,0.8
+test,syrian forces overrun rebel stronghold,syria army takes northern rebel stronghold,4.0
+test,stock index futures point to lower start,stock index futures signal early losses,4.4
+test,man charged after mp hurt in attack,man charged with murder in flat,1.4
+test,chinese stocks close higher midday friday,chinese stocks open lower friday,1.0
+test,nokia apologises for ' faked ' ad,us waives riders for pak aid,0.0
+test,us drone strike kills 5 militants in pakistan,drone strike kills four suspected militants in pakistan,3.0
+test,syria rebels leave besieged homs,syrian rebels retreat from besieged homs district,4.4
+test,"u.s. orders non-essential staff to leave sudan , tunisia","us orders non-essential staff to leave tunisia , sudan",4.0
+test,egypt 's mubarak critical,egypt 's mubarak in critical condition,4.6
+test,"sandy slams into northeast ; at least 18 dead , 7.4m without power","eastern u.s. storms leave 2 dead in va . , 2 million without power",2.6
+test,"romney , obama clash on tax , economy in first debate",obama and romney take stage for first debate,2.2
+test,assad says mercenaries are behind syria unrest,assad accuses us of fueling syrian uprising,3.33333333333333
+test,putin declares victory in russia presidential vote,complaints in russian election mount,1.0
+test,japan pm dissolves lower house for election,iran and world powers set for nuclear talks,0.0
+test,two killed in new israeli strike on gaza : medics,"5 die in strikes on gaza , militants barrage israel",2.0
+test,"navy jet crashes into virginia buildings , injuring six","navy jet crashes into virginia apartments , 9 hurt",3.2
+test,one nato soldier killed in s. afghanistan,british soldier killed in southern afghanistan,3.2
+test,spain jobless rate hits new high,spain 's jobless claims hit new high,4.2
+test,roadside bomb kills 10 afghan civilians : police,roadside bomb kills 5 afghan policemen,2.6
+test,turkey scrambles jets near border,turkey scrambles jets to syrian border,3.6
+test,supreme court to hear voting rights act case,supreme court to hear corporate human rights case,1.4
+test,two die in syria violence after un monitors land,two year doping ban for contador,0.0
+test,remarks by the president at the white house science fair,the presidential planner - the white house science fair,2.8
+test,"civilian , defector killed in syria , says ngo",syria gunmen kill three syrian officers : ngo,1.0
+test,malawi confirms president 's death,malawi confirms president mutharika 's death,4.0
+test,taiwan rattled by strong earthquake,china rocked by twin earthquakes,1.2
+test,bank of england 's paul tucker tainted by libor mess,bank of england deputy denies ordering rate-rigging,2.8
+test,libya postpones assembly election to july 7,libya postpones landmark election to july 7,4.0
+test,red cross says negotiating halt to fighting in syria to take aid,red cross negotiating syria ceasefire to bring aid,4.4
+test,syrian forces shoot civilians on bus,"syrian forces , rebels clash near turkey",0.8
+test,german parliament overwhelmingly backs greek rescue deal,german parliament endorses greek bailout,4.4
+test,"bombings , clashes continue in syria","bombings , clashes as syria opposition seeks arms",3.4
+test,london 2012 olympics opening ceremony ' to feature a green and pleasant land',"london 2012 olympics : opening ceremony to be a ' green and pleasant land ' , says danny boyle",4.2
+test,burma 's reforms bring easing of u.s. sanctions,burma activists say go slow on easing sanctions,2.4
+test,usain bolt wins 200m – steven howard reaction,facebook mobile gains drive revenue growth : reaction,0.2
+test,dozens dead in taliban resort attack,'india police name 3 iranians in embassy attack',0.4
+test,heavy fighting rocks eastern syria ahead of poll,heavy fighting rocks eastern syria - residents,3.8
+test,china yuan weakens to 6.3282 against usd monday,china yuan retreats to 6.2697 against usd thursday,2.8
+test,7 dead in christian school shooting,5 wounded in ohio school shooting,1.4
+test,indonesia anti-terror squad kills two suspected militants,indonesia police shoot dead suspected militants in bali,3.2
+test,us election : mitt romney concedes defeat as barack obama wins second term,romney concedes election to obama in phone call,4.0
+test,armenians vote in parliamentary elections,armenia 's parliamentary vote a test for president,3.2
+test,pakistan blocks twitter over anti-islamic material,pakistan blocks twitter over ' blasphemy',3.8
+test,annan to visit syrian refugees in turkey tuesday,annan to visit syrian refugees in turkey before iran,3.8
+test,venezuela 's chavez in cuba for 3rd anti-cancer treatment,venezuelan leader returning to cuba for treatment,3.2
+test,sachin tendulkar is sworn in as indian senator,mp sachin tendulkar says no to govt bungalow,1.6
+test,residents near gaza instructed to stay near shelter,best ’ s great day brings west indies cheer,0.0
+test,navy jet crashes into apartment building,u.s. navy jet crashes into virginia apartment buildings,3.6
+test,romney wins big in puerto rico primary,romney wins illinois primary,1.5
+test,yahoo ! to name google 's mayer as ceo : report,yahoo names google exec mayer as ceo,4.2
+test,us soldier accused of afghan massacre hires prominent criminal lawyer,us soldier accused of killing afghan civilians identified,2.0
+test,6.0-magnitude quake hits northern italy : usgs,"5.9-magnitude quake hits sunda strait , indonesia : usgs",1.6
+test,us gov 't officially designates haqqani network as terrorists,us designates haqqani network as terrorists,4.4
+test,motor racing : button fastest in year 's first f1 practice,button boasts best time after first practice,3.0
+test,rangers voted into division three,rangers voted into third division,4.8
+test,syria in ceasefire observers call,syrian ceasefire brings uneasy calm,1.8
+test,newark mayor saves neighbor from fire,newark mayor rescues neighbor from burning house,4.2
+test,"spurs get revenge on lakers , lead west","abduct israelis to free prisoners , gaza leaders say",0.0
+test,f1 protests in bahrain,a day of rage in bahrain,2.25
+test,new york stock exchange to reopen wednesday,dealbook : stock exchanges prepare to open,3.0
+test,china 's cpi growth slows to 1.8 pct in july,china 's industrial output growth slows to 9.2 pct in july,2.6
+test,homs mortar fire kills 105,homs offensive kills 200,2.6
+test,hundreds honor student killed in ohio shooting,funeral set for ohio shooting victim,2.0
+test,"bombs in southern thailand kill 5 , wound 50","bombs in thailand kill 14 , wound 340",3.0
+test,us lawmakers take next step on new iran sanctions,somalia lawmakers to vote for new president,0.2
+test,barack obama admits us has ' more nuclear weapons than we need',french gunman wants to ' die with weapons in hands',0.4
+test,2 rockets hit in the eshkol region ; no injuries,10 rockets in 20 minutes in eshkol regional council,1.8
+test,'betrayed ' disabled workers protest against remploy closures,may day marked by protests against austerity cuts,0.6
+test,dr congo rebels kill park rangers,rebels kill two park rangers in eastern congo,4.0
+test,nine pakistani troops killed in militant ambush,"trade : pakistan , india agree to take it a step ahead",0.8
+test,74 dead in egypt soccer violence,at least 73 die in egyptian soccer pitch invasion,3.2
+test,unrest in tense nigeria leaves at least 95 dead,southwest china quakes kill at least 50,0.2
+test,hurricane sandy makes landfall in southeastern jamaica : nhc,hurricane sandy reaches jamaica,3.0
+test,"gaza militants fire 40 rockets into israel , 3 hurt : police",gazans fire four rockets into israel ; no injuries,2.75
+test,remarks with prime minister elkeib after their meeting,remarks with foreign minister koichiro gemba,1.5
+test,iraq releases suspected hezbollah operative wanted by u.s .,iraq said to release hezbollah operative,3.2
+test,pakistani pm shocked at avalanche trapping army personnel,pakistan avalanche : rescuers search for buried soldiers,2.4
+test,barrick in talks with china firm over african assets,obama aide holds talks in china after syria veto,1.2
+test,measure the depth of a body of water,any large deep body of water .,0.8
+test,someone who plays a principal role,an actor who plays a principal role .,3.0
+test,( cause to ) come to rest on a surface,reach or come to rest .,3.8
+test,the act of advocating or promoting something,the act of choosing or selecting .,2.2
+test,alphanumeric sequence used for identification,a numeral or string of numerals that is used for identification .,3.8
+test,a state of being elevated or raised,the event of something being raised upward .,2.6
+test,the act of lifting something,the act of climbing something .,0.6
+test,bind or join ( as if ) with cement .,"shine intensely , as if with heat .",0.2
+test,( finally ) do something or be somewhere,cause something to pass or lead somewhere .,1.0
+test,"a point , as the op part of a compass arrow",a v-shaped mark at one end of an arrow pointer .,3.2
+test,the act of preserving or protecting something,the act of decreasing or reducing something .,0.4
+test,"coerce by violence , fill with terror",coerce by violence or with threats .,4.0
+test,"cause to move , cause to be moved",cease to operate or cause to cease operating .,1.6
+test,the uppermost area of region of something,the act of decreasing or reducing something .,0.0
+test,the foremost part of something,have flavor ; taste of something .,0.0
+test,behave or move in a certain manner,behave in a certain manner .,4.4
+test,a reproduction or physical representation of something,a visual representation of something .,3.0
+test,a type of subdivision of a larger literary composition,a specialized division of a large organization .,1.6
+test,the person who is assigned to a non-elective position,a person who is appointed to a job or position .,4.6
+test,advance ; contribute to the progress or growth of .,contribute to the progress or growth of .,4.2
+test,a narrow channel or span of a sea or ocean,a narrow channel of the sea joining two larger bodies of water .,3.4
+test,the act of preserving or protecting something,the act of cracking something .,0.2
+test,"cut into , possibly creating something new .",the act of cracking something .,0.6
+test,the act of choosing among alternatives,the act of changing one thing for another thing .,2.4
+test,the act of testing something .,the act of breaking something .,0.8
+test,the state of being in contact,the state of being connected .,4.0
+test,giving a reference or citation of something,"change the nature , purpose , or function of something .",0.0
+test,sell something to or obtain something from by underhanded activity .,sell something to or obtain something from by energetic and especially underhanded activity .,3.8
+test,the act of determining or discovering the position of an object,a surface forming part of the outside of an object .,0.2
+test,"a feeling or state of contentment , relief",a state of being relaxed and feeling no pain .,4.0
+test,physically extend or spread outward from a center or focus or inward towards a center ; physically spread from a start point .,extend or spread outward from a center or focus or inward towards a center .,4.2
+test,place into the ground for growing,place or put on the ground .,2.0
+test,an approximated amount of something,a visual representation of something .,0.8
+test,stimulate sexually ; get sexual gratification through self-stimulation,get sexual gratification through self-stimulation .,4.4
+test,the act of acknowledging the truth of something,the act of projecting out from something .,0.8
+test,express audibly ; utter sounds ( not necessarily words ) ; indicate .,express audibly ; utter sounds ( not necessarily words ) .,4.2
+test,the state of being suspected .,the state of being excluded .,0.6
+test,the act of providing approval and support .,the act of having and controlling property .,0.0
+test,relieve someone from work by taking a turn ; take turns working .,relieve ( someone ) from work by taking a turn .,4.8
+test,a side or surface of something,a brief experience of something .,0.0
+test,utter in a certain way,appear in a certain way .,1.4
+test,"the act of turning , rotating an object",turning or twisting around ( in place ) .,3.0
+test,( cause to ) increase in extent or intensity .,increase in extent or intensity .,4.0
+test,the legal state of owing money,the verbal act of offering .,0.4
+test,"make sense of , give meaning to",make sense of ; assign a meaning to .,4.6
+test,the act of beginning something new .,the act of hiring something or someone .,1.0
+test,printed version of electronic data from a computer,( computer science ) matter that is held in a computer and is typed or printed on paper .,4.2
+test,limit in quantity or quality .,limit in quality or quantity .,5.0
+test,search ( as the bottom of a body of water ) for something,search ( as the bottom of a body of water ) for something valuable or lost .,3.5
+test,the act of surrendering or losing something of value,the act of decreasing or reducing something .,2.25
+test,the physical act of following in an effort to overtake or capture .,the act of pursuing in an effort to overtake or capture .,4.8
+test,"expel or eject ( saliva , phlegm , sputum , or vomit ) from the mouth .",expel or eject ( saliva or phlegm or sputum ) from the mouth .,4.4
+test,the natural progression or development of something,the act or means of getting rid of something .,0.0
+test,the act of lifting something,the act of describing something .,0.0
+test,an explanation or alibi for something,an opinion formed by judging something .,0.0
+test,"recover , return to former state",return to a former condition .,4.8
+test,act without permission or with too much confidence .,take liberties or act with too much confidence .,3.6
+test,the act of putting a preparation on something .,the act of testing something .,0.75
+test,become the owner or posessor of something,make a film or photograph of something .,0.0
+test,"the act of moving , turning something",the act of rejecting something .,0.4
+test,"the act of confining , preventing or blocking something",the act of testing something .,0.4
+test,the act of putting a preparation on something .,the act of decreasing or reducing something .,0.4
+test,the act or means of getting rid of something .,the physical position of something .,0.4
+test,the shape of a wave in a given period of time,the popular taste at a given time .,0.4
+test,a distinctive style of clothing,an intuitive understanding of something .,0.0
+test,cause to have an odor,cause to become alive again .,0.0
+test,fall or cause to fall,let or cause to fall in drops .,3.6
+test,"the act of allowing , bestowing something",the act of testing something .,0.6
+test,keep from being seen or perceived by others,hold back ; keep from being perceived by others .,3.8
+test,a document authorizing another to vote on one 's behalf,a power of attorney document given by shareholders of a corporation authorizing a specific vote on their behalf at a corporate meeting .,3.4
+test,the act of lifting something,the act of retaining something .,0.8
+test,"the act of combining , blending , integrating",the act of chipping something .,0.8
+test,smell by inhaling through the nose,perceive by inhaling through the nose .,4.5
+test,the conclusion of a communication,the intended meaning of a communication .,0.8
+test,"( cause to ) adopt a different system , value , or viewpoint",cause to adopt a new or different faith .,3.8
+test,( cause to ) become less intense or strict,cause to become violent or angry .,1.2
+test,the act of choosing or selecting,the act of losing someone or something .,0.2
+test,"narrative or account , intended as factual reporting",a short account of the news .,4.0
+test,engrave by means of dots .,engrave by means of dots and flicks .,3.8
+test,the act of shoving something away,the act of raising something .,1.2
+test,decide the amount to be paid on an insurance claim,decide how much is to be paid on an insurance claim .,4.6
+test,make noise like bad engine,make a noise typical of an engine lacking lubricants .,3.8
+test,be in direct physical contact with,be in direct physical contact with ; make contact .,4.8
+test,the quality of being dependable,the quality of being of practical use .,1.0
+test,"arrange a programme for an individual , group , or entity .",arrange a program of or for .,3.4
+test,express a certain idea when rendering a play or music,give an interpretation or rendition of .,1.4
+test,the quality of being dependable,the act of dwelling in a place .,0.0
+test,a store or supply of something,a store or supply of something ( especially of food or clothing or arms ) .,3.8
+test,suggest or prescribe a solution,suggest the necessity of an intervention ; in medicine .,2.6
+test,person who manages money in board games,a person who is in charge .,0.6
+test,the act of rubbing a surface,the act of dragging ( pulling with force ) .,0.6
+test,the act of dividing or disconnecting .,the act of expelling or projecting or ejecting .,0.6
+test,the act of validating the authenticity of something,the act of concealing the identity of something by modifying its appearance .,1.2
+test,the act of putting a preparation on something .,the act of forcing out someone or something .,0.4
+test,the act of preserving or protecting something,the act of winding or twisting .,0.0
+test,"oppose or approach , as in hostility or competition","oppose , as in hostility or a competition .",4.4
+test,travel ( as if ) through water .,move as if through a sieve .,1.4
+test,"administer or bestow , as portions","administer or bestow , as in small portions .",4.0
+test,form a spiral or move in a spiral course .,to wind or move in a spiral course .,4.8
+test,induce into action by using one 's charm ; provoke to do something .,induce into action by using one 's charm .,4.0
+test,connected underground tunnels used by rabbits,a series of connected underground tunnels occupied by rabbits .,4.6
+test,hold or embrace in a tight grip,hold in a tight grasp .,4.6
+test,the shape of a wave in a given period of time,the shape of a wave illustrated graphically by plotting the values of the period quantity against time .,2.6
+test,the foremost part of something,the lower part of anything .,0.2
+test,the act of controlling by restraining someone or something .,the act of liberating someone or something .,0.2
+test,the act of planning or deliberating,the action of putting something into operation .,2.0
+test,be located at or on top of something,cause ( someone ) to undergo something .,0.0
+test,the scent or odor of something,the act of decreasing or reducing something .,0.0
+test,"( cause to ) make a dry crackling sound , possibly by mixing .",make a dry crackling sound .,3.4
+test,"fill , attach , fix with , or as if with gum","cover , fill , fix or smear with or as if with gum .",4.2
+test,the act of talking about the features of something .,the act of sharing in the activities of a group .,1.2
+test,the act of providing help or aid to someone,the act of applying paint to a surface .,0.2
+test,"a natural growth of plants , usually trees",a growth of similar plants ( usually trees ) in a particular area .,4.2
+test,the act of planning or deliberating,the act of cracking something .,0.2
+test,the physical expanse of the universe,the physical position of something .,0.4
+test,a boundary area or edge of something,a boundary marking the extremities of something .,4.2
+test,reach a destination or goal,reach a destination ; arrive by movement or progress .,3.4
+test,the act of preserving or protecting something,the act of expelling or projecting or ejecting .,0.4
+test,to argue or plead in favor of,argue or speak in defense of .,4.0
+test,"support , sustain , bear , or be responsible for",cause to happen or be responsible for .,2.2
+test,take or capture by force or authority,to put down by force or authority .,2.8
+test,( cause to ) lengthen or stretch out in space,cause to march or go at a marching pace .,0.6
+test,"the act of rending , tearing , ripping",the act of reducing the amount or number .,0.75
+test,equip with armed and armored motor vehicles ( as of an army ) .,equip with armed and armored motor vehicles .,4.8
+test,( the content of ) a communication .,the last section of a communication .,2.8
+test,the act of changing course or twisting oneself .,the act of indicating or pointing out by name .,0.0
+test,the act of pressing together firmly,the act of disturbing the mind or body .,0.0
+test,the state or condition of feeling or being rushed .,the condition of being motivated .,0.6
+test,"move to a lower position , terminate something",lower the pitch of ( musical notes ) .,0.4
+test,the act of pulling a load,the act of making a proposal .,0.4
+test,( cause to ) appear suddenly or briefly,break open or apart suddenly and forcefully .,0.4
+test,the human act of making something new .,the speech act of making something evident .,0.8
+test,make or become more acute or intense,make ready for action or use .,1.0
+test,the activity of breaking or splintering something,the act of breaking something .,4.0
+test,the extreme endpoint of something,get the meaning of something .,1.6
+test,perform an action with an intent to deceive .,make a copy of with the intent to deceive .,2.4
+test,any cause or source of great suffering,any affliction that causes great suffering .,4.6
+test,"the act of moving , turning something",the act of drawing or hauling something .,2.2
+test,to remain emotionally or intellectually attached without necessary physical contact .,to remain emotionally or intellectually attached .,3.8
+test,the state of being pleased with life .,the state of being rejected .,0.4
+test,the height of the sea 's surface,the solid part of the earth 's surface .,0.2
+test,the act of testing something .,the act of starting something .,1.4
+test,cover with a primer base,cover with a primer ; apply a primer to .,4.6
+test,discover a logical or causal connection ; associate,make a logical or causal connection .,3.8
+test,rewrite in a different script .,extend in a different direction .,0.2
+test,"the act of reasoning , cogitation",the act of beginning something new .,0.6
+test,the act of giving a speech,the act of giving a false appearance .,0.4
+test,be located at or on top of something,observe or plot the moving path of something .,0.4
+test,"the act of turning , rotating an object",the act of breaking something .,0.2
+test,the scent or odor of something,have a disagreement over something .,0.0
+test,give an incentive or reason for action .,give an incentive for action .,4.2
+test,the context or setting in which something takes place,the act of cutting something into parts .,0.2
+test,tolerate ; aceept or take on as a responsibility .,give surety or assume responsibility .,3.4
+test,move from one location to another,move from one place to another .,5.0
+test,the act of testing something .,the act of dropping something .,0.4
+test,give a performative affectation to ( something ) .,give a performance ( of something ) .,2.8
+test,a participant who is a beginner in some activity,any new participant in some activity .,4.0
+test,turn the paddle or oar .,turn the paddle ; in canoeing .,3.8
+test,the activity of examining or assessing something,the act of drawing or hauling something .,0.2
+test,the conclusion of a communication,the last section of a communication .,4.6
+test,an object impairs the respiration of someone or something .,the relation of comprising something .,0.6
+test,"be a reason , cause , or justification of",serve as a reason or cause or justification of .,4.4
+test,"retreat or move from a position , relocate",remove from a position or office .,2.6
+test,the human act of making something new .,the act of starting something for the first time ; introducing something new .,3.8
+test,an instance of halting some motion,the act of starting something .,0.4
+test,( cause to ) gradually become weak,cause to become widely known .,1.0
+test,"a deficiency , state of disappointment , non-achievement",an event that does not accomplish its intended purpose .,3.2
+test,"the act of giving up a claim , office , or possession .",the act of giving up ( a claim or office or possession etc . ) .,4.8
+test,the uppermost area of region of something,exclusive control or possession of something .,0.6
+test,take something or someone away from somewhere,take something or somebody with oneself somewhere .,3.2
+test,energy in the form of molecular motion,money in the form of bills or coins .,0.6
+test,a state of exposure to harm,a state of extreme poverty .,0.0
+test,the act of putting a preparation on something .,the act of attaching or affixing something .,1.4
+test,the act of testing something .,the act of rejecting something .,0.4
+test,have a strong desire to do something,have a wish or desire to know something .,3.2
+test,take in ( mentally or physically ),"take ( gas , light or heat ) into a solution .",1.8
+test,the act of intentionally omitting something,the act of rending or ripping or splitting something .,0.2
+test,pronounce with a nasal twang,pronounce with an initial sibilant .,2.4
+test,an upward slope or incline,an upward slope or grade ( as in a road ) .,4.0
+test,an allotment or percentage of something,a relatively long narrow piece of something .,1.0
+test,"shrivel , wither , or mature imperfectly , as of a flower .",shrivel or wither or mature imperfectly .,3.6
+test,"identify , establish location or identity",recognize as being ; establish the identity of someone or something .,4.4
+test,the act of shoving something away,the act of starting something .,0.6
+test,an explanation or alibi for something,an obligation to pay or do something .,0.0
+test,incline from a vertical position,to incline or bend from a vertical position .,4.2
+test,preserve in a tin or jar .,preserve in a can or tin .,4.4
+test,behave or move in a certain manner,dress in a certain manner .,1.0
+test,the act of testing something .,the act of raising something .,0.8
+test,give a deceptive explanation for ; cover up,give a deceptive explanation or excuse for .,4.4
+test,the principal activity that one does to earn money .,the principal activity in your life that you do to earn money .,4.2
+test,the act of dividing or disconnecting .,the act of drawing or hauling something .,0.2
+test,the act of planning or deliberating,the act of becoming more distant .,0.4
+test,the act of testing something .,the act of retaining something .,0.0
+test,12th month of the calendar year,the last ( 12th ) month of the year .,4.8
+test,the activity of examining or assessing something,the activity of protecting someone or something .,0.0
+test,"the act of turning , rotating an object",the act of troubling or annoying someone .,0.4
+test,a company that provides public service commodities,a company that performs a public service ; subject to government regulation .,3.8
+test,get involved with or mixed up,get involved or mixed-up with .,4.6
+test,gradual decrease in the strength of a signal,a gradual decline ( in size or strength or power or number ) .,2.6
+test,a fast rate or occurrence of something,a brief experience of something .,3.2
+test,the act of lifting something,the act of chipping something .,0.0
+test,( cause to ) become even or level,make even or more even .,4.4
+test,declare invalid ; take away the legal force of or render ineffective .,take away the legal force of or render ineffective .,4.2
+test,give an incentive or reason for action .,give an interpretation or rendition of .,0.2
+test,hit or return before it touches the ground,hit before it touches the ground .,4.0
+test,the act or means of getting rid of something .,the state of being unsure of something .,0.0
+test,the act of accusing someone or something for being at fault,the action of putting something into operation .,0.0
+test,fix or set a physical object securely or depeply,fix or set securely or deeply .,3.8
+test,"a storyline ; the plan , scheme , or main story of a literary or dramatic work , true or fictional .",the story that is told in a novel or play or movie etc ..,3.8
+test,the activity of breaking or splintering something,the act of rending or ripping or splitting something .,4.2
+test,a retail store with merchandise for sale,a mercantile establishment for the retail sale of goods or services .,4.2
+test,twist a body part suddenly so as to sprain,twist suddenly so as to sprain .,4.0
+test,resist immunologically foreign tissue or organ,resist immunologically the introduction of some foreign tissue or organ .,4.2
+test,be a factor or play a role in something,the act of stopping something .,0.2
+test,the trading price between sellers and buyers in a an open marketplace,the price at which buyers and sellers trade the item in an open marketplace .,4.8
+test,request or demand something from someone,the act of damaging something or someone .,1.0
+test,"the act of confining , preventing or blocking something",the act of forming or establishing something .,0.8
+test,ride on someone 's shoulders or back ; support on the back or shoulders .,support on the back and shoulders .,3.2
+test,oppose with equal weight or force,contrast with equal weight or force .,3.8
+test,the quality of acting with vigor and vitality,the quality of not being useful or convenient .,0.4
+test,"the quality of being important , worthy of attention",the quality of being important and worthy of note .,4.8
+test,"attachment , restraint or shackle between physical entities",a restraint that confines or restricts freedom ( especially something used to tie down or restrain a prisoner ) .,3.6
+test,"the reduction of the extent of something , e.g , its size , importance or quantity",change toward something smaller or lower .,4.4
+test,a visual characterization of something,a chance to do something .,0.2
+test,put in a particular place or abstract location,"cause to be in an appropriate place , state , or relation .",3.0
+test,the action of extending outwards,the trait of wasting resources .,0.4
+test,the consequence or aftermath of something,have flavor ; taste of something .,0.2
+test,( cause to ) increase in anxiety .,cause to run in panic .,3.6
+test,the activity of examining or assessing something,the act of decreasing or reducing something .,0.0
+test,the act of preserving or protecting something,the act of forming or establishing something .,1.4
+test,turn on an axis ; spin,cause to turn on an axis or center .,3.6
+test,play off-set into opposition or rivalry,set into opposition or rivalry .,3.8
+test,the processing or operation of something,the physical position of something .,1.0
+test,the act of pulling a load,the act of hearing attentively .,0.4
+test,the act of explaining or defending something,the act of designating or identifying something .,0.6
+test,"come upon , attack or catch someone or something unaware",the act of liberating someone or something .,0.0
+test,"the act of turning , rotating an object",the act of dropping something .,0.6
+test,social or economic downfall of someone or a group,failure that results in a loss of position or reputation .,2.8
+test,the primary component of a communication,the last section of a communication .,1.6
+test,the process of becoming less or smaller,process or result of becoming less or smaller .,4.2
+test,the concluding section of a communication,the last section of a communication .,4.2
+test,reduce to small pieces by pounding or grinding .,reduce to small pieces or particles by pounding or abrading .,4.2
+test,the act or capability of seeing,the range of interest or activity that can be anticipated .,0.0
+test,the act of accusing someone or something for being at fault,the act of damaging something or someone .,0.8
+test,give a specific interpretation to,twist and turn so as to give an intended interpretation .,3.2
+test,the state of being suspected .,the state of being rejected .,0.8
+test,"the process of cultivating the land , possibly as a way of life .",agriculture considered as an occupation or way of life .,4.2
+test,a military aircraft that drops ordinance,a military aircraft that drops bombs during flight .,3.0
+test,the act of accusing someone or something for being at fault,the act of liberating someone or something .,0.0
+test,"accept , acclimate or adapt to a context , situation",adapt or conform oneself to new or different conditions .,4.6
+test,"the temperature at which a liquid boils , bubbles",the temperature at which a liquid boils at sea level .,3.6
+test,the human act of making something new .,the act of cracking something .,0.6
+test,beat or hit ( as if ) with a whip .,maintain with or as if with a bet .,0.0
+test,the act of lifting something,the act of stopping something .,0.2
+test,rein in a horse to lose a race,rein in to keep from winning a race .,3.8
+test,( cause to ) come to rest on a surface,cause to come out in a squirt .,1.4
+test,provide or supply with water,cover or swamp with water .,1.8
+test,amount that can be contained,the amount that can be contained .,5.0
+test,contain or have a specific wording or information,have or contain a certain wording or form .,4.4
+test,a channel of social communication,a channel for communication between groups .,4.8
+test,"cause to be or last longer , extend in duration or space .",lengthen or extend in duration or space .,4.2
+test,a rank or position relative to others,take or have a position relative to others .,3.4
+test,the uppermost area of region of something,the act of dropping something .,0.0
+test,the apparent condition or state of something,the act of losing someone or something .,0.2
+test,burn slightly to affect color,burn slightly and superficially so as to affect color .,4.66666666666667
+test,a general trait or characteristic of something,give certain properties to something .,3.2
+test,position in football played by a team member,( american football ) a position on the line of scrimmage .,2.8
+test,the act of arranging elements together .,the act of fastening things together .,2.0
+test,cause a sharp or stinging pain to,cause a sharp or stinging pain or discomfort .,4.0
+test,the act of choosing or selecting,the act of dropping something .,0.8
+test,"incite action , cause an event",serve as the inciting cause of .,4.2
+test,"come up , as of liquid or gas","come up , as of a liquid .",3.6
+test,( cause to ) become less tense ; rest or take one 's ease .,"become less tense , rest , or take one 's ease .",4.4
+test,adapt to a specified measurement or proportion,adapt to a specified measurement .,4.2
+test,"anatomical shape of the body of a being , physique",alternative names for the body of a human being .,2.4
+test,cause romantic action ; lure away from proper conduct,"lure or entice away from duty , principles , or proper conduct .",3.2
+test,make up something fictional or untrue,make up something artificial or untrue .,5.0
+test,remove to or from a place or situation,break from a meeting or gathering .,2.0
+test,the act of lifting something,the act of ending something .,1.2
+test,a happening or incident of human significance,a special set of circumstances .,0.2
+test,protect with or as if with a shield,"protect , hide , or conceal from danger or harm .",3.8
+test,basic monetary unit of kyrgyzstan,the basic unit of money in kyrgyzstan .,4.8
+test,the act of lifting something,the act of cracking something .,0.4
+test,( cause to ) move gently back and forth,cause to move back and forth .,4.4
+test,the state of being in contact,the state of being active .,1.2
+test,the act of testing something .,the act of decreasing or reducing something .,0.4
+test,the act of explaining or defending something,the act of expelling or projecting or ejecting .,0.2
+test,understand the meaning of something .,get the meaning of something .,4.6
+test,take a risk or guess in hope of a favorable outcome,take a risk in the hope of a favorable outcome .,4.6
+test,the act of annoying someone or something,the act of applying force to propel something .,0.2
+test,change ( dramatically ) between high and low values,alternate dramatically between high and low values .,4.6
+test,the activity of examining or assessing something,the act of designating or identifying something .,2.4
+test,( cause to ) be anxious or preoccupied,cause to be balanced or suspended .,0.4
+test,design for a specific purpose,plan something for a specific role or purpose or effect .,4.2
+test,to combat or oppose someone or something,the act of forcing out someone or something .,2.6
+test,( cause to ) form a cluster in either abstract or physical space .,"cause to have , in the abstract sense or physical sense .",2.2
+test,a mental grasp or understanding of something,understanding of the nature or meaning or quality or magnitude of something .,4.2
+test,do something considered below one 's diginty,do something that one considers to be below one 's dignity .,4.6
+test,( game ) a division during which one is allowed to play ( perhaps as offense ) .,( sports ) a division during which one team is on the offensive .,4.2
+test,"the act of cutting off length , snipping off",the act of clipping or snipping .,4.2
+test,a sovereign regime and its assemblage,the sovereign and his advisers who are the governing power of a state .,3.8
+test,the act of annoying someone or something,the act of raising something .,0.75
+test,the extreme endpoint of something,the act or means of getting rid of something .,0.4
+test,be or have a quality of being,the quality of being significant .,2.6
+test,improve by pruning or polishing,improve or perfect by pruning or polishing .,4.4
+test,the act of preserving or protecting something,the act of applying force to propel something .,0.0
+test,register formally as a participant,register formally as a participant or member .,4.4
+test,"a lever that activates a firing mechanism , especially with a firearm",lever that activates the firing mechanism of a gun .,4.0
+test,the act of beginning something new .,the act of ending something .,0.8
+test,the act of annoying someone or something,the act of liberating someone or something .,0.2
+test,"cut into , possibly creating something new .",a reason for wanting something done .,0.6
+test,a casual game of throwing a ball back and forth,a cooperative game in which a ball is passed back and forth .,3.6
+test,"come up , as of liquid or gas","take up , as of debts or payments .",0.2
+test,cause to be immersed in,cause to be hanging or suspended .,0.4
+test,the act of substituting one thing for another,the act of changing one thing for another thing .,3.75
+test,the act of testing something .,a way or means to achieve something .,0.6
+test,the act of validating the authenticity of something,the act of liberating someone or something .,0.8
+test,amount of time that something is postponed,time during which some action is awaited .,3.8
+test,"reverse a direction , attitude or course of action , perhaps perceptually .","reverse ( a direction , attitude , or course of action ) .",3.8
+test,"an established or recognized right , formal or informal .",an established or recognized right .,4.4
+test,the act of intentionally omitting something,the act of forming or establishing something .,0.2
+test,the occupants who dwell on a level of a building,the occupants of a floor .,4.6
+test,a method for solving a problem,the successful action of solving a problem .,3.0
+test,cause to move with a flick or as if with a flick,cover with flakes or as if with flakes .,0.0
+test,an observer of a process or activity,a member of a police force .,0.4
+test,an address used for postal communication,the address where a person or organization can be communicated with .,4.0
+test,"spur on , urge , or deride by cheers and shouts .",spur on or encourage especially by cheers and shouts .,4.0
+test,spare in quality or quantity,limit in quality or quantity .,2.8
+test,the act of shoving something away,the act of hiring something or someone .,0.2
+test,the apparent condition or state of something,the event consisting of the start of something .,1.8
+test,"engrave , shape or cut by chipping away at the surface",engrave or cut by chipping away at a surface .,4.0
+test,something considered trite but amusing,something recalled to the mind .,0.6
+test,the act of lifting something,the act of constructing something .,1.6
+test,concrete enactment of an idea or concept,a concrete representation of an otherwise nebulous concept .,3.8
+test,raise or haul up as if with a mechanism,affect with or as if with a cramp .,0.8
+test,( cause to ) change from a solid to a liquid .,become liquid or fluid when heated .,4.0
+test,( the act of making ) a measurement of something .,the act of making up your mind about something .,1.0
+test,"a duplicate of something , serving as a backup",something additional of the same kind .,3.2
+test,( the act of making ) a measurement of something .,the act of removing or getting rid of something .,0.4
+test,"react , or respond to a call , command , or stimulus",react to a stimulus or command .,4.2
+test,club or association of people with a shared interest,a formal association of people with similar interests .,4.4
+test,"free from obligations , service or confinement",free from obligations or duties .,4.4
+test,the degree or amount of something,the act of dropping something .,0.0
+test,the act of arriving at a certain place,the act of putting something in a certain place .,1.4
+test,medium of exchange minted by a government,the official currency issued by a government or national bank .,3.4
+test,advance or set forward in court,advance or set forth in court .,4.8
+test,make a written note of something,make a written note of .,4.0
+test,the act of explaining or defending something,the allotment of some amount by dividing something .,0.2
+test,a citizen of ancient troy,a native of ancient troy .,3.8
+test,the act of testing something .,the act of rending or ripping or splitting something .,0.0
+test,"the act of turning , rotating an object",the act of terminating a life .,0.0
+test,the act of moving in a hurried manner .,the act of moving hurriedly and in a careless manner .,3.6
+test,"the act of clipping , cutting",the act of describing something .,0.2
+test,physically raise from a lower position .,raise from a lower to a higher position .,4.2
+test,"the act of turning , rotating an object",the act of retaining something .,0.2
+test,an increase in size as measured per unit of time,the rate of increase in size per unit time .,4.6
+test,advance warning or notification of something,the first part or section of something .,0.6
+test,the act of advocating or promoting something,the act of constructing something .,0.6
+test,"supply with water for crops , as with channels , ditches , or streams .","supply with water , as with channels or ditches or streams .",3.8
+test,"smother , surpress or lessen something",the act of testing something .,0.4
+test,cause to be immersed in,cause to be interested or curious .,1.8
+test,the human act of making something new .,the act of making or enacting laws .,0.6
+test,the intended meaning of an instance of communication .,the intended meaning of a communication .,4.4
+test,"be given to , come into the possession of",come into the possession of .,4.4
+test,utter in a certain way,react to in a certain way .,1.2
+test,have or be covered with bristles,the state of being covered with unclean things .,1.6
+test,the act of planning or deliberating,the act of choosing or selecting .,1.8
+test,be located at or on top of something,make a film or photograph of something .,0.0
+test,be in or establish communication with,move or establish in a new location .,0.4
+test,adapt oneself to new or different conditions .,adapt or conform oneself to new or different conditions .,4.8
+test,be located at or on top of something,an obligation to pay or do something .,0.0
+test,"a collection of something , often a large amount",a collection of things sharing a common attribute .,2.4
+test,whip with or as if with a whisk,urge with or as if with a goad .,0.0
+test,dysfunction or ailment of the heart,a disease of the heart .,4.4
+test,decorate a manuscript with red,decorate ( manuscripts ) with letters painted red .,3.8
+test,the act of devoting time and energy to something,the act of liberating someone or something .,0.6
+test,verify something by comparing to a standard,check or regulate ( a scientific experiment ) by conducting a parallel experiment or comparing with another standard .,3.6
+test,"part , cease , or break association with ( something ) .",part ; cease or break association with .,4.6
+test,put heels on a shoe,put a new heel on .,4.0
+test,the act of preserving or protecting something,the act of raising something .,0.8
+test,make images or sounds less sharp,make ( images or sounds ) sharp or sharper .,2.4
+test,"expel or eject saliva , sputum , or an object from the mouth .",expel or eject ( saliva or phlegm or sputum ) from the mouth .,4.4
+test,measure the depth of a body of water,measure the depth of ( a body of water ) with a sounding line .,3.2
+test,give a detailed account of,narrate or give a detailed account of .,4.4
+test,a recurrent artistic theme or pattern,a theme that is repeated or elaborated in a piece of music .,3.0
+test,the act of choosing or selecting,the act of looking or seeing or observing .,0.8
+test,have a strong desire to do something,have a strong desire or urge to do something .,4.8
+test,the activity of looking thoroughly in order to find something or someone .,the act of removing or getting rid of something .,0.2
+test,person who is a social companion,a friend who is frequently in the company of another .,3.6
+test,hold or place in equilibrium,hold or carry in equilibrium .,4.6
+test,the act of accusing someone or something for being at fault,the management of someone or something .,0.4
+test,work as a tinker ( fix pots and pans ),work as a tinker or tinkerer .,3.8
+test,"the act of allowing , bestowing something",the act of forming or establishing something .,0.6
+test,"the termination , ending of a meeting",the termination of a meeting .,5.0
+test,scratch or scrape with claws or nails,attack as if with claws .,4.0
+test,"a social occasion , often official or formal",a formal or official social gathering or ceremony .,3.8
+test,infer or believe to be the case,believe to be the case .,4.2
+test,move in such a way as to avoid,make a sudden movement in a new direction so as to avoid .,4.0
+test,the state of being absent .,the act of climbing something .,0.0
+test,remove by pinching or snipping,sever or remove by pinching or snipping .,4.4
+test,( cause to ) become a powder or as dust .,cause to become widely known .,0.0
+test,"prepare , arrange ; create or organize for a particular purpose",any area set aside for a particular purpose .,2.0
+test,the act of people having sex,the act of climbing something .,0.2
+test,to lecture formally to an audience,accuse formally of a crime .,0.2
+test,the act of creating an artistic work,the act of creating written works .,2.8
+test,the state of being in contact,the state of being excluded .,0.6
+test,"collect discarded , refused or damaged material",collect discarded or refused material .,3.8
+test,an enterprise or company that publishes newsprint,a business firm that publishes newspapers .,4.0
+test,the act of providing incentive to someone,the act of motivating ; providing incentive .,4.0
+test,the activity of examining or assessing something,the act of examining resemblances .,2.2
+test,make marks in the surface of .,make small marks into the surface of .,3.8
+test,make a copy with the intent to deceive .,take up with the tongue .,0.0
+test,the act of choosing or selecting,the act of clipping or snipping .,0.4
+test,spare in quality or quantity,be equal to in quality or ability .,1.2
+test,return to in thought or speech,return in thought or speech to something .,5.0
+test,the act of testing something .,the act of climbing something .,0.0
+test,"manner of handling , managing someone or something",the management of someone or something .,4.4
+test,the act of selecting or picking something,the act of decreasing or reducing something .,1.0
+test,lay off--put an end to a state or activity,put an end to a state or an activity .,4.2
+test,move the body backwards and down into a comfortable resting position,move or arrange oneself in a comfortable and cozy position .,3.8
+test,"shine intensely ; emit a steady , even light from a source .",emit a steady even light without flames .,2.8
+test,the act of purchasing back something previously sold .,the act of starting something .,0.2
+test,"reach or cause to reach the highest point , best something",an act ( or failure to act ) that disappoints someone .,0.2
+test,a type of military aircraft,a unit of military aircraft .,3.8
+test,the act of putting a preparation on something .,the state of taking in or encircling .,0.2
+test,a person who plants or detonates explosives,a person who plants bombs .,3.8
+test,make fit for a specific purpose,suit to a special purpose .,4.2
+test,"strike with horror , surprise , disgust",strike with horror or terror .,3.8
+test,"have the same value , be or become equivalent to something else",establish something as being earlier relative to something else .,2.2
+test,a state of confusion or disorder .,throw into great confusion or disorder .,3.4
+test,"a public enclosure for animals , as dogs",a public enclosure for stray or unlicensed dogs .,4.0
+test,"a system by which one currency is exchanged for another , enabling international transactions",the system by which one currency is exchanged for another ; enables international transactions to take place .,4.8
+test,the natural progression or development of something,the natural process of laying down a deposit of something .,1.8
+test,the act of pulling an object,the act of choosing or selecting .,0.8
+test,a perceptual distinction based on color or shading .,the perceptual effect of the juxtaposition of very different colors .,4.4
+test,the act of purchasing back something previously sold .,the act of retaining something .,1.2
+test,cook in cream or using cream .,"add cream to one 's coffee , for example .",1.2
+test,a negative or undesirable aspect of something,consider as part of something .,0.6
+test,gear or develop something to a particular purpose,suit to a special purpose .,4.6
+test,identify or pick out someone or something,the act of losing someone or something .,0.6
+test,a state of being encircled,the state of being depleted .,0.2
+test,read or conform to the metrical pattern of,conform to a metrical pattern .,4.4
+test,a major branch of a tree,a small thin branch of a tree .,1.4
+test,the act of lifting something,the act of starting something .,0.8
+test,"( cause to ) become a fluid , as when heated .","make ( a solid substance ) liquid , as by heating .",4.8
+test,form schemes in an underhand manner,form intrigues ( for ) in an underhand manner .,4.4
+test,identify or pick out someone or something,the act of forcing out someone or something .,1.0
+test,the act of applying torture to the foot and leg,a form of foot torture in which the feet are encased in iron and slowly crushed .,3.0
+test,move as if unable to control one 's manner or direction of movement .,walk as if unable to control one 's movements .,4.0
+test,arrangement for managing assets on behalf of a beneficiary,something ( as property ) held by one party ( the trustee ) for the benefit of another ( the beneficiary ) .,3.8
+test,make fit for a specific purpose,provide with ( something ) usually for a specific purpose .,4.0
+test,the act of lifting something,the act of winding or twisting .,0.6
+test,"cause to move , cause to be moved",cause to lean to the side .,1.6
+test,"an indication of something , evidence",an indication of some hidden activity .,1.8
+test,the state of being absent .,the state of being suspected .,0.6
+test,( cause to ) break up or cease to function,stop functioning or cohering as a unit .,4.0
+test,the selection of a lottery winner,the last section of a communication .,0.0
+test,being in a protected state or condition,be in some specified state or condition .,2.0
+test,"the act of escaping , fleeing",the act of escaping physically .,4.2
+test,"build , make by combining materials or parts",make by combining materials and parts .,4.0
+test,create a coating for something .,give a performance ( of something ) .,0.6
+test,create a coating for something .,the act of projecting out from something .,0.0
+test,restrict or limit the range of,limit the range or extent of .,4.8
+test,the act of annoying someone or something,the act of dropping something .,0.2
+test,the act of acknowledging the truth of something,the act of perceiving the odor of something .,0.0
+test,the act of providing incentive to someone,the act of hiring something or someone .,1.8
+test,an argument that gives grounds or justification for a position,the justification for some act or belief .,3.2
+test,presentation of a musical theme,( music ) the presentation of a musical theme .,5.0
+test,cause or permit to fall to the ground,let or cause to fall in drops .,2.8
+test,move or sway in a sinuous fashion,"to move or cause to move in a sinuous , spiral , or circular course .",4.4
+test,sell or transport an item or idea abroad,cause to spread in another part of the world .,2.6
+test,the act of taking an offer,the act of making a proposal .,0.8
+test,a group of people appointed to a committee,a committee appointed to judge a competition .,2.6
+test,"intuitions , a hunch or feeling","maintain ( a theory , thoughts , or feelings ) .",1.4
+test,"situate , position , come to rest","settle into a position , usually on a surface or ground .",3.4
+test,sever or remove by pinching or snipping ; tend by cutting .,sever or remove by pinching or snipping .,3.8
+test,the act of lifting something,the act of damaging something or someone .,0.0
+test,place limits on ; form the boundary of or be contiguous to .,form the boundary of ; be contiguous to .,4.4
+test,the value of a currency 's conversion to another currency,the charge for exchanging currency of one country for currency of another .,3.0
+test,the graduated arc of an instrument used to measure angles,the graduated arc that is attached to an instrument for measuring angles .,3.8
+test,the act of lifting something,the act of testing something .,0.8
+test,"the act of escaping , fleeing",the act of retaining something .,0.4
+test,"people who are impoverished , without basic possessions",two people who are married to each other .,0.0
+test,the act of putting a preparation on something .,give certain properties to something .,0.4
+test,the act of explaining or defending something,the activity of supplying or providing something .,0.2
+test,the act of lifting something,the act of raising something .,4.4
+test,confine in or as if in a prison,enclose in or as if in a frame .,1.6
+test,make a copy with the intent to deceive .,make believe with the intent to deceive .,3.2
+test,the act of sorting things into categories,the act of distributing things into classes or categories of the same type .,4.2
+test,fly in or on a glider plane,fly in or as if in a glider plane .,4.0
+test,the act of choosing or selecting,the act of testing something .,1.4
+test,open to members of all races and ethnic groups,open ( a place ) to members of all races and ethnic groups .,4.6
+test,go after with the intent to follow or catch .,go after with the intent to catch .,4.2
+test,the center region of an object,the center of an object .,4.0
+test,an approximated amount of something,an appraisal of the value of something .,2.8
+test,cover completely ; form a cover over ; expand over .,form a carpet-like cover ( over ) .,3.6
+test,room where work or repairs are done,room where work is done .,4.2
+test,the act of shoving something away,the act of testing something .,0.6
+test,take possession of by legal authority ( for security ) .,"take temporary possession of as a security , by legal authority .",3.6
+test,hand over or put in,refer for judgment or consideration .,0.2
+test,cause to turn from one course or use to another,send from one person or place to another .,2.4
+test,the act of pulling a load,the act of dwelling in a place .,0.0
+test,the act of annoying someone or something,the act of projecting out from something .,0.2
+test,the act of talking about the features of something .,the act of projecting out from something .,1.0
+test,turn from an upright / normal position,cause to overturn from an upright or normal position .,3.6
+test,the act of lifting something,the act of dropping something .,0.2
+test,the identification or the realization of something,the end or completion of something .,1.0
+test,the act of concealing or disguising,the act of projecting out from something .,0.6
+test,"a document granting a right or privilege , as to an inventor .",a document granting an inventor sole rights to an invention .,3.8
+test,the central area of an object,the center of an object .,4.6
+test,the act of lifting something,the act of colliding with something .,0.6
+test,the act of lifting something,the act of decreasing or reducing something .,0.4
+test,the act of putting a preparation on something .,the act of stopping something .,0.4
+test,the act of advocating or promoting something,the act of rending or ripping or splitting something .,0.6
+test,"have a distinctive or characteristic taste , perceptible by an experiencer .",have a distinctive or characteristic taste .,4.0
+test,be a sign or indication of ; have as a meaning .,be a sign or indication of .,4.2
+test,the general impression or appearance of something,the general outward appearance of something .,4.4
+test,"know , realize , and comprehend the meaning",know and comprehend the nature or meaning of .,4.8
+test,make or create something for a specific function .,"make something , usually for a specific function .",4.0
+test,get rid of as if with water ( metaphorical ),get rid of as if by submerging .,3.0
+test,the act of acknowledging the truth of something,the act of choosing or selecting .,0.6
+test,change or conform to fit new or different conditions,adapt or conform oneself to new or different conditions .,4.4
+test,the act of providing incentive to someone,the act of troubling or annoying someone .,0.0
+test,a watch with a hinged lid to protect the face,a watch with a hinged metal lid to protect the crystal .,4.0
+test,"support , sustain , bear , or be responsible for",organize or be responsible for .,4.0
+test,strive against another or others to attain a goal,compete for something ; engage in a contest ; measure oneself against others .,3.2
+test,the act of testing something .,the act of cracking something .,0.6
+test,gather or remove ( from a location ) for use .,remove from a position or office .,1.6
+test,"the act of directing attention , resources to something",the act of colliding with something .,0.2
+test,ride on someone 's shoulders or back ; support on the back or shoulders .,ride on someone 's shoulders or back .,4.0
+test,"the act of combining , blending , integrating",the act of mixing together .,3.4
+test,a solid 3d object with rectangular sides,a solid piece of something ( usually having flat rectangular sides ) .,3.2
+test,the translation of an opus from one language to another,the act of moving from one place to another .,0.2
+test,the act of annoying someone or something,the act of admitting someone to enter .,0.0
+test,"write differently or alter a piece or writing , perhaps to suit a different purpose .",rewrite so as to make fit to suit a new or different purpose .,4.4
+test,a celebrity or entertainer who attracts a large audience,an entertainer who attracts large audiences .,4.25
+test,dispose of something as useless and old ; physically tear apart .,dispose of ( something useless or old ) .,4.0
+test,the state of being absent .,the state of being excommunicated .,0.4
+test,rise to surface ; become visible or known,appear or become visible ; make a showing .,3.6
+test,overcome with astonishment or disbelief,correct by punishment or discipline .,0.0
+test,"lessen in force or effect , restrain , weaken",lessen in force or effect .,3.8
+test,the act of intentionally omitting something,the act of climbing something .,0.0
+test,the act of advocating or promoting something,the act of affirming or asserting or stating something .,2.2
+test,a list of items to be consulted and marked off,a list of items ( names or tasks etc . ) to be checked or consulted .,4.6
+test,the act of testing something .,the act of stopping something .,0.6
+test,"the act of damaging something , causing breakage",the act of damaging something or someone .,3.2
+test,put in a particular place or abstract location,put into a certain place or abstract location .,4.6
+test,the act of perceiving a scent,the act of perceiving the odor of something .,4.4
+test,"the act of providing assistance , giving aid",the act of administering medication .,1.8
+test,"lessen in force , impact , or effect",lessen in force or effect .,4.6
+test,cover with wooden boards ; secure,"get on board of ( trains , buses , ships , aircraft , etc . ) .",1.4
+test,the act of explaining or defending something,the act of removing or getting rid of something .,0.0
+test,a lid or top of a container,covering for a hole ( especially a hole in the top of a container ) .,3.8
+test,( cause to ) separate or move in different directions,to cause to separate and go in different directions .,4.6
+test,cause to vibrate in a different pattern,cause to vibrate in a definite pattern .,2.4
+test,the act of dividing or disconnecting .,the act of adding one thing to another .,0.8
+test,decide upon or fix definitely / specify,decide upon or fix definitely .,4.0
+test,provide a seat or base for,provide a feast or banquet for .,1.4
+test,the act of explaining or defending something,the act of rending or ripping or splitting something .,0.0
+test,an observer of a process or activity,a meeting devoted to a particular activity .,0.4
+test,make keen ; give ( new ) life or energy to,give new life or energy to .,3.8
