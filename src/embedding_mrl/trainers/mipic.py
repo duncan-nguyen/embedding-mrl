@@ -1,4 +1,4 @@
-"""MIPIC: Matryoshka InfoNCE plus horizontal (SIA) and vertical (PIC) alignment."""
+"""MIPIC: Matryoshka InfoNCE plus SIA and PIC alignment (paper Eq 18)."""
 
 from __future__ import annotations
 
@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Tuple
 import torch
 
 from ..losses.infonce import matryoshka_info_nce
-from ..losses.mipic import TotalAlignmentLoss
+from ..losses.mipic import MIPICAlignmentLoss
 from ..pooling import pool
 from .base import BaseTrainer
 
@@ -17,20 +17,21 @@ class MIPICTrainer(BaseTrainer):
 
     def setup_modules(self) -> None:
         cfg = self.cfg
-        self.alignment_loss = TotalAlignmentLoss(
+        self.alignment_loss = MIPICAlignmentLoss(
             d_full=cfg.model.hidden_dim,
-            matryoshka_dims=cfg.matryoshka.descending,
-            align_layers=cfg.mipic.align_layers,
-            pipeline_pairs=cfg.mipic.parsed_pipeline_pairs(),
-            alpha=cfg.mipic.alpha,
-            beta=cfg.mipic.beta,
-            gamma=cfg.mipic.gamma,
-            k_map=cfg.mipic.k_map,
-            base_k=cfg.mipic.base_k,
+            matryoshka_dims=cfg.matryoshka.dims,
+            layers=cfg.mipic.layers,
+            checkpoints=cfg.mipic.checkpoint_pairs(),
+            gamma_schedule=cfg.mipic.gamma_schedule,
+            k_min=cfg.mipic.k_min,
+            temperature=cfg.matryoshka.temperature,
             attention_temperature=cfg.mipic.attention_temperature,
-            pipeline_temperature=cfg.mipic.pipeline_temperature,
-            d_att=cfg.mipic.d_att,
-            use_attention_kl=cfg.mipic.use_attention_kl,
+            w_att=cfg.mipic.w_att,
+            w_cka=cfg.mipic.w_cka,
+            w_pic=cfg.mipic.w_pic,
+            aggregate=cfg.mipic.aggregate,
+            pic_hidden_dim=cfg.mipic.pic_hidden_dim,
+            pic_detach_target=cfg.mipic.pic_detach_target,
         ).to(self.device)
 
         num_hidden_states = self.model.config.num_hidden_layers + 1
@@ -61,20 +62,15 @@ class MIPICTrainer(BaseTrainer):
             return_dict=True,
         )
 
-        align1 = self.alignment_loss(
-            list(out1.hidden_states), mask=batch["attention_mask1"]
-        )
-        align2 = self.alignment_loss(
-            list(out2.hidden_states), mask=batch["attention_mask2"]
-        )
+        # SIA/PIC are computed per view and averaged, since both are valid
+        # self-distillation targets for the same sentence.
+        align1 = self.alignment_loss(list(out1.hidden_states), mask=batch["attention_mask1"])
+        align2 = self.alignment_loss(list(out2.hidden_states), mask=batch["attention_mask2"])
         align = {key: (align1[key] + align2[key]) / 2.0 for key in align1}
 
-        emb1 = pool(
-            out1.hidden_states[-1], batch["attention_mask1"], self.cfg.model.pooling
-        )
-        emb2 = pool(
-            out2.hidden_states[-1], batch["attention_mask2"], self.cfg.model.pooling
-        )
+        # L_MRL: SimCSE InfoNCE at every nested prefix (Eq 1, Eq 19).
+        emb1 = pool(out1.hidden_states[-1], batch["attention_mask1"], self.cfg.model.pooling)
+        emb2 = pool(out2.hidden_states[-1], batch["attention_mask2"], self.cfg.model.pooling)
         matry_loss, _ = matryoshka_info_nce(
             emb1,
             emb2,
@@ -82,15 +78,15 @@ class MIPICTrainer(BaseTrainer):
             temperature=self.cfg.matryoshka.temperature,
         )
 
-        loss = (
-            self.cfg.mipic.w_align * align["total_loss"]
-            + self.cfg.mipic.w_matryoshka * matry_loss
-        )
+        # Eq 18: L_MIPIC = alpha * L_MRL + (1 - alpha) * (L_SIA + L_PIC)
+        alpha = self.cfg.mipic.alpha
+        loss = alpha * matry_loss + (1.0 - alpha) * align["total_loss"]
+
         logs = {
-            "align": align["total_loss"].item(),
+            "mrl": matry_loss.item(),
+            "sia": align["sia_loss"].item(),
             "att": align["att_loss"].item(),
             "cka": align["cka_loss"].item(),
-            "chain": align["chain_loss"].item(),
-            "matry": matry_loss.item(),
+            "pic": align["pic_loss"].item(),
         }
         return loss, logs

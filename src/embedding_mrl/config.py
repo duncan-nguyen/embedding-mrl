@@ -171,46 +171,71 @@ class ESEConfig:
 
 @dataclass
 class MIPICConfig:
-    """MIPIC: horizontal (SIA) + vertical (PIC) alignment on top of MRL."""
+    """MIPIC: SIA (cross-dimensional) + PIC (depth-wise) alignment on top of MRL.
 
-    #: Hidden-state indices to align. Index 0 is the embedding layer.
-    align_layers: list[int] = field(default_factory=lambda: [8, 10])
-    #: Each entry is a flat ``(layer, dim, layer, dim, ...)`` chain.
-    pipeline_pairs: list[list[int]] = field(
-        default_factory=lambda: [[3, 16, 7, 128, 11, 768]]
+    Field names follow the paper (``docs/MIPIC.pdf``); see Table 7 and
+    Appendix A.5 for the published per-backbone values.
+    """
+
+    #: Eq 18: ``L = alpha * L_MRL + (1 - alpha) * (L_SIA + L_PIC)``.
+    #: Table 7: 0.4 for TinyBERT-6L and BERT-base, 0.5 for Qwen3-0.6B and BGE-M3.
+    alpha: float = 0.4
+    #: ``L`` - hidden-state indices SIA is applied at (index 0 = embeddings).
+    layers: list[int] = field(default_factory=lambda: [2, 4, 6, 8, 9, 10, 12])
+    #: ``C`` - ordered ``(dim, layer)`` checkpoints chained by PIC.
+    checkpoints: list[list[int]] = field(
+        default_factory=lambda: [
+            [16, 2], [32, 4], [64, 6], [128, 8], [256, 9], [512, 10], [768, 12]
+        ]
     )
-    alpha: float = 0.4  # horizontal attention (SIA) weight
-    beta: float = 0.4  # submatrix CKA weight
-    gamma: float = 0.2  # pipeline InfoNCE (PIC) weight
-    base_k: int = 64
-    d_att: int = 64
-    attention_temperature: float = 1.0
-    pipeline_temperature: float = 0.07
-    #: Explicit ``dim -> k`` map for top-k token selection. ``None`` uses the
-    #: default proportional rule ``max(8, int(dim / d_full * base_k))``.
-    k_map: dict[int, int] | None = None
-    #: The published notebooks zeroed the attention-KL term before returning it,
-    #: so SIA contributed nothing to the gradient. ``False`` reproduces that;
-    #: ``True`` enables the KL term as described in the paper.
-    use_attention_kl: bool = False
+    #: Appendix A.5: ``k_i = max(k_min, ceil(gamma_i * m))``, one gamma per
+    #: truncated prefix in ascending order of dimension.
+    gamma_schedule: list[float] = field(
+        default_factory=lambda: [0.2, 0.3, 0.4, 0.5, 0.6, 0.7]
+    )
+    k_min: int = 8
+    #: SIA softmax temperature. ``None`` reuses the shared ``tau``
+    #: (``matryoshka.temperature``), which is what the paper's notation implies.
+    attention_temperature: float | None = None
+    #: Eq 13 sums the two SIA terms with equal weight; expose them for ablations.
+    w_att: float = 1.0
+    w_cka: float = 1.0
+    w_pic: float = 1.0
+    #: ``"sum"`` follows Eq 13/14/17. ``"mean"`` averages over dims/layers/steps.
+    aggregate: str = "sum"
+    #: Hidden width of the PIC projector ``phi_i``. ``None`` = ``max(d_i, d_j) // 2``.
+    pic_hidden_dim: int | None = None
+    #: Stop gradients on the deeper checkpoint so information flows downward.
+    pic_detach_target: bool = True
     #: Learning-rate multiplier for the alignment module's own parameters.
     module_lr_scale: float = 2.0
-    #: Final mixture: ``w_align * L_align + w_matryoshka * L_MRL``.
-    w_align: float = 0.4
-    w_matryoshka: float = 0.6
 
-    def parsed_pipeline_pairs(self) -> list[tuple[int, int, int, int]]:
-        """Expand each chain into consecutive ``(layer_i, dim_i, layer_j, dim_j)``."""
-        out: list[tuple[int, int, int, int]] = []
-        for chain in self.pipeline_pairs:
-            if len(chain) % 2 != 0:
-                raise ValueError(f"pipeline chain must have even length, got {chain}")
-            stages = [(chain[i], chain[i + 1]) for i in range(0, len(chain), 2)]
-            for (layer_i, dim_i), (layer_j, dim_j) in zip(stages, stages[1:]):
-                out.append((layer_i, dim_i, layer_j, dim_j))
-        if not out:
-            raise ValueError("pipeline_pairs must define at least one transition")
-        return out
+    def __post_init__(self) -> None:
+        if not 0.0 <= self.alpha <= 1.0:
+            raise ValueError(f"mipic.alpha must be in [0, 1], got {self.alpha}")
+        if self.aggregate not in ("sum", "mean"):
+            raise ValueError(
+                f"mipic.aggregate must be 'sum' or 'mean', got {self.aggregate!r}"
+            )
+        bad = [c for c in self.checkpoints if len(c) != 2]
+        if bad:
+            raise ValueError(f"each mipic.checkpoint must be [dim, layer], got {bad}")
+        if len(self.checkpoints) < 2:
+            raise ValueError("mipic.checkpoints needs at least two entries to form a chain")
+
+    def checkpoint_pairs(self) -> list[tuple[int, int]]:
+        """``C`` as ``(dim, layer)`` tuples."""
+        return [(int(dim), int(layer)) for dim, layer in self.checkpoints]
+
+    @property
+    def w_align(self) -> float:
+        """The ``(1 - alpha)`` weight applied to ``L_SIA + L_PIC`` (Eq 18)."""
+        return 1.0 - self.alpha
+
+    @property
+    def w_matryoshka(self) -> float:
+        """The ``alpha`` weight applied to ``L_MRL`` (Eq 18)."""
+        return self.alpha
 
 
 # --------------------------------------------------------------------------- #
@@ -239,15 +264,19 @@ class ExperimentConfig:
             )
         if self.method == "mipic":
             bad_dims = [
-                d
-                for chain in self.mipic.pipeline_pairs
-                for d in chain[1::2]
-                if d > self.model.hidden_dim
+                dim for dim, _ in self.mipic.checkpoint_pairs()
+                if dim > self.model.hidden_dim
             ]
             if bad_dims:
                 raise ValueError(
-                    f"mipic.pipeline_pairs reference dims {bad_dims} > hidden_dim="
+                    f"mipic.checkpoints reference dims {bad_dims} > hidden_dim="
                     f"{self.model.hidden_dim}"
+                )
+            truncated = [d for d in self.matryoshka.dims if d < self.model.hidden_dim]
+            if len(self.mipic.gamma_schedule) != len(truncated):
+                raise ValueError(
+                    f"mipic.gamma_schedule has {len(self.mipic.gamma_schedule)} entries "
+                    f"but there are {len(truncated)} truncated prefixes {sorted(truncated)}"
                 )
 
     # -- (de)serialisation -------------------------------------------------- #

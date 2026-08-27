@@ -39,10 +39,10 @@ def make_config(method: str, output_dir: Path, **extra) -> ExperimentConfig:
         "matryoshka": {"dims": [8, 16, 32]},
         "eval": {"enabled": False},
         "mipic": {
-            "align_layers": [1, 3],
-            "pipeline_pairs": [[1, 8, 3, 32]],
-            "base_k": 8,
-            "d_att": 8,
+            "layers": [1, 3],
+            "checkpoints": [[8, 1], [16, 3], [32, 4]],
+            "gamma_schedule": [0.3, 0.5],
+            "k_min": 2,
         },
     }
     for key, value in extra.items():
@@ -111,7 +111,7 @@ def test_mipic_rejects_layer_indices_the_backbone_cannot_provide(
     tmp_path, offline_backbone
 ):
     cfg = make_config("mipic", tmp_path)
-    cfg.mipic.align_layers = [1, 99]  # the dummy encoder exposes 5 hidden states
+    cfg.mipic.layers = [1, 99]  # the dummy encoder exposes 5 hidden states
     with pytest.raises(ValueError, match="reference hidden-state indices"):
         build_trainer(cfg)
 
@@ -245,3 +245,50 @@ def test_gradient_clipping_path_runs_with_a_disabled_scaler(
     for param in trainer.model.parameters():
         if param.grad is not None:
             assert torch.isfinite(param.grad).all()
+
+
+@pytest.mark.parametrize("method", METHODS)
+def test_training_ends_with_an_evaluation_report_on_disk(method, tmp_path, offline_backbone):
+    """After the last epoch the run must evaluate and persist results.json."""
+    data_root = tmp_path / "data"
+    _write_tiny_eval_corpus(data_root)
+
+    cfg = make_config(method, tmp_path / "run")
+    cfg.data.root = str(data_root)
+    cfg.eval.enabled = True
+    cfg.eval.every_epoch = False  # evaluate only once, at the end
+    cfg.eval.cls_tasks = ["emotion"]
+    cfg.eval.sts_tasks = ["stsb"]
+    cfg.eval.pair_tasks = ["mrpc"]
+    cfg.eval.batch_size = 8
+    cfg.eval.logreg_max_iter = 20
+
+    outcome = build_trainer(cfg).train()
+    run_dir = tmp_path / "run"
+
+    assert (run_dir / "results.json").exists()
+    assert (run_dir / "results.csv").exists()
+    assert (run_dir / "results_epoch1.json").exists()
+
+    report = json.loads((run_dir / "results.json").read_text())
+    assert report["experiment"]["method"] == method
+    assert report["training"]["final_loss"] == pytest.approx(outcome["history"][0]["train_loss"])
+    assert set(report["table"]) == {f"dim_{d}" for d in cfg.matryoshka.dims}
+    assert report["table"]["dim_32"]["mean/sts"] == report["summary"]["sts"]["dim_32"]
+
+
+def test_eval_only_writes_the_same_report(tmp_path, offline_backbone):
+    data_root = tmp_path / "data"
+    _write_tiny_eval_corpus(data_root)
+
+    cfg = make_config("mrl", tmp_path / "run")
+    cfg.data.root = str(data_root)
+    cfg.eval.enabled = True
+    cfg.eval.cls_tasks = []
+    cfg.eval.sts_tasks = ["stsb"]
+    cfg.eval.pair_tasks = ["mrpc"]
+
+    report = build_trainer(cfg).evaluate_only()
+    assert (tmp_path / "run" / "results.json").exists()
+    assert report["training"]["epochs_completed"] == 0
+    assert report["summary"]["sts"]

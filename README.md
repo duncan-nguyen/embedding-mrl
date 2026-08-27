@@ -21,10 +21,14 @@ src/embedding_mrl/
   pooling.py        cls / mean / last-token pooling
   losses/           infonce.py, cka.py, ese.py, mipic.py
   evaluation.py     the Matryoshka evaluation suite
+  reporting.py      results.json / results.csv
   trainers/         base.py + one trainer per method
   cli.py            entry point
 scripts/train.py    run without installing the package
-tests/              68 tests, fully offline (no model downloads)
+scripts/run_all.sh  run every experiment in sequence
+Dockerfile          self-contained training image (code + data + models)
+docker/             build/push scripts, model baking, docker docs
+tests/              116 tests, fully offline (no model downloads)
 notebooks/          the original notebooks, kept for reference
 ```
 
@@ -55,15 +59,55 @@ python scripts/train.py --config configs/mrl/bert.yaml --eval-only \
     --set model.name_or_path=outputs/mrl_bert/encoder
 ```
 
-Artifacts land in `train.output_dir`:
+Training always finishes with an evaluation pass, and the scores are written to
+disk. Artifacts land in `train.output_dir`:
 
 | file | contents |
 | --- | --- |
-| `results.json` | final scores: `{classification, sts, pair, summary}`, each broken down per dimension |
-| `results_epoch{N}.json` | the same, per epoch |
+| `results.json` | **the final report** — run metadata, training losses, per-task scores at every dimension, family averages, and a flat per-dimension table |
+| `results.csv` | the same table as CSV: one row per Matryoshka dimension, one column per task |
+| `results_epoch{N}.json` | raw scores after epoch N (only when `eval.every_epoch` is true) |
 | `history.json` | per-epoch train loss + summary metrics |
 | `config.yaml` | the resolved config the run actually used |
 | `encoder/` | trained weights + tokenizer |
+
+`results.json` looks like this:
+
+```json
+{
+  "experiment": {
+    "name": "mipic_bgem3", "method": "mipic", "model": "BAAI/bge-m3",
+    "hidden_dim": 1024, "pooling": "cls",
+    "matryoshka_dims": [16, 32, 64, 128, 256, 512, 1024],
+    "eval_split": "test", "epochs": 8, "finished_at": "2026-08-27T15:49:22+07:00"
+  },
+  "training": { "final_loss": 2.41, "loss_per_epoch": [...], "duration_seconds": 9821.4 },
+
+  "classification": { "banking77": { "dim_16": {"accuracy": ..., "f1": ...}, ... }, ... },
+  "sts":            { "stsb":      { "dim_16": 0.71, ... }, ... },
+  "pair":           { "mrpc":      { "dim_16": {"accuracy": ..., "f1": ..., "average_precision": ...}, ... }, ... },
+
+  "summary": { "classification": {"dim_16": ...}, "sts": {...}, "pair": {...} },
+  "table":   { "dim_16": {"classification/banking77": ..., "mean/sts": ..., ...}, ... }
+}
+```
+
+The `classification` / `sts` / `pair` keys keep the layout this project has
+always used; `experiment`, `training`, `summary` and `table` are additions.
+
+The same table is printed at the end of the run:
+
+```
+   dim | classification |            sts |           pair
+---------------------------------------------------------
+    16 |         0.6421 |         0.7103 |         0.6890
+    32 |         0.7015 |         0.7488 |         0.7102
+   ...
+```
+
+To evaluate only at the end instead of after every epoch (much faster), set
+`eval.every_epoch: false`. To score an already-trained checkpoint, use
+`--eval-only`; it writes the same `results.json` / `results.csv`.
 
 ## The twelve configs
 
@@ -101,27 +145,48 @@ w_d = 1 / (1 + log(i+1)),  w_l = 1 / (1 + log(L - l))
 
 ### MIPIC (our method) — `losses/mipic.py`
 
-Adds horizontal and vertical alignment on top of the MRL objective. The full
-hidden width is its own teacher — no second model is loaded.
+Adds cross-dimensional and depth-wise alignment on top of the MRL objective. The
+full hidden width is its own teacher — no second model is loaded. Equation
+numbers below refer to [docs/MIPIC.pdf](docs/MIPIC.pdf).
 
-1. **Horizontal attention alignment (SIA)** — token-importance ordering should
-   agree between a truncated prefix and the full width (KL divergence).
-2. **Submatrix CKA** — the geometry of the top-`k` important tokens should
-   agree, measured with per-example CKA.
-3. **Pipeline InfoNCE (PIC)** — a shallow/narrow stage should predict the next
-   deeper/wider one, e.g. `(layer 3, dim 16) → (layer 7, dim 128) → (layer 11, dim 768)`.
+**SIA — Self-Distilled Intra-Relational Alignment** (Sec 3.2), applied at every
+layer in `mipic.layers` and every truncated prefix `d_i`:
+
+1. *Attention distribution matching* (Eq 4–6) — the truncated prefix must rank
+   tokens the way the full width does. The full-dimensional `h_CLS` is the query
+   for both; a learnable `P_i ∈ R^{d_i×D}` lifts the truncated token back to `D`.
+
+   ```
+   s_j^(D) = h_CLS · h_j / √D            a_D = softmax(s^(D)/τ)
+   s_j^(i) = h_CLS · P_iᵀ h_j^(i) / √D   a_i = softmax(s^(i)/τ)
+   L_att^(i) = KL(a_i ‖ a_D)
+   ```
+
+2. *Top-k CKA alignment* (Eq 7–12) — the geometry of the `k_i` most important
+   tokens must agree. Tokens are ranked once by the **teacher** `a_D`, so the
+   selected sets are nested (`S_k₁ ⊂ S_k₂ ⊂ …`), with
+   `k_i = max(8, ⌈γ_i·m⌉)` and `γ = [0.2, 0.3, 0.4, 0.5, 0.6, 0.7]` (Appendix A.5).
+
+   ```
+   L_CKA^(i) = 1 − CKA(h_i, H_i)
+   ```
+
+**PIC — Progressive Information Chaining** (Sec 3.3) — each `(dim, layer)`
+checkpoint in `mipic.checkpoints` must predict the next, deeper and wider one,
+e.g. `(16, layer 2) → (32, layer 4) → … → (768, layer 12)` for BERT-base:
 
 ```
-L_align = α·L_SIA + β·L_CKA + γ·L_PIC          (α=0.4, β=0.4, γ=0.2)
-L_MIPIC = w_align·L_align + w_matryoshka·L_MRL  (0.4 / 0.6)
+L_chain^(i) = InfoNCE(φ_i(z_i), z_{i+1})        (Eq 16)
 ```
 
-> **`use_attention_kl` is `false` by default.** The released notebooks zeroed the
-> SIA KL term before returning it, so `α·L_SIA` contributed nothing to the
-> gradient; only the attention *scores* were used, to pick the top-`k` tokens for
-> the CKA term. The default reproduces the published runs. Set
-> `--set mipic.use_attention_kl=true` to enable the term as the paper describes —
-> that is a different experiment and will not reproduce the notebook numbers.
+**Aggregation** (Eq 13, 14, 17, 18) — unweighted sums, and a single
+hyperparameter `α` trades off MRL against the alignment terms:
+
+```
+L_SIA = Σ_{k∈L} Σ_i (L_att^(i) + L_CKA^(i))
+L_PIC = Σ_i L_chain^(i)
+L_MIPIC = α·L_MRL + (1 − α)·(L_SIA + L_PIC)
+```
 
 ## Evaluation
 
@@ -139,17 +204,85 @@ default suite — add them to `eval.pair_tasks` to use them.
 
 ## Training configuration
 
+Values follow Table 7 and Appendix A.5 of the paper.
+
 | | value |
 | --- | --- |
 | Task | unsupervised pair classification (bi-encoder, SimCSE) |
 | Max sequence length | 256 |
 | Batch size | 16 |
-| Epochs | 5 (MRL, ESE) / 8 (MIPIC) |
-| Optimiser | AdamW, lr 2e-5, weight decay 0.01 |
-| Schedule | cosine with min lr 2e-6, 10% warmup |
-| Temperature | 0.07 |
+| Epochs | 5 |
+| Learning rate | 2e-5 |
+| Optimiser | AdamW, weight decay 0.01 |
+| LR scheduler | cosine |
+| Temperature τ | 0.05 |
+| Matryoshka dims | 16, 32, 64, 128, 256, 512, 768 / 1024 |
 | Precision | FP16 autocast |
 | Pooling | CLS for MRL/MIPIC, mean for ESE |
+
+MIPIC's per-backbone settings (Table 7 for `α`, Appendix A.5 for `L` and `C`):
+
+| backbone | α | `layers` (L) | `checkpoints` (C, as `(dim, layer)`) |
+| --- | --- | --- | --- |
+| TinyBERT-6L | 0.4 | 1,2,3,4,5,6 | (16,1) (32,2) (64,3) (256,4) (512,5) (768,6) |
+| BERT-base | 0.4 | 2,4,6,8,9,10,12 | (16,2) (32,4) (64,6) (128,8) (256,9) (512,10) (768,12) |
+| BGE-M3 | 0.5 | 1,4,7,11,15,19,24 | (16,1) (32,4) (64,7) (128,11) (256,15) (512,19) (1024,24) |
+| Qwen3-0.6B | 0.5 | 2,6,12,16,20,24,28 | (16,2) (32,6) (64,12) (128,16) (256,20) (512,24) (1024,28) |
+
+Top-k schedule: `k_i = max(8, ⌈γ_i·m⌉)` with `γ = [0.2, 0.3, 0.4, 0.5, 0.6, 0.7]`
+over the six truncated prefixes, `m` the sequence length.
+
+### Where the paper is silent
+
+A few settings are not stated and are carried over from the original notebooks:
+
+- **Warmup and minimum LR** — the paper says only "Cosine". The configs use
+  `cosine_with_min_lr` with 10% warmup and `min_lr = 2e-6`.
+- **Gradient clipping** — not mentioned; MIPIC keeps `max_grad_norm: 1.0`.
+- **Baseline hyperparameters** — Table 7 covers MIPIC only. MRL and ESE use the
+  same epochs / LR / batch size / τ, which is what "fair comparison" (Appendix
+  A.2) implies.
+- **Training corpus** — Appendix A.2 describes ~24,000 sentences;
+  `data/train/final_data.csv` ships 20,240 (Banking77 3,000, TweetEval 3,000,
+  WiC 3,000, MRPC 3,000, SciTail 3,000, STS-B 2,893, SICK 2,347). The shipped
+  file is used as-is.
+
+### Two things worth knowing about τ = 0.05
+
+Table 7 lists a single temperature and the paper reuses the symbol `τ` in the
+attention softmax (Eq 4–5), the chain InfoNCE (Eq 16) and SimCSE (Eq 19), so the
+configs apply 0.05 everywhere. Measured on BERT-shaped activations:
+
+- **The attention distribution collapses to one-hot.** `h_CLS·h_j/√D` already
+  spans roughly `[-1, 7]`, so dividing by 0.05 gives a hard argmax (entropy 0).
+  `L_att` still trains — it pushes `P_i` to match the teacher's argmax — but it
+  no longer matches a soft ranking. Decouple it with
+  `--set mipic.attention_temperature=1.0` if that is not the intent. Top-k
+  selection is unaffected: it ranks the raw scores, not the softmax.
+- **`L_att` dominates the objective at initialisation.** With BERT's 7 layers ×
+  6 prefixes, Eq 14 sums 42 KL terms: `L_att ≈ 679` versus `L_CKA ≈ 5`,
+  `L_PIC ≈ 24` and `L_MRL ≈ 20`. That is what Eq 13/14 specify; use
+  `mipic.w_att`, `mipic.w_cka`, `mipic.w_pic` or `mipic.aggregate: mean` to
+  rebalance for an ablation.
+
+## Docker
+
+For the internal GPU server there is a self-contained image — **code + data +
+model weights baked in**, so it runs with no network access:
+
+```bash
+# build and push (see docker/README.md for choosing the CUDA base image)
+DOCKERHUB_USER=yourname ./docker/build_and_push.sh
+
+# on the server
+docker run --rm --gpus all --shm-size=8g \
+    -v "$PWD/outputs:/workspace/outputs" \
+    yourname/embedding-mrl:latest --config configs/mipic/bgem3.yaml
+```
+
+`make build` / `make push` / `make run` wrap the same commands. Full details,
+including image size and how to bake fewer models, are in
+[docker/README.md](docker/README.md).
 
 ## Tests
 
@@ -157,7 +290,7 @@ default suite — add them to `eval.pair_tasks` to use them.
 pytest
 ```
 
-68 tests covering config inheritance and validation, the task registry against
+116 tests covering config inheritance and validation, the task registry against
 the real `data/` files, loss maths (gradient flow, masking, CKA invariances,
 top-`k` selection), pooling, evaluation metrics, and one-epoch training runs for
 all three methods. They use a locally built stub encoder, so nothing is
@@ -182,10 +315,29 @@ preserved, with these deliberate changes:
   Python list against a float (`scores >= thr`), which raises `TypeError`.
   Inputs are now coerced with `np.asarray`.
 - **`results.json` is actually written** — the old README documented it, but no
-  notebook produced it.
-- **Per-model constants are config, not code** — `align_layers`,
-  `pipeline_pairs`, `hidden_dim` and the dimension lists were hard-coded and had
-  to be edited in several places per notebook.
+  notebook produced it. Training now always ends with an evaluation pass that
+  writes `results.json` (plus a flat `results.csv`) with run metadata, per-task
+  scores at every dimension, and family averages.
+- **Per-model constants are config, not code** — layer indices, checkpoints,
+  `hidden_dim` and the dimension lists were hard-coded and had to be edited in
+  several places per notebook.
+- **MIPIC now follows the paper, not the notebooks.** The released notebooks
+  diverged from `docs/MIPIC.pdf` in five ways, all corrected here:
+
+  | | notebooks | paper (current) |
+  | --- | --- | --- |
+  | Attention KL | zeroed before returning — no gradient | Eq 6, active |
+  | Attention scores | shared 64-d space, learned `W_Q`/`W_K` | Eq 4–5, full-dim `h_CLS` query + `P_i` lift |
+  | Top-k ranking | per-dimension scores (sets not nested) | teacher `a_D` (Sec 3.2.2, nested) |
+  | Top-k size | `max(8, dim/D · 64)`, fixed | `max(8, ⌈γ_i·m⌉)`, sequence-dependent (App. A.5) |
+  | Aggregation | weighted mean, `α=β=0.4, γ=0.2` | Eq 13/14/17 sums, single `α` (Eq 18) |
+
+  Layer/checkpoint sets, `α`, τ and the epoch count also differ — see
+  [Training configuration](#training-configuration). The notebook variants are
+  reachable through config (`mipic.aggregate: mean`, `mipic.w_att`,
+  `mipic.attention_temperature`), and the original code is in `notebooks/`.
+- **Epochs and temperature** — the notebooks ran MIPIC for 8 epochs at τ=0.07;
+  Table 7 says 5 epochs at τ=0.05 for every backbone.
 - **`torch.cuda.amp` → `torch.amp`**, with a fallback for older torch.
 
 ## Citation

@@ -18,6 +18,49 @@ def test_shipped_configs_load(path):
     assert Path(cfg.data.train_path).exists()
 
 
+@pytest.mark.parametrize("path", CONFIGS, ids=lambda p: f"{p.parent.name}/{p.stem}")
+def test_shipped_configs_use_the_paper_training_settings(path):
+    """Table 7: 5 epochs, lr 2e-5, max length 256, batch 16, cosine, AdamW, tau=0.05."""
+    cfg = ExperimentConfig.load(path)
+    assert cfg.train.epochs == 5
+    assert cfg.train.lr == pytest.approx(2e-5)
+    assert cfg.train.batch_size == 16
+    assert cfg.data.max_length == 256
+    assert cfg.train.scheduler.startswith("cosine")
+    assert cfg.matryoshka.temperature == pytest.approx(0.05)
+    assert cfg.matryoshka.dims == [16, 32, 64, 128, 256, 512, cfg.model.hidden_dim]
+
+
+@pytest.mark.parametrize(
+    "name,alpha", [("tinybert_6l", 0.4), ("bert", 0.4), ("qwen3_0.6b", 0.5), ("bgem3", 0.5)]
+)
+def test_mipic_alpha_matches_table_7(name, alpha):
+    cfg = ExperimentConfig.load(REPO_ROOT / "configs" / "mipic" / f"{name}.yaml")
+    assert cfg.mipic.alpha == pytest.approx(alpha)
+
+
+@pytest.mark.parametrize(
+    "name,layers,checkpoints",
+    [
+        ("tinybert_6l", [1, 2, 3, 4, 5, 6],
+         [(16, 1), (32, 2), (64, 3), (256, 4), (512, 5), (768, 6)]),
+        ("bert", [2, 4, 6, 8, 9, 10, 12],
+         [(16, 2), (32, 4), (64, 6), (128, 8), (256, 9), (512, 10), (768, 12)]),
+        ("bgem3", [1, 4, 7, 11, 15, 19, 24],
+         [(16, 1), (32, 4), (64, 7), (128, 11), (256, 15), (512, 19), (1024, 24)]),
+        ("qwen3_0.6b", [2, 6, 12, 16, 20, 24, 28],
+         [(16, 2), (32, 6), (64, 12), (128, 16), (256, 20), (512, 24), (1024, 28)]),
+    ],
+)
+def test_mipic_layers_and_checkpoints_match_appendix_a5(name, layers, checkpoints):
+    cfg = ExperimentConfig.load(REPO_ROOT / "configs" / "mipic" / f"{name}.yaml")
+    assert cfg.mipic.layers == layers
+    assert cfg.mipic.checkpoint_pairs() == checkpoints
+    assert cfg.mipic.gamma_schedule == [0.2, 0.3, 0.4, 0.5, 0.6, 0.7]
+    assert cfg.mipic.k_min == 8
+    assert cfg.mipic.aggregate == "sum"
+
+
 def test_there_is_one_config_per_method_and_model():
     assert len(CONFIGS) == 12
 
@@ -49,19 +92,36 @@ def test_unknown_key_is_rejected():
         ExperimentConfig.from_dict({"trian": {"epochs": 1}})
 
 
-def test_pipeline_pairs_expand_into_consecutive_transitions():
-    cfg = ExperimentConfig.from_dict(
-        {"method": "mipic", "mipic": {"pipeline_pairs": [[3, 16, 7, 128, 11, 768]]}}
-    )
-    assert cfg.mipic.parsed_pipeline_pairs() == [(3, 16, 7, 128), (7, 128, 11, 768)]
+def test_checkpoints_parse_as_dim_layer_pairs():
+    cfg = ExperimentConfig.from_dict({"method": "mipic"})
+    assert cfg.mipic.checkpoint_pairs()[0] == (16, 2)
+    assert cfg.mipic.checkpoint_pairs()[-1] == (768, 12)
 
 
-def test_mipic_pipeline_dims_must_fit_the_backbone():
-    with pytest.raises(ValueError, match="pipeline_pairs reference dims"):
+def test_alpha_splits_the_objective_as_equation_18():
+    cfg = ExperimentConfig.from_dict({"method": "mipic", "mipic": {"alpha": 0.4}})
+    assert cfg.mipic.w_matryoshka == pytest.approx(0.4)
+    assert cfg.mipic.w_align == pytest.approx(0.6)
+
+
+def test_alpha_must_be_a_valid_mixing_weight():
+    with pytest.raises(ValueError, match="alpha must be in"):
+        ExperimentConfig.from_dict({"method": "mipic", "mipic": {"alpha": 1.5}})
+
+
+def test_mipic_checkpoint_dims_must_fit_the_backbone():
+    with pytest.raises(ValueError, match="checkpoints reference dims"):
         ExperimentConfig.from_dict(
             {
                 "method": "mipic",
                 "model": {"hidden_dim": 768},
-                "mipic": {"pipeline_pairs": [[3, 16, 11, 1024]]},
+                "mipic": {"checkpoints": [[16, 3], [1024, 11]]},
             }
+        )
+
+
+def test_gamma_schedule_must_match_the_truncated_prefixes():
+    with pytest.raises(ValueError, match="gamma_schedule has"):
+        ExperimentConfig.from_dict(
+            {"method": "mipic", "mipic": {"gamma_schedule": [0.2, 0.3]}}
         )

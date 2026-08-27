@@ -5,21 +5,18 @@ model:
   name_or_path: BAAI/bge-m3
   hidden_dim: 1024
   pooling: cls
+  trust_remote_code: false
 matryoshka:
   dims: [16, 32, 64, 128, 256, 512, 1024]
 mipic:
-  align_layers: [2, 8, 14, 20, 23]   # 24-layer XLM-R backbone
-  pipeline_pairs: [[2, 16, 8, 64, 14, 128, 20, 512, 23, 1024]]
-  alpha: 0.4
-  beta: 0.4
-  gamma: 0.2
-  base_k: 64
-  d_att: 64
-  use_attention_kl: false
-  module_lr_scale: 2.0
-  w_align: 0.4
-  w_matryoshka: 0.6
+  # Table 7: alpha (MRL weight) = 0.5
+  alpha: 0.5
+  # Appendix A.5 -- 24-layer XLM-R backbone.
+  layers: [1, 4, 7, 11, 15, 19, 24]
+  checkpoints: [[16, 1], [32, 4], [64, 7], [128, 11], [256, 15], [512, 19], [1024, 24]]
+  gamma_schedule: [0.2, 0.3, 0.4, 0.5, 0.6, 0.7]
+  k_min: 8
+  aggregate: sum
 train:
-  epochs: 8
   max_grad_norm: 1.0
   output_dir: outputs/mipic_bgem3

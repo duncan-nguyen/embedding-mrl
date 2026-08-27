@@ -1,0 +1,30 @@
+# Convenience wrapper for the internal GPU server.
+#
+#   IMAGE=myname/embedding-mrl:latest docker compose run --rm train \
+#       --config configs/mipic/bgem3.yaml
+#
+services:
+  train:
+    image: ${IMAGE:-embedding-mrl:latest}
+    # Drop `build` and rely on the pulled image once it is on Docker Hub.
+    build:
+      context: .
+      args:
+        BASE_IMAGE: ${BASE_IMAGE:-pytorch/pytorch:2.5.1-cuda12.1-cudnn9-runtime}
+    volumes:
+      - ./outputs:/workspace/outputs
+    environment:
+      # The image is fully self-contained; keep it from reaching for the Hub.
+      HF_HUB_OFFLINE: "1"
+      TRANSFORMERS_OFFLINE: "1"
+    # Large batches need more than Docker's default 64 MB of shared memory.
+    shm_size: "8gb"
+    ipc: host
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    command: ["--config", "configs/mipic/bgem3.yaml"]

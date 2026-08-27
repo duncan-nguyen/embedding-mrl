@@ -16,6 +16,7 @@ data:
   max_length: 256
   num_workers: 2
 
+# Table 7: 5 epochs, lr 2e-5, max length 256, batch 16, cosine, AdamW.
 train:
   epochs: 5
   batch_size: 16
@@ -31,8 +32,9 @@ train:
   empty_cache_every: 0
 
 matryoshka:
+  # D = {16, 32, 64, 128, 256, 512, 768/1024}, Appendix A.4
   dims: [16, 32, 64, 128, 256, 512, 768]
-  temperature: 0.07
+  temperature: 0.05      # tau, Table 7
 
 eval:
   enabled: true

@@ -6,12 +6,12 @@ import pytest
 import torch
 
 from embedding_mrl.losses import (
+    AttentionDistributionMatching,
     CKALoss,
-    HorizontalAttentionAlignment,
+    MIPICAlignmentLoss,
     PerExampleCKALoss,
     PipelineInfoNCELoss,
-    SubmatrixCKALoss,
-    TotalAlignmentLoss,
+    TopKCKAAlignment,
     epresso_simcse,
     epresso_simcse_from_hidden_states,
     info_nce,
@@ -107,31 +107,58 @@ def test_cka_is_invariant_to_isotropic_scaling():
     assert PerExampleCKALoss()(x, 3.7 * x).item() == pytest.approx(0.0, abs=1e-5)
 
 
-def test_attention_alignment_masks_padding_out():
-    module = HorizontalAttentionAlignment(d_small=8, d_full=D, d_att=16, enabled=True)
+def _probs(module, hidden, mask=None, temperature=0.05):
+    return module._scores_to_probs(module.teacher_scores(hidden), mask, temperature)
+
+
+def test_attention_matching_masks_padding_out():
+    module = AttentionDistributionMatching(d_small=8, d_full=D)
     mask = torch.ones(B, L, dtype=torch.long)
     mask[:, L // 2 :] = 0
     hidden = torch.randn(B, L, D)
 
-    kl, scores = module(hidden[..., :8], hidden, mask=mask)
-    probs, _ = module.compute_attention_dist(hidden[..., :8], module.proj_small, mask)
-    assert kl.item() >= 0.0
+    probs = _probs(module, hidden, mask)
     assert torch.allclose(probs[:, L // 2 :], torch.zeros(B, L - L // 2), atol=1e-6)
-    assert scores.shape == (B, L)
+    assert torch.allclose(probs.sum(dim=1), torch.ones(B), atol=1e-5)
 
 
-def test_attention_alignment_disabled_returns_zero_but_still_scores():
-    module = HorizontalAttentionAlignment(d_small=8, d_full=D, d_att=16, enabled=False)
+def test_attention_kl_is_non_negative_and_zero_for_identical_distributions():
+    module = AttentionDistributionMatching(d_small=D, d_full=D)
     hidden = torch.randn(B, L, D)
-    kl, scores = module(hidden[..., :8], hidden, mask=torch.ones(B, L, dtype=torch.long))
-    assert kl.item() == 0.0
-    assert scores.shape == (B, L)
+    mask = torch.ones(B, L, dtype=torch.long)
+
+    teacher = _probs(module, hidden, mask)
+    kl = module(hidden, hidden, teacher_probs=teacher, mask=mask)
+    assert kl.item() >= -1e-6
+
+    # Force the student's lift to be the identity -> the two distributions match.
+    with torch.no_grad():
+        module.up_project.weight.copy_(torch.eye(D))
+    kl_identity = module(hidden, hidden, teacher_probs=teacher, mask=mask)
+    assert kl_identity.item() == pytest.approx(0.0, abs=1e-4)
 
 
-def test_submatrix_cka_selects_the_top_k_tokens():
+def test_attention_scores_use_the_full_dimensional_cls_as_query():
+    """Eq 4: s_j = h_CLS . h_j / sqrt(D)."""
+    module = AttentionDistributionMatching(d_small=8, d_full=D)
+    hidden = torch.randn(B, L, D)
+    expected = (hidden[:, 0, :].unsqueeze(1) * hidden).sum(-1) / math.sqrt(D)
+    assert torch.allclose(module.teacher_scores(hidden), expected, atol=1e-5)
+
+
+def test_attention_kl_flows_into_the_projection():
+    module = AttentionDistributionMatching(d_small=8, d_full=D)
+    hidden = torch.randn(B, L, D)
+    teacher = _probs(module, hidden)
+    module(hidden[..., :8], hidden, teacher_probs=teacher).backward()
+    assert module.up_project.weight.grad is not None
+    assert torch.isfinite(module.up_project.weight.grad).all()
+
+
+def test_top_k_selection_picks_the_highest_ranked_tokens():
     hidden = torch.randn(B, L, D)
     scores = torch.randn(B, L)
-    selected = SubmatrixCKALoss.select_top_k_tokens(hidden, scores, k=4)
+    selected = TopKCKAAlignment.select_top_k(hidden, scores, k=4)
     assert selected.shape == (B, 4, D)
 
     expected_idx = scores.topk(4, dim=1).indices
@@ -139,17 +166,28 @@ def test_submatrix_cka_selects_the_top_k_tokens():
         assert torch.allclose(selected[i], hidden[i, expected_idx[i]])
 
 
-def test_submatrix_cka_never_selects_padding():
+def test_top_k_selection_never_picks_padding():
     hidden = torch.randn(B, L, D)
     scores = torch.full((B, L), -5.0)
-    scores[:, :3] = 5.0  # only the first three tokens are informative
+    scores[:, :3] = 5.0
     mask = torch.zeros(B, L, dtype=torch.long)
     mask[:, :3] = 1
-    selected = SubmatrixCKALoss.select_top_k_tokens(hidden, scores, k=3, mask=mask)
-    # topk orders by score, not position, so compare as sets of token vectors
+    selected = TopKCKAAlignment.select_top_k(hidden, scores, k=3, mask=mask)
     for row in range(B):
         for token in selected[row]:
             assert any(torch.allclose(token, hidden[row, i]) for i in range(3))
+
+
+def test_top_k_sets_are_nested_because_ranking_is_shared():
+    """Sec 3.2.2: S_k1 subset S_k2 subset ... - the teacher ranking is used for all dims."""
+    hidden = torch.randn(1, L, D)
+    scores = torch.randn(1, L)
+    order = scores.topk(L, dim=1).indices[0].tolist()
+    for k_small, k_large in [(2, 4), (4, 7)]:
+        small = set(order[:k_small])
+        large = set(order[:k_large])
+        assert small < large
+        assert TopKCKAAlignment.select_top_k(hidden, scores, k=k_small).shape[1] == k_small
 
 
 def test_pipeline_infonce_stops_gradient_on_the_target():
@@ -160,50 +198,94 @@ def test_pipeline_infonce_stops_gradient_on_the_target():
     assert tgt.grad is None or tgt.grad.abs().sum() == 0
 
 
+def test_pipeline_infonce_can_propagate_into_the_target():
+    src = torch.randn(B, L, 8, requires_grad=True)
+    tgt = torch.randn(B, L, 16, requires_grad=True)
+    PipelineInfoNCELoss(d_src=8, d_tgt=16, d_hidden=8, detach_target=False)(src, tgt).backward()
+    assert tgt.grad is not None and tgt.grad.abs().sum() > 0
+
+
 def _alignment(**kwargs):
     defaults = dict(
         d_full=D,
         matryoshka_dims=DIMS,
-        align_layers=[1, 3],
-        pipeline_pairs=[(1, 4, 3, 32)],
-        d_att=16,
-        base_k=8,
+        layers=[1, 3],
+        checkpoints=[(4, 1), (8, 2), (32, 4)],
+        gamma_schedule=[0.2, 0.4, 0.6],
+        k_min=2,
+        temperature=0.05,
     )
     defaults.update(kwargs)
-    return TotalAlignmentLoss(**defaults)
+    return MIPICAlignmentLoss(**defaults)
 
 
-def test_total_alignment_returns_all_components_and_backpropagates():
-    module = _alignment(use_attention_kl=True)
+def test_alignment_returns_all_components_and_backpropagates():
+    module = _alignment()
     hidden = _hidden()
     out = module(hidden, mask=torch.ones(B, L, dtype=torch.long))
 
-    assert set(out) == {"total_loss", "att_loss", "cka_loss", "chain_loss"}
-    expected = 0.4 * out["att_loss"] + 0.4 * out["cka_loss"] + 0.2 * out["chain_loss"]
-    assert torch.allclose(out["total_loss"], expected)
+    assert set(out) == {"total_loss", "sia_loss", "att_loss", "cka_loss", "pic_loss"}
+    # Eq 13: SIA sums the attention and CKA terms with equal weight.
+    assert torch.allclose(out["sia_loss"], out["att_loss"] + out["cka_loss"])
+    assert torch.allclose(out["total_loss"], out["sia_loss"] + out["pic_loss"])
 
     out["total_loss"].backward()
     assert hidden[1].grad is not None and torch.isfinite(hidden[1].grad).all()
 
 
-def test_attention_term_is_zero_when_the_kl_is_disabled():
-    out = _alignment(use_attention_kl=False)(_hidden(), mask=torch.ones(B, L, dtype=torch.long))
-    assert out["att_loss"].item() == 0.0
-    assert out["cka_loss"].item() != 0.0
+def test_sum_aggregation_scales_with_the_number_of_layers():
+    """Eq 14 sums over layers, so more layers means a larger SIA term."""
+    hidden = _hidden()
+    mask = torch.ones(B, L, dtype=torch.long)
+    torch.manual_seed(1)
+    one = _alignment(layers=[1])(hidden, mask)["att_loss"].item()
+    torch.manual_seed(1)
+    two = _alignment(layers=[1, 3])(hidden, mask)["att_loss"].item()
+    assert two > one
 
 
-def test_default_k_map_grows_with_the_dimension():
-    module = _alignment(base_k=64)
-    assert module.k_map(D) == 64
-    assert module.k_map(4) == 8  # floor of 8
-    assert module.k_map(16) <= module.k_map(32)
+def test_mean_aggregation_averages_instead_of_summing():
+    hidden = _hidden()
+    mask = torch.ones(B, L, dtype=torch.long)
+    summed = _alignment(aggregate="sum")(hidden, mask)
+    averaged = _alignment(aggregate="mean")(hidden, mask)
+    n_terms = len(DIMS[:-1]) * 2  # 3 truncated prefixes x 2 layers
+    assert summed["cka_loss"].item() > averaged["cka_loss"].item()
+    assert averaged["cka_loss"].item() == pytest.approx(
+        summed["cka_loss"].item() / n_terms, rel=1e-4
+    )
 
 
-def test_explicit_k_map_is_honoured():
-    module = _alignment(k_map={4: 2, 8: 3})
-    assert module.k_map(4) == 2 and module.k_map(8) == 3
+def test_top_k_schedule_follows_the_gamma_ratios():
+    """Appendix A.5: k_i = max(k_min, ceil(gamma_i * m))."""
+    module = _alignment(gamma_schedule=[0.2, 0.5, 0.7], k_min=8)
+    assert module.top_k_for(4, seq_len=100) == 20
+    assert module.top_k_for(8, seq_len=100) == 50
+    assert module.top_k_for(16, seq_len=100) == 70
+
+
+def test_top_k_schedule_respects_the_floor_and_the_sequence_length():
+    module = _alignment(gamma_schedule=[0.2, 0.5, 0.7], k_min=8)
+    assert module.top_k_for(4, seq_len=10) == 8  # ceil(0.2*10)=2 -> floored to k_min
+    assert module.top_k_for(16, seq_len=5) == 5  # never exceeds the sequence
+    assert module.top_k_for(16, seq_len=100, min_real_tokens=12) == 12
+
+
+def test_gamma_schedule_must_cover_every_truncated_prefix():
+    with pytest.raises(ValueError, match="gamma_schedule has"):
+        _alignment(gamma_schedule=[0.2, 0.4])
+
+
+def test_alignment_needs_at_least_two_checkpoints():
+    with pytest.raises(ValueError, match="at least two checkpoints"):
+        _alignment(checkpoints=[(4, 1)])
 
 
 def test_out_of_range_layer_indices_fail_fast():
     with pytest.raises(ValueError, match="reference hidden-state indices"):
-        _alignment(align_layers=[1, 99]).validate_against(num_hidden_states=5)
+        _alignment(layers=[1, 99]).validate_against(num_hidden_states=5)
+
+
+def test_checkpoint_layers_are_validated_too():
+    with pytest.raises(ValueError, match="reference hidden-state indices"):
+        _alignment(checkpoints=[(4, 1), (32, 42)]).validate_against(num_hidden_states=5)

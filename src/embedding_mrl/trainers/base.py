@@ -17,6 +17,7 @@ from transformers import AutoModel, AutoTokenizer, get_scheduler
 from ..config import ExperimentConfig
 from ..data import build_train_loader
 from ..evaluation import MatryoshkaEvaluator
+from ..reporting import build_report, format_summary, write_report
 from ..utils import (
     autocast,
     count_trainable_parameters,
@@ -98,7 +99,9 @@ class BaseTrainer(ABC):
         dtype = resolve_dtype(cfg.torch_dtype)
         if dtype is not None:
             try:
-                return AutoModel.from_pretrained(cfg.name_or_path, dtype=dtype, **kwargs).to(self.device)
+                return AutoModel.from_pretrained(
+                    cfg.name_or_path, dtype=dtype, **kwargs
+                ).to(self.device)
             except TypeError:
                 kwargs["torch_dtype"] = dtype
         return AutoModel.from_pretrained(cfg.name_or_path, **kwargs).to(self.device)
@@ -158,6 +161,7 @@ class BaseTrainer(ABC):
         cfg = self.cfg
         self.cfg.dump(self.output_dir / "config.yaml")
         last_results: Optional[Dict[str, Any]] = None
+        run_started = time.time()
 
         for epoch in range(cfg.train.epochs):
             self._set_train_mode()
@@ -223,20 +227,43 @@ class BaseTrainer(ABC):
             self.history.append(record)
             save_json(self.history, self.output_dir / "history.json")
 
-        if last_results is not None:
-            save_json(last_results, self.output_dir / "results.json")
         if cfg.train.save_model:
             self.save()
-        return {"history": self.history, "results": last_results}
+
+        report = None
+        if last_results is not None:
+            report = self._write_report(last_results, time.time() - run_started)
+        elif self.evaluator is None:
+            LOGGER.warning(
+                "Evaluation is disabled (eval.enabled=false) - no results.json written."
+            )
+
+        return {"history": self.history, "results": last_results, "report": report}
+
+    def _write_report(
+        self, results: Dict[str, Any], duration_seconds: Optional[float] = None
+    ) -> Dict[str, Any]:
+        """Assemble and persist ``results.json`` / ``results.csv``, then log the table."""
+        report = build_report(self.cfg, results, self.history, duration_seconds)
+        path = write_report(report, self.output_dir)
+        LOGGER.info(
+            "Final results for %s on the %s split (mean over tasks):\n%s",
+            self.cfg.name,
+            self.cfg.eval.split,
+            format_summary(report),
+        )
+        LOGGER.info("Wrote %s and %s", path, path.with_suffix(".csv"))
+        return report
 
     def evaluate_only(self) -> Dict[str, Any]:
+        """Evaluate the current weights and write the same report a full run does."""
         if not self.evaluator:
             raise RuntimeError(
                 "evaluation is disabled in this config (eval.enabled=false)"
             )
+        started = time.time()
         results = self.evaluator.evaluate(self.model)
-        save_json(results, self.output_dir / "results.json")
-        return results
+        return self._write_report(results, time.time() - started)
 
     def save(self) -> None:
         target = self.output_dir / "encoder"
