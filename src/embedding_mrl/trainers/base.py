@@ -33,7 +33,7 @@ LOGGER = logging.getLogger("embedding_mrl.train")
 
 
 class BaseTrainer(ABC):
-    """Template for the three methods; subclasses only implement :meth:`compute_loss`."""
+    """Template for every method; subclasses only implement :meth:`compute_loss`."""
 
     method: str = "base"
 
@@ -110,6 +110,9 @@ class BaseTrainer(ABC):
     def setup_modules(self) -> None:
         """Instantiate any trainable loss modules (MIPIC alignment heads)."""
 
+    def on_optimizer_step(self) -> None:
+        """Called after every parameter update (SDR-MRL's EMA teacher uses it)."""
+
     @abstractmethod
     def compute_loss(
         self, batch: Dict[str, torch.Tensor]
@@ -182,6 +185,7 @@ class BaseTrainer(ABC):
                 self.scaler.step(self.optimizer)
                 self.scaler.update()
                 self.scheduler.step()
+                self.on_optimizer_step()
 
                 batch_size = batch["input_ids1"].size(0)
                 running_loss += loss.item() * batch_size

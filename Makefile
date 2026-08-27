@@ -15,7 +15,7 @@ help:
 	@echo "build-fast build without the model-loading verification step"
 	@echo "push       build and push to Docker Hub as $(IMAGE):$(TAG)"
 	@echo "run        run one experiment in the container (CONFIG=$(CONFIG))"
-	@echo "run-all    run all 12 experiments in the container"
+	@echo "run-all    run all 16 experiments in the container"
 	@echo "shell      open a shell inside the image"
 	@echo ""
 	@echo "IMAGE=$(IMAGE)  TAG=$(TAG)"

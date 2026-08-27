@@ -27,7 +27,7 @@ def _setup_logging(level: int) -> None:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="embedding-mrl",
-        description="Train / evaluate Matryoshka embedding models (MRL, ESE, MIPIC).",
+        description="Train / evaluate Matryoshka embedding models (MRL, ESE, MIPIC, SDR-MRL).",
     )
     parser.add_argument(
         "--config", required=True, help="path to a YAML config under configs/"

@@ -42,6 +42,14 @@ def build_dimension_table(results: Dict[str, Any]) -> Dict[str, Dict[str, float]
                 if value is not None:
                     table.setdefault(dim, {})[f"{family}/{task}"] = value
 
+    # SDR-MRL Sec 6: distortion sits next to quality so the two can be read off
+    # the same row - that comparison is RQ4 (Eq 121).
+    semantic = results.get("semantic", {})
+    for dim, value in semantic.get("distortion", {}).items():
+        table.setdefault(dim, {})["semantic/distortion"] = float(value)
+    for dim, scores in semantic.get("preservation", {}).items():
+        table.setdefault(dim, {})["semantic/knn_recall"] = float(scores["knn_recall"])
+
     # Append the family averages already computed by the evaluator.
     for family, per_dim in results.get("summary", {}).items():
         for dim, value in per_dim.items():
@@ -95,6 +103,8 @@ def build_report(
         "summary": results.get("summary", {}),
         "table": build_dimension_table(results),
     }
+    if results.get("semantic"):
+        report["semantic"] = results["semantic"]
     return report
 
 
@@ -122,7 +132,7 @@ def write_csv(report: Dict[str, Any], path: str | Path) -> None:
         for key in row:
             if key not in columns:
                 columns.append(key)
-    columns.sort(key=lambda c: (c.startswith("mean/"), c))
+    columns.sort(key=lambda c: (c.startswith("semantic/"), c.startswith("mean/"), c))
 
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)

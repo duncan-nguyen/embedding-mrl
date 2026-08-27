@@ -1,4 +1,4 @@
-"""Contrastive objectives shared by all three methods."""
+"""Contrastive objectives shared by every method."""
 
 from __future__ import annotations
 

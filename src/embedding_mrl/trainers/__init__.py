@@ -5,11 +5,13 @@ from .base import BaseTrainer
 from .ese import ESETrainer
 from .mipic import MIPICTrainer
 from .mrl import MRLTrainer
+from .sdr import SDRTrainer
 
 TRAINERS = {
     "mrl": MRLTrainer,
     "ese": ESETrainer,
     "mipic": MIPICTrainer,
+    "sdr": SDRTrainer,
 }
 
 
@@ -21,4 +23,12 @@ def build_trainer(cfg: ExperimentConfig) -> BaseTrainer:
     return trainer_cls(cfg)
 
 
-__all__ = ["BaseTrainer", "MRLTrainer", "ESETrainer", "MIPICTrainer", "TRAINERS", "build_trainer"]
+__all__ = [
+    "BaseTrainer",
+    "MRLTrainer",
+    "ESETrainer",
+    "MIPICTrainer",
+    "SDRTrainer",
+    "TRAINERS",
+    "build_trainer",
+]

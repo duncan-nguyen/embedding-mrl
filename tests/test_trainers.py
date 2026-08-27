@@ -10,7 +10,7 @@ from embedding_mrl.config import ExperimentConfig
 from embedding_mrl.trainers import TRAINERS, build_trainer
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-METHODS = ["mrl", "ese", "mipic"]
+METHODS = ["mrl", "ese", "mipic", "sdr"]
 
 
 def make_config(method: str, output_dir: Path, **extra) -> ExperimentConfig:
