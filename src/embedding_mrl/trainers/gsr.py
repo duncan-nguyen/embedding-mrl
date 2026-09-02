@@ -18,7 +18,12 @@ from ..gsr_teacher import (
     build_spectral_teacher_cache,
     encode_teacher_corpus,
 )
-from ..losses.gsr import GSRShellLossOutput, full_normalize, gsr_shell_loss
+from ..losses.gsr import (
+    GSRShellLossOutput,
+    full_normalize,
+    gsr_shell_loss,
+    prefix_risk_majorizer_weights,
+)
 from ..losses.infonce import info_nce, matryoshka_info_nce
 from ..pooling import pool
 from ..utils import save_json
@@ -78,6 +83,7 @@ class GSRTrainer(BaseTrainer):
         self.steps_path.write_text("", encoding="utf-8")
         save_json(
             {
+                "objective": "prefix_risk_majorizer_v1",
                 "geometry_dims": self.geometry_dims,
                 "warmup_epochs": self.cfg.gsr.warmup_epochs,
                 "refresh_every_epochs": self.cfg.gsr.refresh_every_epochs,
@@ -140,6 +146,10 @@ class GSRTrainer(BaseTrainer):
             raise
 
         diagnostics = dict(new_cache.diagnostics)
+        diagnostics["objective"] = "prefix_risk_majorizer_v1"
+        diagnostics["majorizer_weights"] = prefix_risk_majorizer_weights(
+            len(new_cache.shells)
+        )
         diagnostics["encoding"] = encode_diagnostics
         diagnostics["pooling"] = self.cfg.model.pooling
         diagnostics["cache_dtype"] = self.cfg.gsr.cache_dtype
@@ -302,6 +312,14 @@ class GSRTrainer(BaseTrainer):
                         + gsr2.shell_losses[key].detach()
                     )
                 )
+                logs[f"gsr/{key}_majorizer_weight"] = gsr1.shell_weights[key]
+                logs[f"gsr/{key}_majorized_loss"] = float(
+                    0.5
+                    * (
+                        gsr1.majorized_shell_losses[key].detach()
+                        + gsr2.majorized_shell_losses[key].detach()
+                    )
+                )
             if diagnostic_step:
                 logs.update(self._geometry_metrics(outputs, cache.c_teacher))
                 logs.update(self._alignment_metrics(outputs))
@@ -457,6 +475,12 @@ class GSRTrainer(BaseTrainer):
             prefix = f"gsr/{key}"
             metrics[f"{prefix}_loss"] = float(
                 torch.stack([out.shell_losses[key].detach() for out in outputs]).mean()
+            )
+            metrics[f"{prefix}_majorizer_weight"] = outputs[0].shell_weights[key]
+            metrics[f"{prefix}_majorized_loss"] = float(
+                torch.stack(
+                    [out.majorized_shell_losses[key].detach() for out in outputs]
+                ).mean()
             )
             metrics[f"{prefix}_energy_ratio"] = float(
                 student.mean() / teacher.mean().clamp_min(self.cfg.gsr.eps)
@@ -632,6 +656,7 @@ class GSRTrainer(BaseTrainer):
         summary: dict[str, Any] = {
             "active": cache is not None,
             "refresh_count": self.teacher_refresh_count,
+            "objective": "prefix_risk_majorizer_v1",
         }
         if cache is not None:
             summary.update(
@@ -639,6 +664,9 @@ class GSRTrainer(BaseTrainer):
                     "teacher_refresh_index": cache.refresh_index,
                     "teacher_source_epoch": cache.source_epoch + 1,
                     "shells": [list(shell) for shell in cache.shells],
+                    "majorizer_weights": prefix_risk_majorizer_weights(
+                        len(cache.shells)
+                    ),
                     "merged_boundaries": cache.merged_boundaries,
                     "c_teacher": cache.c_teacher,
                     "effective_rank": cache.diagnostics["effective_rank"],
@@ -723,6 +751,7 @@ class GSRTrainer(BaseTrainer):
         return {
             "epoch": epoch_index + 1,
             "stage": stage,
+            "objective": "prefix_risk_majorizer_v1",
             "sample_count": embeddings.size(0),
             "teacher_refresh_index": self.teacher_cache.refresh_index,
             "total_loss": float(output.total_loss),
@@ -771,6 +800,7 @@ class GSRTrainer(BaseTrainer):
     def method_report_metadata(self) -> Dict[str, Any]:
         cache = self.teacher_cache
         geometry: dict[str, Any] = {
+            "objective": "prefix_risk_majorizer_v1",
             "geometry_dims": self.geometry_dims,
             "weight": self.cfg.gsr.weight,
             "warmup_epochs": self.cfg.gsr.warmup_epochs,
@@ -784,6 +814,9 @@ class GSRTrainer(BaseTrainer):
                 {
                     "final_teacher_refresh": cache.refresh_index,
                     "shells": [list(shell) for shell in cache.shells],
+                    "majorizer_weights": prefix_risk_majorizer_weights(
+                        len(cache.shells)
+                    ),
                     "merged_boundaries": cache.merged_boundaries,
                     "effective_rank": cache.diagnostics["effective_rank"],
                     "c_teacher": cache.c_teacher,

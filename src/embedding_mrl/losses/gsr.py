@@ -23,6 +23,8 @@ class GSRShellLossOutput:
 
     total_loss: torch.Tensor
     shell_losses: Dict[str, torch.Tensor]
+    shell_weights: Dict[str, float]
+    majorized_shell_losses: Dict[str, torch.Tensor]
     student_distances: Dict[str, torch.Tensor]
     teacher_distances: Dict[str, torch.Tensor]
 
@@ -75,6 +77,26 @@ def build_shell_slices(dims: Sequence[int], full_dim: int | None = None) -> list
     return list(zip(boundaries[:-1], boundaries[1:]))
 
 
+def prefix_risk_majorizer_weights(num_shells: int) -> list[float]:
+    """Return the diagonal majorizer weights for cumulative prefix risk.
+
+    If ``e_j`` is the residual-distance error of shell ``j``, then the error at
+    prefix ``k`` is ``sum_{j <= k} e_j``.  Applying Cauchy--Schwarz to every
+    prefix and summing over all supported geometry prefixes gives
+
+    ``sum_k (sum_{j <= k} e_j)^2 <= sum_j beta_j e_j^2``,
+
+    where ``beta_j = sum_{k=j}^K k``.  These weights therefore follow from the
+    prefix-risk bound rather than from empirical loss or gradient scaling.
+    """
+    if not isinstance(num_shells, int) or isinstance(num_shells, bool):
+        raise TypeError(f"num_shells must be an integer, got {num_shells!r}")
+    if num_shells < 1:
+        raise ValueError(f"num_shells must be positive, got {num_shells}")
+    total = num_shells * (num_shells + 1) // 2
+    return [float(total - (j - 1) * j // 2) for j in range(1, num_shells + 1)]
+
+
 def merge_tied_shells(
     dims: Sequence[int],
     eigenvalues: torch.Tensor,
@@ -112,7 +134,7 @@ def gsr_shell_loss(
     c_teacher: float | torch.Tensor,
     eps: float = 1e-8,
 ) -> GSRShellLossOutput:
-    """Unbiased within-batch U-statistic for residual distance-shell matching."""
+    """Unbiased U-statistic for the prefix-risk-majorized GSR objective."""
     if student.ndim != 2 or teacher_scores.ndim != 2:
         raise ValueError("student and teacher_scores must both be [batch, dim]")
     if student.shape != teacher_scores.shape:
@@ -142,10 +164,13 @@ def gsr_shell_loss(
     teacher_scores = teacher_scores.detach().float()
     student = student.float()
     shell_losses: Dict[str, torch.Tensor] = {}
+    shell_weights: Dict[str, float] = {}
+    majorized_shell_losses: Dict[str, torch.Tensor] = {}
     student_distances: Dict[str, torch.Tensor] = {}
     teacher_distances: Dict[str, torch.Tensor] = {}
+    majorizer_weights = prefix_risk_majorizer_weights(len(shells))
 
-    for start, end in shells:
+    for (start, end), weight in zip(shells, majorizer_weights):
         if not 0 <= start < end <= student.size(1):
             raise ValueError(f"invalid shell {(start, end)} for dim {student.size(1)}")
         key = shell_key((start, end))
@@ -153,15 +178,19 @@ def gsr_shell_loss(
         teacher_pair = condensed_squared_distances(teacher_scores[:, start:end])
         student_distances[key] = student_pair
         teacher_distances[key] = teacher_pair
-        shell_losses[key] = (student_pair - teacher_pair).square().mean() / (
+        shell_loss = (student_pair - teacher_pair).square().mean() / (
             denominator + eps
         )
+        shell_losses[key] = shell_loss
+        shell_weights[key] = weight
+        majorized_shell_losses[key] = weight * shell_loss
 
-    total = torch.stack(list(shell_losses.values())).mean()
+    total = torch.stack(list(majorized_shell_losses.values())).sum()
     return GSRShellLossOutput(
         total_loss=total,
         shell_losses=shell_losses,
+        shell_weights=shell_weights,
+        majorized_shell_losses=majorized_shell_losses,
         student_distances=student_distances,
         teacher_distances=teacher_distances,
     )
-

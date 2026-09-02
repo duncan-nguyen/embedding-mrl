@@ -154,6 +154,13 @@ def test_gsr_can_be_intentionally_disabled_during_all_epochs():
     assert cfg.gsr.weight == 0.0
 
 
+def test_gsr_weight_is_a_bounded_tradeoff():
+    with pytest.raises(ValueError, match=r"must lie in \[0, 1\]"):
+        ExperimentConfig.from_dict(
+            {"method": "gsr", "gsr": {"weight": 1.01, "warmup_epochs": 0}}
+        )
+
+
 # --------------------------------------------------------------------------- #
 # CLI override parsing
 # --------------------------------------------------------------------------- #

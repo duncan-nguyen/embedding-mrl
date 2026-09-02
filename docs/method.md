@@ -150,18 +150,15 @@ $$
 \left\|V_{1:d_k}^\top(q^T_n-q^T_m)\right\|_2^2.
 $$
 
-The GSR loss matches the increments rather than repeatedly matching whole prefixes:
+Let the normalized risk of shell $k$ be
 
 $$
-\boxed{
-\mathcal L_{\mathrm{GSR}}
+\ell_k
 =
-\frac1K\sum_{k=1}^K
 \frac{
 \mathbb E_{n\ne m}
 \left[(s_k(n,m)-r_k(n,m))^2\right]
 }{c_T+\varepsilon}
-}
 $$
 
 with the fixed teacher scale
@@ -176,6 +173,45 @@ c_T
 $$
 
 A single common denominator preserves the relative energy of the spectral shells. It avoids both the scale ambiguity of CKA and the noise amplification caused by independently normalizing weak tail shells.
+
+Uniformly averaging the shell risks ignores that an early shell contributes to
+more supported prefixes than a late shell.  Instead, apply the prefix bound
+
+$$
+\left(\sum_{j=1}^k e_j\right)^2
+\le k\sum_{j=1}^k e_j^2,
+\qquad e_j=s_j-r_j,
+$$
+
+and sum it over all supported geometry prefixes.  This yields
+
+$$
+\sum_{k=1}^K
+\mathbb E\left[\left(\sum_{j=1}^ke_j\right)^2\right]
+\le
+\sum_{j=1}^K\beta_j\mathbb E[e_j^2],
+\qquad
+\beta_j=\sum_{k=j}^K k.
+$$
+
+We therefore optimize the diagonal prefix-risk majorizer
+
+$$
+\boxed{
+\mathcal L_{\mathrm{GSR}}
+=
+\sum_{j=1}^K\beta_j\ell_j,
+\qquad
+\beta_j
+=
+\frac{K(K+1)-(j-1)j}{2}.
+}
+$$
+
+The weights are fixed by the supported prefix set, not by observed losses or
+gradients.  If numerical eigengap ties merge geometry shells, $K$ denotes the
+number of retained shells and the same construction applies to their retained
+cumulative endpoints.
 
 ## 4. Unbiased mini-batch optimization
 
@@ -203,14 +239,14 @@ $$
 }{c_T+\varepsilon}.
 $$
 
-Therefore
+Therefore the weighted estimator
 
 $$
 \widehat{\mathcal L}_{\mathrm{GSR}}
-=\frac1K\sum_k\widehat{\ell}_k
+=\sum_{k=1}^K\beta_k\widehat{\ell}_k
 $$
 
-is an unbiased degree-two U-statistic for the corpus pair objective. The batch size controls estimator variance, not the number or rank of meaningful shells. In particular, a batch of 16 can train targets at dimensions 16, 32, 64, and beyond without forcing later shells to zero.
+is an unbiased degree-two U-statistic for the prefix-risk majorizer. The batch size controls estimator variance, not the number or rank of meaningful shells. In particular, a batch of 16 can train targets at dimensions 16, 32, 64, and beyond without forcing later shells to zero.
 
 This pair formulation also eliminates two ambiguities of mini-batch Gram matching: per-batch centering and the unequal sampling probabilities of Gram diagonal and off-diagonal entries.
 
@@ -245,6 +281,10 @@ $$
 \right].
 }
 $$
+
+We restrict $\lambda\in[0,1]$.  At $\lambda=0$ the objective is exactly the
+ordinary MRL baseline; the task branch is never attenuated when geometry is
+enabled.
 
 The teacher is deterministic; only the student receives stochastic augmentation. Gradients never pass through $q^T$, $V$, or $c_T$.
 
@@ -307,6 +347,11 @@ $$
 
 Thus minimizing local shell errors simultaneously bounds the geometry distortion of every supported prefix. Opposing shell errors may cancel in a cumulative prefix error, but GSR does not reward that cancellation because it penalizes every increment separately.
 
+Summing the displayed inequality over $k$ gives exactly the weights
+$\beta_j=\sum_{k=j}^K k$ used by $\mathcal L_{\mathrm{GSR}}$.  The training
+loss is therefore an explicit upper bound on the sum of the supported prefix
+distortions.
+
 ### Proposition 3: residual supervision diagonalizes scale coupling
 
 For one pair, collect the shell errors into
@@ -324,13 +369,16 @@ $$
 =e^\top L^\top Le,
 $$
 
-whereas GSR has
+whereas GSR uses the diagonal majorizer
 
 $$
-\ell_{\mathrm{shell}}=e^\top e.
+\ell_{\mathrm{GSR}}
+=e^\top W_\beta e,
+\qquad
+W_\beta=\operatorname{diag}(\beta_1,\ldots,\beta_K).
 $$
 
-The two losses have the same exact zero set, but not the same optimization geometry. The dense matrix $L^\top L$ couples every early-band error to all later prefixes and has condition number $\Theta(K^2)$; shell supervision yields an identity metric in residual-error space. GSR therefore provides direct credit assignment to the responsible band instead of optimizing it through cumulative cross-scale interference.
+The two losses have the same exact zero set, but not the same optimization geometry. The dense matrix $L^\top L$ couples every early-band error to all later prefixes and has condition number $\Theta(K^2)$.  $W_\beta$ preserves how often each residual affects the prefix risk while removing all cross-shell terms. GSR therefore provides direct credit assignment to the responsible band instead of optimizing it through cumulative cross-scale interference.
 
 ### Proposition 4: block-subspace identifiability
 
@@ -401,7 +449,7 @@ The proposed contribution is the combination of:
 
 1. **Residual assignment:** a one-to-one map from each nested coordinate band to a disjoint spectral increment of one global teacher geometry.
 2. **Exact successive refinement:** student coordinate distances and teacher spectral distances admit parallel additive decompositions, so local band supervision controls every cumulative prefix.
-3. **Decoupled credit assignment:** residual supervision diagonalizes the cumulative scale coupling induced by whole-prefix matching.
+3. **Prefix-risk majorization:** a theoretically fixed diagonal majorizer preserves each shell's cumulative prefix responsibility while removing cross-scale coupling.
 4. **Batch-rank-free stochastic training:** a pairwise U-statistic optimizes corpus geometry without constructing a corpus Gram matrix or requiring the batch size to exceed the prefix dimension.
 5. **Joint co-adaptation:** standard task supervision remains active at every prefix while the geometry objective determines what each additional band contributes.
 

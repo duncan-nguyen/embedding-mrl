@@ -21,6 +21,7 @@ from embedding_mrl.losses import (
     gsr_shell_loss,
     matryoshka_info_nce,
     merge_tied_shells,
+    prefix_risk_majorizer_weights,
 )
 
 DIMS = [4, 8, 16, 32]
@@ -100,6 +101,26 @@ def test_gsr_is_zero_for_matching_shell_geometries_and_only_grads_student():
     out.total_loss.backward()
     assert student.grad is not None
     assert teacher.grad is None
+
+
+def test_prefix_risk_majorizer_weights_follow_prefix_bound():
+    assert prefix_risk_majorizer_weights(3) == [6.0, 5.0, 3.0]
+    with pytest.raises(ValueError, match="must be positive"):
+        prefix_risk_majorizer_weights(0)
+
+
+def test_gsr_total_is_the_prefix_risk_majorizer():
+    student = torch.randn(B, D)
+    teacher = torch.randn(B, D)
+    out = gsr_shell_loss(
+        student, teacher, build_shell_slices(DIMS), c_teacher=1.0
+    )
+    expected = sum(
+        out.shell_weights[key] * out.shell_losses[key]
+        for key in out.shell_losses
+    )
+    assert torch.allclose(out.total_loss, expected)
+    assert list(out.shell_weights.values()) == [10.0, 9.0, 7.0, 4.0]
 
 
 def test_gsr_supports_shells_wider_than_the_batch():

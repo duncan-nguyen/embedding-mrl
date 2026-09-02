@@ -219,13 +219,17 @@ bands, then estimates each shell loss from all unordered pairs in the current
 mini-batch:
 
 ```text
-L_GSR = mean_k mean_{i<j} (s_ij^k - r_ij^k)^2 / c_teacher
-L = L_MRL + λ L_GSR
+ell_k = mean_{i<j} (s_ij^k - r_ij^k)^2 / c_teacher
+beta_k = sum_{m=k}^K m
+L_GSR = sum_k beta_k ell_k
+L = L_MRL + λ L_GSR,  λ in [0, 1]
 ```
 
 The PCA is global rather than batch-local, so batch size controls estimator
 variance but does not cap the available spectral rank. The same encoder is used
 to refresh the teacher between epochs; no teacher model is needed at inference.
+The fixed `beta_k` weights form a diagonal upper bound on the sum of cumulative
+prefix distortions; they do not depend on observed losses or gradients.
 See [docs/method.md](docs/method.md) for the complete formulation.
 
 ## Evaluation

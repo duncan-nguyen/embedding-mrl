@@ -306,8 +306,10 @@ class GSRConfig:
         for name, value in numeric_positive.items():
             if not isinstance(value, (int, float)) or isinstance(value, bool):
                 raise TypeError(f"gsr.{name} must be a number, got {value!r}")
-        if self.weight < 0:
-            raise ValueError(f"gsr.weight must be non-negative, got {self.weight}")
+        if not 0 <= self.weight <= 1:
+            raise ValueError(
+                f"gsr.weight must lie in [0, 1], got {self.weight}"
+            )
         if self.eigengap_tolerance < 0:
             raise ValueError(
                 "gsr.eigengap_tolerance must be non-negative, "

@@ -14,6 +14,7 @@ from .gsr import (
     full_normalize,
     gsr_shell_loss,
     merge_tied_shells,
+    prefix_risk_majorizer_weights,
 )
 from .mipic import (
     AttentionDistributionMatching,
@@ -41,5 +42,6 @@ __all__ = [
     "condensed_squared_distances",
     "build_shell_slices",
     "merge_tied_shells",
+    "prefix_risk_majorizer_weights",
     "gsr_shell_loss",
 ]

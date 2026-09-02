@@ -44,7 +44,7 @@ Proposed fields:
 
 ```yaml
 gsr:
-  weight: 1.0
+  weight: 1.0                 # lambda in [0, 1]
   warmup_epochs: 1
   refresh_every_epochs: 1
   teacher_batch_size: 64
@@ -62,7 +62,7 @@ gsr:
 
 Validation must reject:
 
-- non-positive weights, batch sizes, refresh intervals, or epsilons;
+- weights outside `[0, 1]`, non-positive batch sizes, refresh intervals, or epsilons;
 - `warmup_epochs >= train.epochs` unless GSR is intentionally disabled;
 - unsorted, repeated, non-positive, or over-width geometry dimensions;
 - geometry dimensions not contained in `matryoshka.dims`;
