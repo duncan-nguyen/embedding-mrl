@@ -3,12 +3,6 @@
 Every task is scored at each nested dimension. Embeddings are extracted **once**
 at full width and then truncated per dimension - mathematically identical to the
 notebooks' per-dimension re-encoding, but ``len(dims)`` times cheaper.
-
-Setting ``eval.semantic_distortion`` adds the SDR-MRL measurement protocol
-(``docs/latex/main.pdf`` Sec 6): the fixed-teacher distortion-rate profile, the
-normalised distortion area, and neighborhood preservation. It runs for every
-method, which is the point - the proposal's central claim is a comparison of
-*where in the code* MRL, ESE, MIPIC and SDR-MRL place semantic information.
 """
 
 from __future__ import annotations
@@ -29,14 +23,8 @@ from sklearn.metrics import (
 )
 from tqdm.auto import tqdm
 
-from . import geometry
 from .config import ExperimentConfig
-from .data import (
-    build_pair_loader,
-    build_single_text_loader,
-    resolve_eval_paths,
-    semantic_corpus,
-)
+from .data import build_pair_loader, build_single_text_loader, resolve_eval_paths
 from .pooling import pool
 from .utils import autocast
 
@@ -230,152 +218,6 @@ class MatryoshkaEvaluator:
             )
         return results
 
-    # -- semantic distortion-rate protocol (Sec 6) -------------------------- #
-    @torch.no_grad()
-    def _embed_corpus(self, model, sentences: list[str]) -> torch.Tensor:
-        """Full-width embeddings for a plain list of sentences."""
-        batch_size = self.cfg.eval.batch_size
-        chunks = []
-        with autocast(self.cfg.train.fp16, self.device):
-            for start in tqdm(
-                range(0, len(sentences), batch_size), desc="Semantic corpus", leave=False
-            ):
-                encoded = self.tokenizer(
-                    sentences[start : start + batch_size],
-                    truncation=True,
-                    padding=True,
-                    max_length=self.cfg.eval.sts_max_length,
-                    return_tensors="pt",
-                )
-                chunks.append(
-                    self._encode(
-                        model, encoded["input_ids"], encoded["attention_mask"]
-                    ).float()
-                )
-        return torch.cat(chunks)
-
-    def _reference_teacher(self, sentences: list[str]) -> torch.Tensor | None:
-        """Eq 86's fixed ``T_ref``: one teacher held constant across all models.
-
-        Without it a weak model can look low-distortion simply because its own
-        prefixes agree with its own weak full-dimensional representation.
-        """
-        name = self.cfg.eval.reference_model
-        if not name:
-            return None
-
-        from transformers import AutoModel
-
-        LOGGER.info("  [semantic] reference teacher: %s", name)
-        reference = AutoModel.from_pretrained(
-            name, trust_remote_code=self.cfg.model.trust_remote_code
-        ).to(self.device)
-        reference.eval()
-        try:
-            return self._embed_corpus(reference, sentences)
-        finally:
-            del reference
-            if self.device.type == "cuda":
-                torch.cuda.empty_cache()
-
-    def eval_semantic_distortion(self, model) -> dict[str, object]:
-        """The distortion-rate profile, SDRA and neighborhood preservation."""
-        cfg = self.cfg.eval
-        sentences = semantic_corpus(
-            self.cfg.data, cfg, cfg.distortion_tasks, cfg.distortion_max_samples
-        )
-        LOGGER.info("  [semantic] %d sentences", len(sentences))
-
-        student = self._embed_corpus(model, sentences)
-        teacher = self._reference_teacher(sentences)
-        reference = cfg.reference_model or "self"
-        if teacher is None:
-            teacher = student  # self-reference; flagged in the payload below
-
-        if cfg.calibrate_student_temperature:
-            # Eq 24: the infimum over decoder temperatures, per prefix.
-            profile, temperatures = geometry.calibrated_distortion_profile(
-                student,
-                teacher,
-                self.dims,
-                teacher_temperature=cfg.distortion_teacher_temperature,
-                student_temperature=cfg.distortion_student_temperature,
-            )
-        else:
-            profile = geometry.distortion_profile(
-                student,
-                teacher,
-                self.dims,
-                teacher_temperature=cfg.distortion_teacher_temperature,
-                student_temperature=cfg.distortion_student_temperature,
-            )
-            temperatures = {d: cfg.distortion_student_temperature for d in profile}
-        zero_rate = geometry.zero_rate_distortion(
-            teacher, temperature=cfg.distortion_teacher_temperature
-        )
-        normalized = geometry.normalized_distortion(profile, zero_rate)
-
-        preservation = {}
-        for dim in self.dims:
-            prefix = student[:, :dim]
-            trust, continuity = geometry.trustworthiness_and_continuity(
-                prefix, teacher, k=cfg.knn_k
-            )
-            preservation[f"dim_{dim}"] = {
-                "knn_recall": geometry.knn_recall(prefix, teacher, k=cfg.knn_k),
-                "similarity_spearman": geometry.similarity_spearman(prefix, teacher),
-                "trustworthiness": trust,
-                "continuity": continuity,
-            }
-            LOGGER.info(
-                "    dim %-5d D = %.4f | kNN@%d = %.4f | trust = %.4f",
-                dim,
-                profile[dim],
-                cfg.knn_k,
-                preservation[f"dim_{dim}"]["knn_recall"],
-                trust,
-            )
-
-        payload: dict[str, object] = {
-            "reference": reference,
-            "corpus_size": len(sentences),
-            "teacher_temperature": cfg.distortion_teacher_temperature,
-            "student_temperature": cfg.distortion_student_temperature,
-            "student_temperature_calibrated": bool(cfg.calibrate_student_temperature),
-            "student_temperatures": {f"dim_{d}": v for d, v in temperatures.items()},
-            "zero_rate_distortion": zero_rate,
-            "distortion": {f"dim_{d}": v for d, v in profile.items()},
-            "normalized_distortion": {f"dim_{d}": v for d, v in normalized.items()},
-            "sdra": geometry.sdra(normalized, self.cfg.model.hidden_dim),
-            "monotonicity_violation_rate": geometry.monotonicity_violation_rate(profile),
-            "distortion_reduction": {
-                f"dim_{d}": v for d, v in geometry.distortion_reduction(profile).items()
-            },
-            "refinement_gain": {
-                f"dim_{d}": v for d, v in geometry.refinement_gain(profile).items()
-            },
-            "preservation": preservation,
-        }
-
-        if cfg.rotation_trials > 0:
-            payload["rotation_stress_test"] = self._rotation_report(student)
-        return payload
-
-    def _rotation_report(self, embeddings: torch.Tensor) -> dict[str, object]:
-        """Sec 9.1: identical full-space geometry, different prefix quality."""
-        raw = geometry.rotation_stress_test(
-            embeddings,
-            self.dims,
-            num_rotations=self.cfg.eval.rotation_trials,
-            k=self.cfg.eval.knn_k,
-        )
-        return {
-            "full_dim_gram_shift": raw["full_dim_gram_shift"],
-            "baseline_knn_recall": {f"dim_{d}": v for d, v in raw["baseline"].items()},
-            "rotated_knn_recall": {f"dim_{d}": v for d, v in raw["rotated"].items()},
-            "mean_drop": {f"dim_{d}": v for d, v in raw["mean_drop"].items()},
-        }
-
     # -- entry point -------------------------------------------------------- #
     def evaluate(self, model) -> dict[str, dict[str, object]]:
         """Run every configured task. Restores the model's original mode afterwards."""
@@ -401,10 +243,6 @@ class MatryoshkaEvaluator:
             for name, path in self.paths["pair"]:
                 LOGGER.info("  [pair] %s", name)
                 results["pair"][name] = self.eval_pair(model, path)
-
-            if self.cfg.eval.semantic_distortion:
-                LOGGER.info("  [semantic] distortion-rate profile")
-                results["semantic"] = self.eval_semantic_distortion(model)
         finally:
             if was_training:
                 model.train()

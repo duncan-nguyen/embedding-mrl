@@ -1,11 +1,11 @@
 # Matryoshka Representation Learning: ACL Conference Experiments
 
-Experimental code for an ACL submission comparing four ways to train Matryoshka
+Experimental code for an ACL submission comparing three ways to train Matryoshka
 embedding models — representations that stay useful when truncated to
 `[16, 32, 64, 128, 256, 512, 1024]` (or `768`), so inference cost can be traded
 against quality at serving time.
 
-Four methods × four backbones = sixteen experiments, all driven by one CLI and
+Three methods × four backbones = twelve experiments, all driven by one CLI and
 one YAML file each.
 
 ## Layout
@@ -19,20 +19,17 @@ src/embedding_mrl/
   config.py         dataclass config, YAML inheritance, CLI overrides
   data.py           datasets, collators, task→CSV registry
   pooling.py        cls / mean / last-token pooling
-  losses/           infonce.py, cka.py, ese.py, mipic.py, sdr.py
-  geometry.py       semantic distortion-rate metrics (SDRA, kNN recall, P_nest)
-  diagnostics.py    per-batch instrumentation of SDR-MRL's own quantities
+  losses/           infonce.py, cka.py, ese.py, mipic.py
   evaluation.py     the Matryoshka evaluation suite
   reporting.py      results.json / results.csv
   trainers/         base.py + one trainer per method
   cli.py            entry point
 scripts/train.py    run without installing the package
 scripts/run_all.sh  run every experiment in sequence
-scripts/verify_sdr_math.py  check the SDR-MRL code against the paper's proofs
 notebooks/colab/     run_experiment.ipynb — one experiment on Colab, GPU included
 Dockerfile          self-contained training image (code + data + models)
 docker/             build/push scripts, model baking, docker docs
-tests/              209 tests, fully offline (no model downloads)
+tests/              135 tests, fully offline (no model downloads)
 notebooks/          the original notebooks, kept for reference
 ```
 
@@ -50,11 +47,10 @@ pip install -e .            # or: pip install -r requirements.txt
 
 `notebooks/colab/run_experiment.ipynb` clones this repo, installs what Colab is
 missing, and runs one experiment end to end. Method, backbone and every training
-and SDR-MRL setting are a form at the top of the notebook — pick them, then
-*Runtime → Run all*. The training corpus and all evaluation CSVs ship in the
-repo, so the only runtime download is the backbone itself. It finishes with the
-results table, the quality- and distortion-rate curves, and the training
-diagnostics.
+setting are a form at the top of the notebook — pick them, then *Runtime → Run
+all*. The training corpus and all evaluation CSVs ship in the repo, so the only
+runtime download is the backbone itself. It finishes with the results table and
+the quality-versus-dimension curves.
 
 BERT-base and TinyBERT-6L fit a free T4; BGE-M3 and Qwen3-0.6B need
 `BATCH_SIZE` around 4–8.
@@ -132,20 +128,19 @@ To evaluate only at the end instead of after every epoch (much faster), set
 `eval.every_epoch: false`. To score an already-trained checkpoint, use
 `--eval-only`; it writes the same `results.json` / `results.csv`.
 
-## The sixteen configs
+## The twelve configs
 
 | | BERT (768) | TinyBERT-6L (768) | BGE-M3 (1024) | Qwen3-0.6B (1024) |
 | --- | --- | --- | --- | --- |
 | **MRL** | `configs/mrl/bert.yaml` | `configs/mrl/tinybert_6l.yaml` | `configs/mrl/bgem3.yaml` | `configs/mrl/qwen3_0.6b.yaml` |
 | **ESE** | `configs/ese/bert.yaml` | `configs/ese/tinybert_6l.yaml` | `configs/ese/bgem3.yaml` | `configs/ese/qwen3_0.6b.yaml` |
 | **MIPIC** | `configs/mipic/bert.yaml` | `configs/mipic/tinybert_6l.yaml` | `configs/mipic/bgem3.yaml` | `configs/mipic/qwen3_0.6b.yaml` |
-| **SDR-MRL** | `configs/sdr/bert.yaml` | `configs/sdr/tinybert_6l.yaml` | `configs/sdr/bgem3.yaml` | `configs/sdr/qwen3_0.6b.yaml` |
 
 Each inherits `configs/base.yaml` via `_base_` and overrides only what differs.
 
 ## Methods
 
-All four train a bi-encoder with unsupervised SimCSE: the same sentence is
+All three train a bi-encoder with unsupervised SimCSE: the same sentence is
 encoded twice, and dropout makes the two views differ.
 
 ### MRL (baseline) — `losses/infonce.py`
@@ -212,170 +207,6 @@ L_PIC = Σ_i L_chain^(i)
 L_MIPIC = α·L_MRL + (1 − α)·(L_SIA + L_PIC)
 ```
 
-### SDR-MRL (proposal) — `losses/sdr.py`
-
-[docs/latex/main.pdf](docs/latex/main.pdf). The other three methods ask *how similar
-is the truncated representation to the full one*. SDR-MRL asks a different
-question: **at a given storage rate, how much of the teacher's semantic
-neighborhood is still recoverable?**
-
-The full-dimensional embedding defines a distribution over which other item in
-the batch is the anchor's semantic neighbor, and each prefix has to reproduce
-it with nothing but its own cosine geometry:
-
-```
-p_T(S = j | x_i) = softmax_j cos(z_i^(K), z_j^(K)) / τ_T        (Eq 23, stop-grad)
-q_k(S = j | z_i) = softmax_j cos(z_i^(k), z_j^(k)) / τ_k        (Eq 25)
-D_k              = E_X KL(p_T ‖ q_k)                            (Eq 26)
-```
-
-The candidate set `C_i` is the batch plus a FIFO **memory queue** of the last
-`sdr.queue_size` full-width embeddings (Sec 4.2). With batch 16 alone `S` has at
-most `log 15 = 2.7` nats and most anchors have no real neighbour in their batch,
-so the queue is what makes `p_T` peak on genuine neighbours.
-
-The decoder's only parameters are the `K−1` temperatures `τ_k`, one per
-truncated prefix, learned during training and discarded afterwards — nothing is
-added at inference time. They are per prefix for a reason: the optimal decoder
-`p_T(S | Z_k)` is a posterior average over every input sharing the prefix, so
-it is *flatter* than the teacher, and a decoder pinned to `τ_T` pays for that in
-`ε_k`. Minimising over `τ_k` sits inside the infimum that defines `D*_k`, so it
-only tightens the bound; the full width keeps `τ_K = τ_T` and `D_K = 0`.
-
-What makes `D_k` more than another alignment loss is Proposition 1: it
-decomposes as `D_k = I_T(S; X | Z_k) + ε_k` with `ε_k ≥ 0`, so it is a
-variational **upper bound on the semantic information the prefix has lost**.
-Because the prefixes are nested, the drop between adjacent rates is the new
-block's conditional information, `D*_{k−1} − D*_k = I_T(S; B̃_k | Z_{k−1})`
-(Eq 45, with `B̃_k` the *normalised* block — the raw block is not a function of
-the normalised prefixes). The decomposition itself is the standard
-Barber–Agakov identity, and it is exact only for a teacher that does not move
-with the student — see the caveat on `teacher: online` below.
-
-Training minimises that distortion across a distribution of deployment rates:
-
-```
-L_SDR = L_task + λ_sem · Σ_k π_k D_k + λ_mono · Σ_k [D_k − sg(D_{k−1})]_+   (Eq 55)
-```
-
-`L_task` is the ordinary Matryoshka InfoNCE and is not decoration: the semantic
-term alone is minimised by a collapsed teacher, whose neighborhood every prefix
-reproduces trivially. `π` is the deployment-rate prior (uniform by default,
-`inverse_dim` to bias toward small prefixes). `λ_mono = 0` in the shipped
-configs — Eq 56's minimal model — because Prop 2 guarantees monotonicity only
-for the optimal decoder, and whether the practical one needs the regulariser is
-an empirical question. When it is on, the hinge's lower prefix is a
-stop-gradient target: without `sg`, `∂[D_k − D_{k−1}]_+ / ∂D_{k−1} = −1` and the
-regulariser is minimised by making the *smaller* prefix worse.
-
-Note the scale of the two terms: `L_sem` is a `π`-weighted **average** over
-`K−1` prefixes, `L_task` a **sum** over `K` InfoNCE terms at the same τ, so at
-`λ_sem = 1` the semantic gradient is roughly `1/K` of the task gradient. Sweep
-`{1, 3, 10}`.
-
-**`teacher: online` caveat (Sec 4.9).** With the student's own full width as
-teacher, `D_k = 0` is reached just as well by the *tail* coordinates going inert
-as by the prefix learning anything — the task loss saturates long before it
-constrains the tail. The online variant is therefore a self-consistency
-regulariser; the information reading is exact for `ema` / `frozen`. The
-diagnostics' `share` column (`E ‖h_{1:d}‖² / ‖h‖²`) is the detector: the
-smallest prefix's share climbing toward 1 means the tail is being emptied.
-
-Setting `sdr.stochastic_rate: true` draws one rate per step instead of walking
-every prefix; it is unbiased for the same objective (Eq 68) at a fraction of the
-cost, and the sampled monotonic edge is importance-weighted by `1/π_k` so it
-stays unbiased for Eq 54 too. Every axis the proposal proposes to vary is a
-config field:
-
-| field | Eq / §  | choices |
-| --- | --- | --- |
-| `divergence` | Eq 27, §8.2 | `forward_kl` (mass-covering), `reverse_kl`, `js` |
-| `geometry` | §8.2 | `snd`, `gram_mse`, `cka`, `hard_neighbor` |
-| `candidates` | §8.6 | `all`, `teacher_topm`, `teacher_topm_student_hard` |
-| `queue_size` | §4.2 | `0` = batch only; the shipped configs use `4096` |
-| `rate_prior` | Eq 49-50 | `uniform`, `inverse_dim`, `custom` + `rate_weights` |
-| `teacher` | §4.15 | `online` (stop-grad self), `ema`, `frozen` |
-| `teacher_temperature` | Eq 125 | τ_T |
-| `student_temperature`, `learnable_temperature`, `temperature_lr`, `temperature_min/max` | Eq 24 | initial τ_k, whether it is learned, and its clamp |
-
-A frozen teacher may have any hidden width — only its neighborhood distribution
-is ever read — but it must accept the student's tokenizer.
-
-### Debugging SDR-MRL
-
-The loss is one scalar and hides everything the propositions are stated in
-terms of. `sdr.diagnostics_every: N` recomputes those quantities every `N`
-steps, logs them and appends them to `diagnostics.jsonl`:
-
-```
-teacher: H=1.412 nats (perplexity 4.1 of 79 candidates, max p=0.572, mean cos=-0.015)
-D_0=2.957  D_full=1.80e-09  V_mono=0.00
-
-   dim |      D_k |  D_k/D_0 |     gain |  eta*1e3 |    kNN@3 |  H(q_k) |  |dbary| |  tau_k |  share
-----------------------------------------------------------------------------------------------------
-     4 |   2.6153 |    0.884 |        - |        - |    0.208 |   2.712 |   0.4639 |  0.160 |  0.233
-     8 |   1.5925 |    0.539 |   1.0228 |  255.712 |    0.417 |   1.959 |   0.3297 |  0.100 |  0.513
-    16 |   0.2980 |    0.101 |   1.2945 |  161.815 |    0.750 |   1.530 |   0.2115 |  0.060 |  0.822
-    32 |   0.0000 |    0.000 |   0.2980 |   18.623 |    1.000 |   1.412 |   0.0000 |  0.050 |  1.000
-```
-
-(Synthetic 32-d data, batch 16 plus a queue of 64, so 79 candidates.) Reading it:
-
-- **`H` (teacher entropy, Eq 112)** — the τ_T knob made legible. `perplexity` is
-  the effective number of semantic neighbors: near 1 the teacher has degenerated
-  to hard-neighbor supervision, near the candidate count it is uniform and `D_k`
-  carries no signal for any prefix. With no queue and batch 16 the ceiling is
-  `log 15 = 2.7` nats, which is why the shipped configs add one.
-- **`mean cos`** — collapse detector for the §4.9 failure mode. Climbing toward
-  1 means the semantic term is being satisfied by collapse, not by ordering.
-- **`share`** — `E ‖h_{1:d}‖² / ‖h‖²`, the prefix's share of the raw embedding's
-  energy. The subtler §4.9 failure: with an online teacher `D_k → 0` also when
-  the *tail* is emptied. If the smallest prefix's share climbs toward 1 while
-  `D_k` falls, that is what is happening; switch to `teacher: ema`.
-- **`tau_k`** — the learned decoder temperature (Eq 24). It should sit above
-  `τ_T` at small `d` and fall toward it as `d → D`; a `tau_k` pinned at the clamp
-  means the bounds are too tight.
-- **`D_k/D_0`** — distortion against the zero-rate uniform decoder (Eq 88-89).
-  **Above 1 the prefix is worse than knowing nothing**, which the raw `D_k`
-  never makes obvious.
-- **`gain` / `eta`** — `D_{k−1} − D_k`, the block's conditional semantic
-  information (Eq 45), and the same per added coordinate (Eq 122). This is where
-  a model reveals how it allocates capacity, and where MRL, ESE, MIPIC and
-  SDR-MRL are expected to differ even at equal accuracy.
-- **`kNN`** — rank-based counterpart to `D_k`. Distortion can fall by matching
-  the teacher's similarity *scale*; recall only moves when the neighbor ordering
-  genuinely improves, so the two disagreeing is itself a finding.
-- **`|dbary|`** — `‖Σ_j (q_ij − p_ij) z_j‖`, which by Eq 61 *is* the gradient up
-  to `1/τ`: the distance from the student's local semantic barycenter to the
-  teacher's. It should shrink as training proceeds.
-- **`D_full`** — ~0 by construction with an online teacher: the full width
-  decodes at `τ_K = τ_T` and *is* the teacher. Anything else means the two sides
-  of the estimator are not seeing the same candidates.
-- **`V_mono`** (Eq 108) — the fraction of adjacent prefixes where adding
-  coordinates made the neighborhood *harder* to recover. This is the evidence
-  for or against needing `λ_mono` at all.
-
-`scripts/verify_sdr_math.py` checks the implementation against the derivations
-themselves — 43 assertions over independently constructed worlds:
-
-```
-Eq 59/61/65   the gradient identities, by autograd vs closed form
-Eq 30-32      D_k = I_T(S;X|Z_k) + ε_k on an exact discrete S–X–Z chain
-Eq 39/42/45   the optimal decoder, monotonicity, and the refinement identity
-Eq 68         unbiasedness of stochastic rate sampling
-Eq 75-84      Theorem 1's linear-Gaussian nested optimum, incl. PCA's suboptimality
-Eq 114-118    rotation leaves ZZ^T untouched but wrecks the prefixes
-Eq 24/31-32   the optimal decoder is flatter at low rate; a learnable τ_k only tightens the bound
-Eq 54/69      the hinge has zero gradient into D_{k−1}; the sampled edge is unbiased
-Sec 4.9       with an online teacher, an inert tail is a minimiser of L_task + L_sem
-```
-
-The rotation one is the motivation for the whole method, and it is worth
-running once for the intuition: an orthogonal rotation preserves every
-full-dimensional retrieval metric exactly while dropping prefix kNN recall by
-~0.5. The last one is the method's main caveat, and worth running for the same
-reason.
-
 ## Evaluation
 
 Every task is scored at all seven Matryoshka dimensions.
@@ -398,34 +229,6 @@ badly — Emotion (6 classes, 33% majority) reads **50.8 as accuracy and 28.0 as
 macro-F1** on the same embeddings. The MIPIC tables
 ([docs/MIPIC.pdf](docs/MIPIC.pdf) Tables 1–2) report macro-F1, so lining an
 accuracy column up against them silently shifts that task by ~20 points.
-
-### Semantic distortion-rate protocol
-
-`eval.semantic_distortion: true` adds the SDR-MRL measurement protocol (§6). It
-runs for **every** method, which is the point — the proposal's claim is about
-where in the code each method places semantic information, not only about final
-accuracy. Results land under `results.json → semantic`:
-
-| key | Eq | meaning |
-| --- | --- | --- |
-| `distortion` | 86 | `D_k^ref` per dimension, against a fixed teacher, at the best decoder temperature per prefix |
-| `student_temperatures` | Eq 24 | the `τ_k` each `D_k^ref` was measured at (`eval.calibrate_student_temperature`, on by default); the infimum over the cosine-decoder family, so a prefix is not charged for merely being less certain than the reference |
-| `normalized_distortion` | 89 | rescaled so zero-rate = 1 and full width = 0 |
-| `sdra` | 91 | area under that curve; **lower means useful structure appears earlier** |
-| `distortion_reduction`, `refinement_gain` | 119, 122 | per-block and per-coordinate semantic gain |
-| `monotonicity_violation_rate` | 108 | fraction of prefixes where more coordinates hurt |
-| `preservation` | 96, §6.4 | kNN recall, similarity Spearman, trustworthiness, continuity |
-| `rotation_stress_test` | 114-118 | set `eval.rotation_trials > 0` |
-
-Set `eval.reference_model` to hold the teacher **fixed across every compared
-model** — Eq 86 requires it. Without it each model is scored against its own
-full width, which measures self-consistency rather than semantic quality; the
-report records `"reference": "self"` when that happens.
-
-`geometry.price_of_nestedness` (Eq 92-93) compares a Matryoshka prefix against a
-model trained at that width alone. Produce the independent baseline with e.g.
-`--set matryoshka.dims='[64]' --set model.hidden_dim=768`, then feed both
-`results.json` tables to the function.
 
 ## Training configuration
 
@@ -515,17 +318,11 @@ including image size and how to bake fewer models, are in
 pytest
 ```
 
-209 tests covering config inheritance and validation, the task registry against
+135 tests covering config inheritance and validation, the task registry against
 the real `data/` files, loss maths (gradient flow, masking, CKA invariances,
-top-`k` selection), pooling, evaluation metrics, the semantic distortion-rate
-protocol, and one-epoch training runs for all four methods. They use a locally
-built stub encoder, so nothing is downloaded and the suite finishes in seconds.
-
-The SDR-MRL derivations have their own harness, which the suite also runs:
-
-```bash
-python scripts/verify_sdr_math.py
-```
+top-`k` selection), pooling, evaluation metrics, and one-epoch training runs for
+all three methods. They use a locally built stub encoder, so nothing is
+downloaded and the suite finishes in seconds.
 
 ## Notes on the refactor
 

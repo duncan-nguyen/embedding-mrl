@@ -15,31 +15,13 @@ from typing import Any
 
 import yaml
 
-METHODS = ("mrl", "ese", "mipic", "sdr")
+METHODS = ("mrl", "ese", "mipic")
 POOLING_MODES = ("cls", "mean", "last")
-
-# SDR-MRL ablation axes (Sec 8). They live here rather than in the loss module so
-# a config can be validated without importing torch.
-#: A4 - which probabilistic geometry the prefix has to reproduce.
-DIVERGENCES = ("forward_kl", "reverse_kl", "js")
-#: A5 - what cross-dimensional structure is preserved at all.
-GEOMETRIES = ("snd", "gram_mse", "cka", "hard_neighbor")
-#: A6 - how local the semantic graph is.
-CANDIDATE_MODES = ("all", "teacher_topm", "teacher_topm_student_hard")
-#: A7 - the deployment-rate prior pi.
-RATE_PRIORS = ("uniform", "inverse_dim", "custom")
-#: A3 - where the semantic teacher comes from.
-TEACHERS = ("online", "ema", "frozen")
 
 
 # --------------------------------------------------------------------------- #
 # Sub-configs
 # --------------------------------------------------------------------------- #
-def _require_choice(field_name: str, value: str, allowed: Sequence[str]) -> None:
-    if value not in allowed:
-        raise ValueError(f"{field_name} must be one of {tuple(allowed)}, got {value!r}")
-
-
 @dataclass
 class ModelConfig:
     """Backbone encoder used as the (self-distilled) student."""
@@ -184,35 +166,6 @@ class EvalConfig:
     )
     pair_tasks: list[str] = field(default_factory=lambda: ["mrpc", "scitail", "wic"])
 
-    # -- SDR-MRL semantic distortion-rate protocol (docs/latex/main.pdf Sec 6) --- #
-    #: Measure the distortion-rate profile, SDRA and neighborhood preservation.
-    #: Applies to every method, so MRL/ESE/MIPIC/SDR curves are comparable.
-    semantic_distortion: bool = False
-    #: Sentence source for the semantic corpus; any STS or pair task name.
-    #: Only the raw sentences are used - no labels.
-    distortion_tasks: list[str] = field(default_factory=lambda: ["stsb"])
-    #: Cap on corpus size; the neighborhood matrices are O(N^2).
-    distortion_max_samples: int = 2000
-    #: Eq 86 requires *one* teacher shared by every compared model. ``None``
-    #: falls back to each model's own full width, which measures self-consistency
-    #: rather than semantic quality - the report flags which one was used.
-    reference_model: str | None = None
-    #: tau_T / tau_S for the evaluation-time distributions (Eq 125-126).
-    distortion_teacher_temperature: float = 0.05
-    distortion_student_temperature: float = 0.05
-    #: Report ``D_k^ref`` at the best decoder temperature for each prefix
-    #: (a grid from ``tau_S`` upward) instead of at ``tau_S`` alone. This is
-    #: the infimum over the cosine-decoder family, i.e. the tightest Prop 1
-    #: bound the protocol can state, and it stops a model being penalised for
-    #: a prefix that is merely less *certain* than the teacher. The chosen
-    #: temperatures are recorded next to the profile.
-    calibrate_student_temperature: bool = True
-    #: ``M`` in Eq 96's kNNRecall, and the neighbourhood size for
-    #: trustworthiness / continuity.
-    knn_k: int = 10
-    #: Sec 9.1: rotate the full space and re-measure prefix quality. 0 disables.
-    rotation_trials: int = 0
-
     def __post_init__(self) -> None:
         if self.split not in ("test", "validation"):
             raise ValueError(
@@ -312,128 +265,6 @@ class MIPICConfig:
         return self.alpha
 
 
-@dataclass
-class SDRConfig:
-    """SDR-MRL: semantic distortion-rate learning (``docs/latex/main.pdf``).
-
-    Eq 55 is the whole objective::
-
-        L_SDR = L_task + lambda_sem * sum_k pi_k D_k
-                       + lambda_mono * sum_k [D_k - sg(D_{k-1})]_+
-
-    Defaults follow Sec 10.1 (Eq 123-128): the minimal proposed model is the
-    semantic term alone (``lambda_mono = 0``, Eq 56), in-batch candidates,
-    ``tau_T = 0.05`` and per-prefix decoder temperatures ``tau_k`` initialised
-    at ``0.05`` and learned (Eq 24). Every remaining field is one row of the
-    ablation table in Sec 8.
-    """
-
-    #: Eq 127: weight of the semantic distortion term. ``L_sem`` is a
-    #: pi-weighted *average* over prefixes while ``L_task`` is a *sum* over
-    #: all K of them, so at equal lambda the semantic gradient is roughly
-    #: 1/K of the task gradient. Search {1, 3, 10} rather than {0.1, 0.3, 1}.
-    lambda_sem: float = 1.0
-    #: Eq 56/128: the monotonic refinement regulariser is off in the minimal
-    #: model and only kept if the A4 ablation shows it earns its place.
-    lambda_mono: float = 0.0
-    #: Eq 125: teacher neighborhood temperature (A9 sweeps it).
-    teacher_temperature: float = 0.05
-    #: Eq 24/126: the *initial* decoder temperature ``tau_k`` of every prefix.
-    student_temperature: float = 0.05
-    #: Learn one ``tau_k`` per truncated prefix. The optimal decoder
-    #: ``p_T(S | Z_k)`` is flatter than ``p_T(S | X)`` - a prefix that has lost
-    #: information should be *less* certain - and a decoder pinned to
-    #: ``tau_T`` cannot express that. Minimising over ``tau_k`` is the infimum
-    #: over the decoder family, so it only tightens Prop 1's bound.
-    learnable_temperature: bool = True
-    #: Learning rate for the ``tau_k`` parameters (they live in log space).
-    temperature_lr: float = 1e-2
-    #: Clamp for ``tau_k``.
-    temperature_min: float = 0.01
-    temperature_max: float = 1.0
-    #: Sec 4.2: number of past full-width embeddings kept as extra candidates
-    #: in ``C_i``. With batch 16 the semantic variable carries at most
-    #: ``log 15 ~ 2.7`` nats and most anchors have no genuine neighbour in the
-    #: batch; a queue lets ``p_T`` peak on real neighbours. 0 disables.
-    queue_size: int = 0
-    #: A4 - "forward_kl" (Eq 27, mass-covering), "reverse_kl" or "js".
-    divergence: str = "forward_kl"
-    #: A5 - "snd" is the proposal; "gram_mse", "cka" and "hard_neighbor" are the
-    #: generic-alignment alternatives it has to beat.
-    geometry: str = "snd"
-    #: A6 - "all" (Sec 10.1), "teacher_topm", or "teacher_topm_student_hard".
-    candidates: str = "all"
-    top_m: int = 32
-    #: A7 - "uniform" (Eq 49), "inverse_dim" (Eq 50) or "custom" + rate_weights.
-    rate_prior: str = "uniform"
-    #: Unnormalised deployment prior, one entry per *truncated* prefix.
-    rate_weights: list[float] | None = None
-    #: A8 / Sec 4.13 - sample one rate per step instead of walking all prefixes.
-    stochastic_rate: bool = False
-    #: A3 - "online" (stop-gradient self-teacher), "ema" or "frozen".
-    teacher: str = "online"
-    #: EMA decay when ``teacher == "ema"``.
-    teacher_momentum: float = 0.999
-    #: Required when ``teacher == "frozen"``: an independently trained
-    #: full-dimensional encoder. It must accept the student's tokenizer; its
-    #: hidden width is free, since only its neighborhood distribution is used.
-    teacher_model: str | None = None
-    #: Build the teacher from the *other* SimCSE view instead of the same one.
-    #: Off by default: Eq 21 defines the teacher on the same ``h_i``.
-    cross_view: bool = False
-    #: Weight of ``L_task`` (Eq 52); the Matryoshka InfoNCE keeps the teacher
-    #: itself from collapsing (Sec 4.9).
-    w_task: float = 1.0
-    #: Eq 52's ``alpha_k``, one per nested dimension. ``None`` = uniform.
-    task_weights: list[float] | None = None
-
-    #: Recompute the mathematical diagnostics (teacher entropy, the in-batch
-    #: distortion-rate profile, marginal gains, barycenter gaps) every N steps
-    #: and append them to ``diagnostics.jsonl``. 0 disables.
-    diagnostics_every: int = 0
-    #: ``M`` for the in-batch kNN recall reported alongside the distortion.
-    diagnostics_knn_k: int = 5
-
-    def __post_init__(self) -> None:
-        _require_choice("sdr.divergence", self.divergence, DIVERGENCES)
-        _require_choice("sdr.geometry", self.geometry, GEOMETRIES)
-        _require_choice("sdr.candidates", self.candidates, CANDIDATE_MODES)
-        _require_choice("sdr.rate_prior", self.rate_prior, RATE_PRIORS)
-        _require_choice("sdr.teacher", self.teacher, TEACHERS)
-
-        if self.lambda_sem < 0 or self.lambda_mono < 0:
-            raise ValueError("sdr.lambda_sem and sdr.lambda_mono must be non-negative")
-        if not 0.0 <= self.teacher_momentum < 1.0:
-            raise ValueError(
-                f"sdr.teacher_momentum must be in [0, 1), got {self.teacher_momentum}"
-            )
-        if self.teacher == "frozen" and not self.teacher_model:
-            raise ValueError("sdr.teacher='frozen' requires sdr.teacher_model")
-        if self.rate_prior == "custom" and not self.rate_weights:
-            raise ValueError("sdr.rate_prior='custom' requires sdr.rate_weights")
-        if self.top_m < 1:
-            raise ValueError(f"sdr.top_m must be >= 1, got {self.top_m}")
-        if self.diagnostics_every < 0:
-            raise ValueError(
-                f"sdr.diagnostics_every must be >= 0, got {self.diagnostics_every}"
-            )
-        if not 0 < self.temperature_min <= self.student_temperature <= self.temperature_max:
-            raise ValueError(
-                "sdr.student_temperature must satisfy 0 < temperature_min <= "
-                f"student_temperature <= temperature_max, got min={self.temperature_min}, "
-                f"student={self.student_temperature}, max={self.temperature_max}"
-            )
-        if self.temperature_lr <= 0:
-            raise ValueError(f"sdr.temperature_lr must be positive, got {self.temperature_lr}")
-        if self.queue_size < 0:
-            raise ValueError(f"sdr.queue_size must be >= 0, got {self.queue_size}")
-        if self.queue_size > 0 and self.geometry == "cka":
-            raise ValueError(
-                "sdr.queue_size > 0 is incompatible with geometry='cka': CKA is a "
-                "whole-batch statistic and has no notion of extra candidates"
-            )
-
-
 # --------------------------------------------------------------------------- #
 # Root config
 # --------------------------------------------------------------------------- #
@@ -449,7 +280,6 @@ class ExperimentConfig:
     mrl: MRLConfig = field(default_factory=MRLConfig)
     ese: ESEConfig = field(default_factory=ESEConfig)
     mipic: MIPICConfig = field(default_factory=MIPICConfig)
-    sdr: SDRConfig = field(default_factory=SDRConfig)
 
     def __post_init__(self) -> None:
         if self.method not in METHODS:
@@ -474,30 +304,6 @@ class ExperimentConfig:
                 raise ValueError(
                     f"mipic.gamma_schedule has {len(self.mipic.gamma_schedule)} entries "
                     f"but there are {len(truncated)} truncated prefixes {sorted(truncated)}"
-                )
-        if self.method == "sdr":
-            # Eq 48 weights the truncated prefixes only: the full width is the
-            # teacher, so its own distortion is not part of the objective.
-            truncated = sorted(d for d in self.matryoshka.dims if d < self.model.hidden_dim)
-            if not truncated:
-                raise ValueError(
-                    f"sdr needs at least one prefix below hidden_dim="
-                    f"{self.model.hidden_dim}, got dims={self.matryoshka.ascending}"
-                )
-            if self.sdr.rate_weights is not None and len(self.sdr.rate_weights) != len(
-                truncated
-            ):
-                raise ValueError(
-                    f"sdr.rate_weights has {len(self.sdr.rate_weights)} entries but "
-                    f"there are {len(truncated)} truncated prefixes {truncated}"
-                )
-            if self.sdr.task_weights is not None and len(
-                self.sdr.task_weights
-            ) != len(self.matryoshka.dims):
-                raise ValueError(
-                    f"sdr.task_weights has {len(self.sdr.task_weights)} entries but "
-                    f"there are {len(self.matryoshka.dims)} nested dimensions "
-                    f"{self.matryoshka.ascending}"
                 )
 
     # -- (de)serialisation -------------------------------------------------- #

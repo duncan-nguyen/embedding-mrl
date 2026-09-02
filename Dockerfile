@@ -80,7 +80,7 @@ RUN if [ "${VERIFY_MODELS}" = "1" ]; then python /usr/local/bin/verify_models.py
 # Config validation + the offline unit suite, as a build-time self-check.
 RUN python -m pytest tests/ -q -p no:cacheprovider && \
     for cfg in configs/*/*.yaml; do embedding-mrl --config "$cfg" --print-config > /dev/null; done && \
-    echo "all 16 configs resolve"
+    echo "all 12 configs resolve"
 
 # uid 1000 keeps files written into a mounted outputs/ owned by a normal user.
 RUN if ! getent group 1000 >/dev/null; then groupadd --gid 1000 mrl; fi && \

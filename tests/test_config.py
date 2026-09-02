@@ -13,7 +13,7 @@ CONFIGS = sorted(p for p in (REPO_ROOT / "configs").rglob("*.yaml") if p.name !=
 @pytest.mark.parametrize("path", CONFIGS, ids=lambda p: f"{p.parent.name}/{p.stem}")
 def test_shipped_configs_load(path):
     cfg = ExperimentConfig.load(path)
-    assert cfg.method in ("mrl", "ese", "mipic", "sdr")
+    assert cfg.method in ("mrl", "ese", "mipic")
     assert max(cfg.matryoshka.dims) == cfg.model.hidden_dim
     assert Path(cfg.data.train_path).exists()
 
@@ -62,7 +62,7 @@ def test_mipic_layers_and_checkpoints_match_appendix_a5(name, layers, checkpoint
 
 
 def test_there_is_one_config_per_method_and_model():
-    assert len(CONFIGS) == 16  # 4 methods x 4 backbones
+    assert len(CONFIGS) == 12  # 3 methods x 4 backbones
 
 
 def test_base_inheritance_and_override(tmp_path):

@@ -137,47 +137,6 @@ def _require(paths: Sequence[Path]) -> None:
         raise FileNotFoundError("missing evaluation CSV(s): " + ", ".join(missing))
 
 
-def semantic_corpus(
-    data_cfg: DataConfig,
-    eval_cfg: EvalConfig,
-    task_names: Sequence[str],
-    max_samples: int | None = None,
-) -> list[str]:
-    """Unlabelled sentences for the SDR-MRL distortion protocol (Sec 6).
-
-    The semantic random variable ``S`` is a *neighborhood* relation, so nothing
-    but the sentences themselves is needed: both sides of every pair are pooled,
-    de-duplicated (order preserved, so the corpus is reproducible) and capped.
-
-    Args:
-        task_names: any STS or pair task; they are the only files in ``data/``
-            that hold free-standing sentences at the right length.
-    """
-    root = data_cfg.test_path
-    seen: dict[str, None] = {}
-
-    for name in task_names:
-        registry = STS_TASKS if name in STS_TASKS else PAIR_TASKS
-        task = _lookup(registry, name, "semantic-corpus")
-        path = root / task.eval_file(eval_cfg.split)
-        _require([path])
-
-        frame = pd.read_csv(path)
-        missing = [c for c in ("sentence1", "sentence2") if c not in frame.columns]
-        if missing:
-            raise KeyError(f"{path} has no {missing} column(s) to build a corpus from")
-        for column in ("sentence1", "sentence2"):
-            for text in frame[column].astype(str):
-                seen.setdefault(text, None)
-
-    sentences = list(seen)
-    if not sentences:
-        raise ValueError(f"semantic corpus is empty for tasks {list(task_names)}")
-    if max_samples is not None and len(sentences) > max_samples:
-        sentences = sentences[:max_samples]
-    return sentences
-
-
 # --------------------------------------------------------------------------- #
 # Training data (unsupervised SimCSE: the same sentence forms both views)
 # --------------------------------------------------------------------------- #

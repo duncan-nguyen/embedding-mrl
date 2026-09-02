@@ -5,13 +5,11 @@ from .base import BaseTrainer
 from .ese import ESETrainer
 from .mipic import MIPICTrainer
 from .mrl import MRLTrainer
-from .sdr import SDRTrainer
 
 TRAINERS = {
     "mrl": MRLTrainer,
     "ese": ESETrainer,
     "mipic": MIPICTrainer,
-    "sdr": SDRTrainer,
 }
 
 
@@ -28,7 +26,6 @@ __all__ = [
     "MRLTrainer",
     "ESETrainer",
     "MIPICTrainer",
-    "SDRTrainer",
     "TRAINERS",
     "build_trainer",
 ]
