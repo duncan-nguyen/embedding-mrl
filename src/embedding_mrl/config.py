@@ -276,12 +276,18 @@ class MIPICConfig:
 
 @dataclass
 class GSRConfig:
-    """Geometric Successive Refinement on corpus-level spectral shells."""
+    """Geometric Successive Refinement on corpus-level kernel spectral shells."""
 
-    weight: float = 1.0
+    weight: float = 0.1
     warmup_epochs: int = 1
-    refresh_every_epochs: int = 1
+    #: ``0`` freezes the teacher built after warmup; positive values enable the
+    #: alternating-refresh ablation at the requested epoch interval.
+    refresh_every_epochs: int = 0
     teacher_batch_size: int = 64
+    teacher_geometry: str = "semantic_kernel"
+    kernel_temperature: float = 0.05
+    kernel_ridge: float = 1e-6
+    kernel_chunk_size: int = 2048
     #: ``None`` reuses every Matryoshka endpoint.
     geometry_dims: list[int] | None = None
     #: Only merges numerical ties; near-gap sensitivity remains a diagnostic.
@@ -300,6 +306,8 @@ class GSRConfig:
     def __post_init__(self) -> None:
         numeric_positive = {
             "weight": self.weight,
+            "kernel_temperature": self.kernel_temperature,
+            "kernel_ridge": self.kernel_ridge,
             "eigengap_tolerance": self.eigengap_tolerance,
             "eps": self.eps,
         }
@@ -317,10 +325,20 @@ class GSRConfig:
             )
         if self.eps <= 0:
             raise ValueError(f"gsr.eps must be positive, got {self.eps}")
+        if self.kernel_temperature <= 0:
+            raise ValueError("gsr.kernel_temperature must be positive")
+        if self.kernel_ridge <= 0:
+            raise ValueError("gsr.kernel_ridge must be positive")
+        if self.teacher_geometry not in ("semantic_kernel", "linear_pca"):
+            raise ValueError(
+                "gsr.teacher_geometry must be 'semantic_kernel' or 'linear_pca', "
+                f"got {self.teacher_geometry!r}"
+            )
         integer_fields = {
             "warmup_epochs": self.warmup_epochs,
             "refresh_every_epochs": self.refresh_every_epochs,
             "teacher_batch_size": self.teacher_batch_size,
+            "kernel_chunk_size": self.kernel_chunk_size,
             "diagnostics_every_steps": self.diagnostics_every_steps,
             "diagnostic_samples": self.diagnostic_samples,
             "diagnostic_pairs": self.diagnostic_pairs,
@@ -330,9 +348,11 @@ class GSRConfig:
                 raise TypeError(f"gsr.{name} must be an integer, got {value!r}")
         if self.warmup_epochs < 0:
             raise ValueError("gsr.warmup_epochs must be non-negative")
+        if self.refresh_every_epochs < 0:
+            raise ValueError("gsr.refresh_every_epochs must be non-negative")
         for name in (
-            "refresh_every_epochs",
             "teacher_batch_size",
+            "kernel_chunk_size",
             "diagnostics_every_steps",
             "diagnostic_pairs",
         ):

@@ -161,6 +161,39 @@ def test_gsr_weight_is_a_bounded_tradeoff():
         )
 
 
+def test_gsr_defaults_to_a_fixed_semantic_kernel_teacher():
+    cfg = ExperimentConfig.from_dict(
+        {"method": "gsr", "gsr": {"warmup_epochs": 0}}
+    )
+    assert cfg.gsr.teacher_geometry == "semantic_kernel"
+    assert cfg.gsr.refresh_every_epochs == 0
+    assert cfg.gsr.weight == pytest.approx(0.1)
+
+
+def test_gsr_kernel_and_refresh_parameters_are_validated():
+    with pytest.raises(ValueError, match="teacher_geometry"):
+        ExperimentConfig.from_dict(
+            {
+                "method": "gsr",
+                "gsr": {"warmup_epochs": 0, "teacher_geometry": "unknown"},
+            }
+        )
+    with pytest.raises(ValueError, match="kernel_temperature"):
+        ExperimentConfig.from_dict(
+            {
+                "method": "gsr",
+                "gsr": {"warmup_epochs": 0, "kernel_temperature": 0.0},
+            }
+        )
+    with pytest.raises(ValueError, match="refresh_every_epochs"):
+        ExperimentConfig.from_dict(
+            {
+                "method": "gsr",
+                "gsr": {"warmup_epochs": 0, "refresh_every_epochs": -1},
+            }
+        )
+
+
 # --------------------------------------------------------------------------- #
 # CLI override parsing
 # --------------------------------------------------------------------------- #

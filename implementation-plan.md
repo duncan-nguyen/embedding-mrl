@@ -4,23 +4,22 @@ This plan integrates [method.md](docs/method.md) into the repository's existing
 `config -> trainer -> epoch evaluation -> report` protocol. It deliberately
 keeps MRL, ESE, and MIPIC behavior unchanged.
 
-Implementation status: phases A-D and the offline Phase-E gates are complete.
-All four production configs resolve and the CPU stub smoke suite exercises an
-active teacher refresh. A real-backbone/GPU smoke run remains intentionally
-unexecuted until training infrastructure and model weights are selected.
+Implementation status: the semantic-kernel revision, fixed-teacher lifecycle,
+diagnostics, configuration, and offline tests are complete. A real-backbone/GPU
+run remains the empirical gate.
 
 ## 1. Locked implementation decisions
 
 - Add `gsr` as a fourth method. GSR retains the existing Matryoshka InfoNCE
   objective and adds the residual distance-shell loss.
-- Do not keep a second model in memory. At each refresh boundary, run the
-  current encoder in `eval()` and `no_grad()`, cache its deterministic
-  full-normalized corpus embeddings, compute the spectral teacher, then freeze
-  those tensors while the encoder trains.
+- Do not keep a second model in memory. After warmup, run the current encoder in
+  `eval()` and `no_grad()` once, construct the global semantic-kernel teacher,
+  and freeze it for the remaining epochs. Periodic refresh is an ablation.
 - Identify corpus examples by a stable integer `sample_id`; never associate a
   shuffled batch with teacher targets by batch position.
-- Compute teacher covariance over the full configured training corpus, not an
-  optimization mini-batch.
+- Build a seed-fixed Nyström map of the exponential cosine kernel using
+  `min(corpus_size, hidden_dim)` landmarks, row-normalize it, then compute the
+  teacher covariance over the full corpus rather than an optimization batch.
 - Cache teacher spectral coordinates on CPU in FP32. For the current corpus
   (20,243 examples), a full `N x 1024` cache is about 79 MiB.
 - Compute eigendecomposition and all geometry losses in FP32 or FP64, outside
@@ -30,8 +29,8 @@ unexecuted until training infrastructure and model weights are selected.
 - Use a common, teacher-fixed normalization constant `c_teacher`.
 - Keep task prefixes at every configured Matryoshka dimension. Merge geometry
   shells only when an exact/numerical eigenvalue tie crosses a boundary.
-- Refresh the teacher only between epochs/outer blocks. Targets must not move
-  inside an optimization block.
+- Keep the main teacher fixed after warmup so the auxiliary target is
+  stationary. If the refresh ablation is enabled, refresh only between epochs.
 - Make non-finite geometry, incomplete teacher coverage, invalid cache indices,
   and degenerate `c_teacher` hard errors with a diagnostic artifact.
 
@@ -44,10 +43,14 @@ Proposed fields:
 
 ```yaml
 gsr:
-  weight: 1.0                 # lambda in [0, 1]
+  weight: 0.1                 # lambda in [0, 1]
   warmup_epochs: 1
-  refresh_every_epochs: 1
+  refresh_every_epochs: 0     # fixed; >0 is refresh ablation
   teacher_batch_size: 64
+  teacher_geometry: semantic_kernel
+  kernel_temperature: 0.05
+  kernel_ridge: 1.0e-6
+  kernel_chunk_size: 2048
   geometry_dims: null          # null -> matryoshka.dims
   eigengap_tolerance: 1.0e-6   # numerical tie, not a tuned gap threshold
   merge_tied_shells: true
@@ -62,7 +65,8 @@ gsr:
 
 Validation must reject:
 
-- weights outside `[0, 1]`, non-positive batch sizes, refresh intervals, or epsilons;
+- weights outside `[0, 1]`, negative refresh intervals, non-positive batch
+  sizes, kernel temperature/ridge/chunk sizes, or epsilons;
 - `warmup_epochs >= train.epochs` unless GSR is intentionally disabled;
 - unsorted, repeated, non-positive, or over-width geometry dimensions;
 - geometry dimensions not contained in `matryoshka.dims`;
@@ -166,12 +170,14 @@ Teacher construction:
 
 1. Run deterministic pooled embeddings for every corpus row.
 2. Full-normalize in FP32 and fill `Q[N, D]` by stable ID.
-3. Compute `mean = Q.mean(0)` and centered covariance
-   `(Q - mean).T @ (Q - mean) / N`.
-4. Symmetrize covariance before `torch.linalg.eigh`.
-5. Sort eigenpairs descending and compute `(Q - mean) @ V`.
+3. Select `min(N, D)` landmarks from a seed-fixed corpus permutation; form the
+   chunked cross-kernel `C` and landmark kernel `W`.
+4. Compute `Phi = C (W + ridge I)^(-1/2)`, normalize each row, and zero-pad only
+   when `N < D`. Never materialize an `N x N` matrix.
+5. Compute the centered covariance of these unit kernel features, symmetrize it,
+   eigendecompose, and cache `(U - mean) @ V`.
 6. Merge only boundaries whose relative eigengap is below numerical tolerance.
-7. Compute `c_teacher` exactly without an `N x N` Gram matrix. For unit vectors,
+7. Compute `c_teacher` exactly without an `N x N` Gram matrix. For unit features,
    use the corpus sums of pairwise dot products and squared dot products:
 
    ```text
@@ -179,12 +185,14 @@ Teacher construction:
    ```
 
    with off-diagonal means derived from `sum(Q)` and `Q.T @ Q`.
-8. Release `Q` after the spectral-coordinate cache is built.
+8. Release the temporary kernel map after the spectral-coordinate cache is built.
 
 Hard checks:
 
 - every embedding and cache tensor is finite;
-- normalized row norms are within tolerance of one;
+- input and Nyström-feature row norms are finite and nonzero;
+- the regularized landmark kernel is positive definite and its condition number
+  and reconstruction residual are logged;
 - covariance symmetry residual is small;
 - negative eigenvalue mass is within numerical tolerance;
 - eigenpairs satisfy residual and orthogonality tolerances;
@@ -264,7 +272,7 @@ output_dir/
 `steps.jsonl` is append-only and contains one compact record every configured
 diagnostic interval. Large matrices belong in `.pt`, never JSON.
 
-### Teacher refresh metrics
+### Teacher construction metrics
 
 Log and save:
 
@@ -272,6 +280,10 @@ Log and save:
 - encode, covariance, eigendecomposition, projection, and total refresh time;
 - ID coverage, duplicates, missing IDs, and non-finite rows;
 - raw embedding norm and normalized row-norm min/mean/max;
+- kernel value range and near-zero fraction;
+- landmark count/IDs, regularized kernel spectrum and condition number;
+- Nyström row norms before sphericalization, landmark reconstruction error,
+  and raw/spherical approximation error on a seed-fixed panel;
 - teacher mean norm;
 - covariance trace, Frobenius norm, symmetry residual;
 - minimum eigenvalue, negative eigenvalue count/mass;
@@ -286,8 +298,9 @@ Log and save:
 - drift from the preceding teacher: mean shift, relative spectrum change, and
   cumulative-subspace projector distance at every stable boundary.
 
-These metrics distinguish bad corpus coverage, numerical PCA failure, spectrum
-collapse, unstable boundaries, and an excessively moving teacher.
+These metrics distinguish bad corpus coverage, kernel saturation, ill-conditioned
+landmarks, poor Nyström approximation, numerical eigensolver failure, and
+spectrum collapse.
 
 ### Step and epoch metrics
 
@@ -350,7 +363,7 @@ Extend `build_report` without changing historical task keys:
   "experiment": {"method": "gsr", "...": "..."},
   "training": {"...": "..."},
   "geometry": {
-    "final_teacher_refresh": 4,
+    "final_teacher_refresh": 0,
     "shell_boundaries": [0, 16, 32, 64, 128, 256, 512, 768],
     "merged_boundaries": [],
     "effective_rank": 0.0,
@@ -390,6 +403,9 @@ on the terminal is persisted to `output_dir/train.log`.
 
 - streaming covariance equals a direct centered covariance;
 - descending eigenpairs reconstruct covariance within tolerance;
+- the semantic-kernel teacher is deterministic across chunk sizes for a fixed
+  seed, including when `N < D`;
+- adding the cached PCA translation back yields unit vectors with zero GSR loss;
 - analytic `c_teacher` equals explicit enumeration of all corpus pairs;
 - cached scores match direct `(Q - mean) @ V`;
 - shuffled cache construction still maps every row to the correct sample ID;
@@ -402,6 +418,7 @@ on the terminal is persisted to `output_dir/train.log`.
 
 - `gsr` is registered and its shipped configs load;
 - warmup epochs use only MRL and later epochs activate GSR;
+- the default teacher is constructed once and remains fixed;
 - refresh occurs at the configured epochs only;
 - teacher construction leaves the encoder in the correct train/eval mode;
 - one CPU smoke epoch updates encoder parameters and writes all artifacts;

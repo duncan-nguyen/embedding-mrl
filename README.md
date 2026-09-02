@@ -210,13 +210,13 @@ L_PIC = Σ_i L_chain^(i)
 L_MIPIC = α·L_MRL + (1 − α)·(L_SIA + L_PIC)
 ```
 
-### GSR (our method) — `losses/gsr.py`
+### Kernel-GSR (our method) — `losses/gsr.py`
 
-Geometric Successive Refinement builds a frozen spectral teacher from one
-deterministic pass of the current encoder over the whole training corpus. It
-assigns successive PCA residual-distance shells to successive native coordinate
-bands, then estimates each shell loss from all unordered pairs in the current
-mini-batch:
+Geometric Successive Refinement builds one fixed semantic-kernel teacher after
+an MRL warmup. A chunked Nyström map uses at most `hidden_dim` corpus landmarks,
+then row-normalization and a global PCA rotation assign successive residual
+distance shells to successive native coordinate bands. Each shell loss is
+estimated from all unordered pairs in the current mini-batch:
 
 ```text
 ell_k = mean_{i<j} (s_ij^k - r_ij^k)^2 / c_teacher
@@ -225,11 +225,13 @@ L_GSR = sum_k beta_k ell_k
 L = L_MRL + λ L_GSR,  λ in [0, 1]
 ```
 
-The PCA is global rather than batch-local, so batch size controls estimator
-variance but does not cap the available spectral rank. The same encoder is used
-to refresh the teacher between epochs; no teacher model is needed at inference.
-The fixed `beta_k` weights form a diagonal upper bound on the sum of cumulative
-prefix distortions; they do not depend on observed losses or gradients.
+The kernel teacher is global rather than batch-local, so batch size controls
+estimator variance but does not cap spectral rank. Its unit-spherical Nyström
+features also make the full target attainable by the normalized student. The
+teacher stays fixed after construction (`refresh_every_epochs: 0`); positive
+values enable refresh only as an ablation. No teacher model is needed at
+inference. The fixed `beta_k` weights form a diagonal upper bound on the sum of
+cumulative prefix distortions; they do not depend on losses or gradients.
 See [docs/method.md](docs/method.md) for the complete formulation.
 
 ## Evaluation

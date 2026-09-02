@@ -261,6 +261,7 @@ def build_spectral_teacher_cache(
     stable_rank = float(nonnegative.sum() / nonnegative.max().clamp_min(eps))
 
     diagnostics: dict[str, Any] = {
+        "geometry_type": "linear_pca",
         "refresh_index": refresh_index,
         "source_epoch": source_epoch,
         "corpus_size": n,
@@ -323,6 +324,216 @@ def build_spectral_teacher_cache(
         source_epoch=source_epoch,
         diagnostics=diagnostics,
     )
+
+
+@torch.no_grad()
+def build_semantic_kernel_teacher_cache(
+    embeddings: torch.Tensor,
+    dims: Sequence[int],
+    *,
+    temperature: float = 0.05,
+    ridge: float = 1e-6,
+    chunk_size: int = 2048,
+    landmark_seed: int = 42,
+    compute_device: torch.device | None = None,
+    eigengap_tolerance: float = 1e-6,
+    eps: float = 1e-8,
+    refresh_index: int = 0,
+    source_epoch: int = 0,
+    merge_ties: bool = True,
+) -> SpectralTeacherCache:
+    """Build the nonlinear GSR teacher through a global Nyström feature map.
+
+    The exponential cosine kernel
+
+    ``k(x, y) = exp((<x, y> - 1) / temperature)``
+
+    is positive semidefinite and has unit diagonal.  We use at most ``D``
+    corpus landmarks to obtain a ``D``-wide Nyström map, pad only when the
+    corpus itself has fewer than ``D`` rows, and normalize every mapped row.
+    The ordinary spectral builder then merely rotates this unit-sphere feature
+    representation.  Consequently, its full-dimensional pair geometry is
+    exactly attainable by a unit-normalized ``D``-dimensional student.
+    """
+    started = time.time()
+    if embeddings.ndim != 2 or embeddings.size(0) < 2:
+        raise ValueError("teacher embeddings must be [N, D] with N >= 2")
+    if not torch.isfinite(embeddings).all():
+        raise FloatingPointError("teacher embeddings contain non-finite values")
+    if temperature <= 0:
+        raise ValueError("kernel temperature must be positive")
+    if ridge <= 0:
+        raise ValueError("kernel ridge must be positive")
+    if chunk_size <= 0:
+        raise ValueError("kernel chunk size must be positive")
+
+    raw = embeddings.detach().cpu().float()
+    n, hidden_dim = raw.shape
+    if int(dims[-1]) != hidden_dim:
+        raise ValueError(
+            f"largest dim must equal teacher width {hidden_dim}, got {dims[-1]}"
+        )
+    raw_norms = raw.norm(dim=1)
+    zero_rows = int((raw_norms <= eps).sum())
+    if zero_rows:
+        raise FloatingPointError(
+            f"teacher produced {zero_rows} near-zero embeddings; geometry is undefined"
+        )
+
+    device = compute_device or torch.device("cpu")
+    q = full_normalize(raw, eps=eps).to(device)
+    landmark_count = min(n, hidden_dim)
+    generator = torch.Generator().manual_seed(landmark_seed)
+    landmark_ids = torch.randperm(n, generator=generator)[:landmark_count]
+    landmark_ids_device = landmark_ids.to(device)
+    landmarks = q.index_select(0, landmark_ids_device)
+
+    kernel_started = time.time()
+    cross_kernel = torch.empty(
+        n, landmark_count, dtype=torch.float32, device=device
+    )
+    for start in range(0, n, chunk_size):
+        end = min(start + chunk_size, n)
+        similarities = q[start:end] @ landmarks.T
+        cross_kernel[start:end] = torch.exp(
+            (similarities.clamp(-1.0, 1.0) - 1.0) / temperature
+        )
+    # Recompute W in float64. Extracting it from the float32 cross-kernel can
+    # introduce negative eigenvalues larger than the small ridge when the
+    # landmark set is ill-conditioned.
+    landmarks_cpu = landmarks.detach().cpu().double()
+    landmark_kernel_cpu = torch.exp(
+        (
+            (landmarks_cpu @ landmarks_cpu.T).clamp(-1.0, 1.0)
+            - 1.0
+        )
+        / temperature
+    )
+    landmark_kernel_cpu = 0.5 * (
+        landmark_kernel_cpu + landmark_kernel_cpu.T
+    )
+    landmark_kernel = landmark_kernel_cpu.float().to(device)
+    kernel_seconds = time.time() - kernel_started
+
+    factor_started = time.time()
+    regularized = landmark_kernel_cpu + ridge * torch.eye(
+        landmark_count, dtype=torch.float64
+    )
+    kernel_eigenvalues, kernel_eigenvectors = torch.linalg.eigh(regularized)
+    minimum_regularized_eigenvalue = float(kernel_eigenvalues.min())
+    if minimum_regularized_eigenvalue <= 0:
+        raise FloatingPointError(
+            "regularized landmark kernel is not positive definite: "
+            f"minimum eigenvalue={minimum_regularized_eigenvalue:.3e}"
+        )
+    inverse_sqrt = (
+        kernel_eigenvectors
+        @ torch.diag(kernel_eigenvalues.rsqrt())
+        @ kernel_eigenvectors.T
+    ).float().to(device)
+    nystrom = cross_kernel @ inverse_sqrt
+    factor_seconds = time.time() - factor_started
+
+    feature_started = time.time()
+    feature_norms_before = nystrom.norm(dim=1)
+    near_zero_features = int((feature_norms_before <= eps).sum())
+    if near_zero_features:
+        raise FloatingPointError(
+            "semantic kernel produced "
+            f"{near_zero_features} near-zero Nyström rows; increase "
+            "gsr.kernel_temperature"
+        )
+    panel_count = min(n, 512)
+    panel_generator = torch.Generator().manual_seed(landmark_seed + 1)
+    panel_ids = torch.randperm(n, generator=panel_generator)[:panel_count].to(device)
+    panel_q = q.index_select(0, panel_ids)
+    exact_panel_kernel = torch.exp(
+        ((panel_q @ panel_q.T).clamp(-1.0, 1.0) - 1.0) / temperature
+    )
+    raw_panel_features = nystrom.index_select(0, panel_ids)
+    raw_panel_gram = raw_panel_features @ raw_panel_features.T
+    raw_panel_relative_error = float(
+        (raw_panel_gram - exact_panel_kernel).norm()
+        / exact_panel_kernel.norm().clamp_min(eps)
+    )
+    nystrom = full_normalize(nystrom, eps=eps)
+    spherical_panel_features = nystrom.index_select(0, panel_ids)
+    spherical_panel_gram = spherical_panel_features @ spherical_panel_features.T
+    spherical_panel_relative_error = float(
+        (spherical_panel_gram - exact_panel_kernel).norm()
+        / exact_panel_kernel.norm().clamp_min(eps)
+    )
+    if landmark_count < hidden_dim:
+        nystrom = torch.nn.functional.pad(
+            nystrom, (0, hidden_dim - landmark_count)
+        )
+    kernel_features = nystrom.detach().cpu().float()
+    feature_seconds = time.time() - feature_started
+
+    landmark_features = nystrom.index_select(0, landmark_ids_device)[
+        :, :landmark_count
+    ]
+    reconstructed_landmark_kernel = landmark_features @ landmark_features.T
+    landmark_reconstruction_error = float(
+        (reconstructed_landmark_kernel - landmark_kernel).norm()
+        / landmark_kernel.norm().clamp_min(eps)
+    )
+
+    cache = build_spectral_teacher_cache(
+        kernel_features,
+        dims,
+        eigengap_tolerance=eigengap_tolerance,
+        eps=eps,
+        refresh_index=refresh_index,
+        source_epoch=source_epoch,
+        merge_ties=merge_ties,
+    )
+    cache.diagnostics["geometry_type"] = "semantic_exponential_kernel"
+    cache.diagnostics["kernel"] = {
+        "name": "exponential_cosine",
+        "temperature": temperature,
+        "ridge": ridge,
+        "landmark_seed": landmark_seed,
+        "landmark_count": landmark_count,
+        "landmark_ids": landmark_ids.tolist(),
+        "chunk_size": chunk_size,
+        "minimum_regularized_eigenvalue": minimum_regularized_eigenvalue,
+        "maximum_regularized_eigenvalue": float(kernel_eigenvalues.max()),
+        "regularized_condition_number": float(
+            kernel_eigenvalues.max() / kernel_eigenvalues.min()
+        ),
+        "cross_kernel": {
+            "min": float(cross_kernel.min()),
+            "mean": float(cross_kernel.mean()),
+            "max": float(cross_kernel.max()),
+            "near_zero_fraction": float((cross_kernel <= eps).float().mean()),
+        },
+        "feature_norm_before_normalization": {
+            "min": float(feature_norms_before.min()),
+            "mean": float(feature_norms_before.mean()),
+            "max": float(feature_norms_before.max()),
+        },
+        "landmark_reconstruction_relative_error": landmark_reconstruction_error,
+        "approximation_panel": {
+            "sample_count": panel_count,
+            "raw_nystrom_relative_frobenius_error": raw_panel_relative_error,
+            "spherical_nystrom_relative_frobenius_error": (
+                spherical_panel_relative_error
+            ),
+        },
+        "timing": {
+            "kernel_seconds": kernel_seconds,
+            "factor_seconds": factor_seconds,
+            "feature_seconds": feature_seconds,
+        },
+    }
+    cache.diagnostics["input_raw_norm"] = {
+        "min": float(raw_norms.min()),
+        "mean": float(raw_norms.mean()),
+        "max": float(raw_norms.max()),
+    }
+    cache.diagnostics["build_seconds"] = time.time() - started
+    return cache
 
 
 @torch.no_grad()

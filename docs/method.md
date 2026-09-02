@@ -1,8 +1,8 @@
-# Geometric Successive Refinement for Matryoshka Representations
+# Kernel Geometric Successive Refinement for Matryoshka Representations
 
 ## One-sentence thesis
 
-Matryoshka prefixes should not independently imitate the same full embedding; each newly added coordinate band should recover the **next residual component of a corpus-level spectral geometry**.
+Matryoshka prefixes should not independently imitate the same full embedding; each newly added coordinate band should recover the **next residual component of a corpus-level semantic-kernel geometry**.
 
 ## 1. Motivation
 
@@ -22,7 +22,8 @@ should add beyond the previous prefix.
 
 Whole-prefix alignment does not resolve this allocation problem when its similarity is scale invariant, and redundancy penalties only state what a new band should avoid. We instead assign every band a positive target: the spectral geometry that becomes available at its additional dimensional budget.
 
-We call the resulting protocol **Geometric Successive Refinement (GSR)**.
+We call the resulting protocol **Kernel Geometric Successive Refinement
+(Kernel-GSR)**, abbreviated as `gsr` in the implementation.
 
 ## 2. Geometry branch
 
@@ -50,18 +51,48 @@ $$
 
 Thus the task branch retains standard cosine-based MRL, while the geometry branch obtains an additive decomposition aligned with the full angular representation.
 
-### 2.2 A corpus-level spectral teacher
+### 2.2 A corpus-level semantic-kernel teacher
 
-At outer iteration $t$, freeze a teacher snapshot $\bar\theta_t$ and encode the training corpus $\mathcal D=\{x_n\}_{n=1}^N$ deterministically:
-
-$$
-Q^T=[q_{\bar\theta_t}(x_1),\ldots,q_{\bar\theta_t}(x_N)]^\top\in\mathbb R^{N\times D}.
-$$
-
-Let
+After task-only warmup, freeze one teacher snapshot $\bar\theta$ and encode the
+training corpus $\mathcal D=\{x_n\}_{n=1}^N$ deterministically:
 
 $$
-X^T=C_NQ^T,
+Q=[q_{\bar\theta}(x_1),\ldots,q_{\bar\theta}(x_N)]^\top\in\mathbb R^{N\times D}.
+$$
+
+Define the positive-semidefinite exponential cosine kernel
+
+$$
+\kappa_\tau(q_i,q_j)
+=
+\exp\!\left(\frac{q_i^\top q_j-1}{\tau}\right),
+\qquad \tau>0.
+$$
+
+Its diagonal is one and it is positive semidefinite because its power-series
+expansion is a nonnegative mixture of polynomial dot-product kernels. It is
+monotone in cosine similarity and, unlike a linear Gram matrix, can represent
+nonlinear semantic neighborhoods. Construct a
+global Nyström map using a seed-fixed subset of
+$M=\min(N,D)$ corpus landmarks. With cross-kernel $C\in\mathbb R^{N\times M}$
+and landmark kernel $W\in\mathbb R^{M\times M}$,
+
+$$
+\Phi=C(W+\rho I)^{-1/2},
+\qquad
+u_n=\frac{\Phi_n}{\max(\|\Phi_n\|_2,\varepsilon)}.
+$$
+
+When $M<D$, append zero coordinates so that $u_n\in\mathbb R^D$. This occurs
+only when the corpus has fewer rows than the encoder width. The row
+normalization is important: it keeps the full teacher geometry exactly
+attainable by the unit-normalized student rather than asking a spherical
+student to match an unconstrained low-rank projection.
+
+Let $U=[u_1,\ldots,u_N]^\top$ and
+
+$$
+X^T=C_NU,
 \qquad
 C_N=I-\frac1N\mathbf 1\mathbf 1^\top,
 $$
@@ -109,7 +140,9 @@ $$
 
 where $G_T=X^T(X^T)^\top$ and $(G_T)^{[d_k]}$ is its truncated spectral approximation.
 
-Unlike a mini-batch eigendecomposition, this target is defined by corpus statistics and is not rank-limited by the optimization batch size.
+The cached teacher coordinates are $Y=X^TV$. Unlike a mini-batch
+eigendecomposition, both the Nyström landmarks and the spectrum are defined by
+the whole corpus and are not rank-limited by the optimization batch size.
 
 ## 3. Residual distance shells
 
@@ -118,11 +151,11 @@ Directly optimizing an $N\times N$ Gram matrix is unnecessary. For two corpus ex
 $$
 r_k(n,m)
 =
-\left\|V_k^\top\left(q^T_n-q^T_m\right)\right\|_2^2
+\left\|V_k^\top\left(u_n-u_m\right)\right\|_2^2
 =
-\left(q^T_n-q^T_m\right)^\top
+\left(u_n-u_m\right)^\top
 P_k
-\left(q^T_n-q^T_m\right).
+\left(u_n-u_m\right).
 $$
 
 For a student view $q^S_n=q_\theta(a(x_n))$, define the contribution of coordinate band $I_k$:
@@ -147,7 +180,7 @@ $$
 $$
 \sum_{j=1}^kr_j(n,m)
 =
-\left\|V_{1:d_k}^\top(q^T_n-q^T_m)\right\|_2^2.
+\left\|V_{1:d_k}^\top(u_n-u_m)\right\|_2^2.
 $$
 
 Let the normalized risk of shell $k$ be
@@ -168,7 +201,7 @@ c_T
 =
 \mathbb E_{n\ne m}
 \left[
-\|q^T_n-q^T_m\|_2^4
+\|u_n-u_m\|_2^4
 \right].
 $$
 
@@ -275,9 +308,9 @@ $$
 +\lambda\,
 \frac12
 \left[
-\mathcal L_{\mathrm{GSR}}(q^{S,1},q^T)
+\mathcal L_{\mathrm{GSR}}(q^{S,1},U)
 +
-\mathcal L_{\mathrm{GSR}}(q^{S,2},q^T)
+\mathcal L_{\mathrm{GSR}}(q^{S,2},U)
 \right].
 }
 $$
@@ -286,23 +319,28 @@ We restrict $\lambda\in[0,1]$.  At $\lambda=0$ the objective is exactly the
 ordinary MRL baseline; the task branch is never attenuated when geometry is
 enabled.
 
-The teacher is deterministic; only the student receives stochastic augmentation. Gradients never pass through $q^T$, $V$, or $c_T$.
+The teacher is deterministic; only the student receives stochastic augmentation. Gradients never pass through $U$, $V$, or $c_T$.
 
-### Alternating teacher refresh
+### Fixed-teacher protocol
 
 1. Warm up the student with $\mathcal L_{\mathrm{MRL}}$.
-2. Snapshot $\bar\theta\leftarrow\operatorname{sg}(\theta)$.
-3. Encode the corpus with $\bar\theta$; compute $V$, the cached teacher spectral coordinates $(Q^T-\mu_T)V$, and $c_T$.
-4. Freeze all teacher quantities and optimize the student for one outer block or epoch.
-5. Refresh the teacher and repeat.
+2. Snapshot $\bar\theta\leftarrow\operatorname{sg}(\theta)$ once.
+3. Encode the corpus with $\bar\theta$; compute its global Nyström map, $V$,
+   cached coordinates $(U-\mu_T)V$, and $c_T$.
+4. Freeze all teacher quantities for the remaining training epochs.
 
-Freezing the teacher within each outer block gives a well-defined optimization objective and avoids step-wise eigenvector chasing. The method needs no per-step eigendecomposition, projector, token selection, or inference-time component.
+This makes the auxiliary objective stationary after warmup and prevents the
+student from chasing a moving eigensystem. Periodic refresh is retained only as
+an explicit ablation. The method needs no per-step eigendecomposition,
+projector, token selection, or inference-time component.
 
 ## 6. Mathematical properties
 
 ### Proposition 1: rank-matched global refinement
 
-For each $k$, the cumulative teacher target is the best rank-$d_k$ approximation of the centered teacher Gram matrix in Frobenius norm:
+For each $k$, the cumulative teacher target is the best rank-$d_k$
+approximation of the centered, row-normalized Nyström-feature Gram matrix in
+Frobenius norm:
 
 $$
 \sum_{j=1}^kR_j
@@ -314,7 +352,10 @@ $$
 
 Each increment $R_k$ has rank at most the width of its assigned student band.
 
-**Reason.** This is the truncated eigendecomposition of $G_T$, grouped according to the Matryoshka boundaries.
+**Reason.** This is the truncated eigendecomposition of $G_T=X^T(X^T)^\top$,
+grouped according to the Matryoshka boundaries. The statement is exact for the
+constructed Nyström teacher geometry; approximation to the full exponential
+kernel is controlled separately by landmark coverage and ridge.
 
 ### Proposition 2: local shell error controls every prefix
 
@@ -333,7 +374,7 @@ $$
 \left(
 \|q^S_n[1:d_k]-q^S_m[1:d_k]\|_2^2
 -
-\|V_{1:d_k}^\top(q^T_n-q^T_m)\|_2^2
+\|V_{1:d_k}^\top(u_n-u_m)\|_2^2
 \right)^2
 \right]\\
 &\qquad=
@@ -392,17 +433,25 @@ Therefore GSR identifies the teacher principal subspace assigned to each coordin
 
 This is a **block-privileged basis** result. It guarantees the requested endpoints $d_1,\ldots,d_K$, not arbitrary truncations inside a band. Coordinate-wise identifiability would require rank-one shells or additional within-band prefix supervision.
 
-### Proposition 5: relationship to post-hoc PCA
+### Proposition 5: attainability and relationship to post-hoc kernel rotation
 
 For a frozen teacher, the construction
 
 $$
-X^S=[X^TV_1O_1\mid\cdots\mid X^TV_KO_K]
+q^S=UV
 $$
 
-achieves zero global GSR loss. Hence frozen-teacher GSR contains post-hoc PCA rotation as an exact solution.
+has unit row norm and achieves zero global GSR loss because centering adds only
+a translation, which cancels in pair distances. More generally, independent
+within-shell rotations preserve zero loss. Thus the auxiliary target is
+feasible; it does not impose incompatible distances on the spherical student.
 
-This fact bounds the claim of the method: GSR is not a new PCA algorithm. Its learning hypothesis is that **joint MRL and residual-shell supervision co-adapt the representation geometry**, producing more task-useful spectral prefixes than applying PCA after conventional training. Post-hoc PCA and a frozen-encoder learned rotation are therefore mandatory baselines, not optional ablations.
+This fact bounds the claim of the method: GSR is not a new kernel-PCA
+algorithm. Its learning hypothesis is that **joint MRL and residual-shell
+supervision co-adapt the representation geometry**, producing more task-useful
+spectral prefixes than applying the same kernel rotation after conventional
+training. Linear PCA-GSR and post-hoc kernel rotation are therefore mandatory
+ablations.
 
 ## 7. Spectral non-uniqueness
 
@@ -431,9 +480,13 @@ This makes the method honest about what the teacher spectrum can identify rather
 
 ## 8. Complexity
 
-Teacher refresh requires one corpus encoding pass and a covariance eigendecomposition. For large corpora, only the required leading eigenspaces need to be computed with randomized or incremental PCA.
+Teacher construction requires one corpus encoding pass, a chunked $N\times D$
+cross-kernel, one $D\times D$ Nyström factorization, and one $D\times D$
+covariance eigendecomposition. Its arithmetic cost is $O(ND^2+D^3)$ and its
+largest additional tensor is $O(ND)$; no $N\times N$ kernel is materialized.
 
-Teacher spectral coordinates can be cached once per outer block. Per training batch, GSR computes band-wise pair distances with cost
+Teacher spectral coordinates are cached once after warmup. Per training batch,
+GSR computes band-wise pair distances with cost
 
 $$
 O(B^2D)
@@ -447,11 +500,14 @@ The contribution is not “using PCA for Matryoshka embeddings.” PCA-guided co
 
 The proposed contribution is the combination of:
 
-1. **Residual assignment:** a one-to-one map from each nested coordinate band to a disjoint spectral increment of one global teacher geometry.
-2. **Exact successive refinement:** student coordinate distances and teacher spectral distances admit parallel additive decompositions, so local band supervision controls every cumulative prefix.
-3. **Prefix-risk majorization:** a theoretically fixed diagonal majorizer preserves each shell's cumulative prefix responsibility while removing cross-scale coupling.
-4. **Batch-rank-free stochastic training:** a pairwise U-statistic optimizes corpus geometry without constructing a corpus Gram matrix or requiring the batch size to exceed the prefix dimension.
-5. **Joint co-adaptation:** standard task supervision remains active at every prefix while the geometry objective determines what each additional band contributes.
+1. **Nonlinear global teacher:** a unit-spherical Nyström map converts semantic
+   exponential-kernel neighborhoods into an attainable $D$-dimensional corpus
+   geometry without constructing an $N\times N$ matrix.
+2. **Residual assignment:** a one-to-one map from each nested coordinate band to a disjoint spectral increment of that global teacher geometry.
+3. **Exact successive refinement:** student coordinate distances and teacher spectral distances admit parallel additive decompositions, so local band supervision controls every cumulative prefix.
+4. **Prefix-risk majorization:** a theoretically fixed diagonal majorizer preserves each shell's cumulative prefix responsibility while removing cross-scale coupling.
+5. **Batch-rank-free stochastic training:** a pairwise U-statistic optimizes corpus geometry without requiring the batch size to exceed the prefix dimension.
+6. **Joint co-adaptation:** standard task supervision remains active at every prefix while the geometry objective determines what each additional band contributes.
 
 The nearest distinctions are:
 
@@ -466,6 +522,7 @@ The nearest distinctions are:
 ### Supported by the formulation
 
 - GSR removes the mini-batch rank ceiling of batch-Gram spectral supervision.
+- The full kernel-teacher geometry is attainable by a unit-normalized student.
 - Every band receives a capacity-matched residual geometry target.
 - The proposed mini-batch estimator is unbiased for the corpus pair objective.
 - Small shell errors upper-bound the distance distortion of every supported prefix.
@@ -474,9 +531,9 @@ The nearest distinctions are:
 
 ### Require empirical evidence
 
-- Joint GSR produces better task prefixes than post-hoc PCA.
+- Joint GSR produces better task prefixes than post-hoc kernel rotation.
 - Spectral residual assignment improves downstream accuracy or robustness.
-- A particular refresh period, loss weight, or boundary schedule is optimal.
+- A particular kernel temperature, loss weight, or boundary schedule is optimal.
 - Gains correlate with spectral tail energy or baseline shell leakage.
 
 ### Claims to avoid
@@ -505,11 +562,11 @@ $$
 }.
 $$
 
-GSR predicts that reducing this off-assignment improves low-dimensional task quality when the teacher boundary eigengaps are stable. The method is falsified as a distinct training contribution if its gains are matched by post-hoc PCA or if lower shell error improves only the auxiliary geometry metric while leaving task prefixes unchanged.
+GSR predicts that reducing this off-assignment improves low-dimensional task quality when the teacher boundary eigengaps are stable. The method is falsified as a distinct training contribution if its gains are matched by post-hoc kernel rotation or if lower shell error improves only the auxiliary geometry metric while leaving task prefixes unchanged.
 
 ## 12. Core paper statement
 
-> We formulate Matryoshka representation learning as geometric successive refinement. A corpus-level teacher embedding induces a nested sequence of spectral subspaces, while Matryoshka coordinate bands induce an exactly additive sequence of pairwise distance increments. GSR assigns each coordinate band the residual spectral geometry unlocked by its additional width. A pairwise U-statistic provides unbiased mini-batch optimization without the rank ceiling of batch Gram matrices, and local shell errors provably control the geometry distortion of every supported prefix. Unlike whole-prefix PCA alignment or redundancy regularization, GSR supervises the missing geometry contributed by each newly added band while preserving task learning at every prefix.
+> We formulate Matryoshka representation learning as geometric successive refinement. A fixed corpus-level exponential-kernel teacher induces a nested sequence of spectral subspaces, while Matryoshka coordinate bands induce an exactly additive sequence of pairwise distance increments. A unit-spherical Nyström construction makes the nonlinear teacher attainable without materializing a corpus kernel matrix. GSR assigns each coordinate band the residual geometry unlocked by its additional width. A pairwise U-statistic provides unbiased mini-batch optimization without the rank ceiling of batch Gram matrices, and local shell errors provably control every supported prefix while preserving task learning at every dimension.
 
 ## References for positioning
 

@@ -9,10 +9,14 @@ model:
 matryoshka:
   dims: [16, 32, 64, 128, 256, 512, 768]
 gsr:
-  weight: 1.0
+  weight: 0.1
   warmup_epochs: 1
-  refresh_every_epochs: 1
+  refresh_every_epochs: 0
   teacher_batch_size: 64
+  teacher_geometry: semantic_kernel
+  kernel_temperature: 0.05
+  kernel_ridge: 1.0e-6
+  kernel_chunk_size: 2048
   geometry_dims: [16, 32, 64, 128, 256, 512, 768]
   eigengap_tolerance: 1.0e-6
   merge_tied_shells: true

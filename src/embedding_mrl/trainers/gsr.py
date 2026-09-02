@@ -15,6 +15,7 @@ from torch.utils.data import DataLoader, Subset
 from ..data import build_teacher_loader
 from ..gsr_teacher import (
     SpectralTeacherCache,
+    build_semantic_kernel_teacher_cache,
     build_spectral_teacher_cache,
     encode_teacher_corpus,
 )
@@ -33,7 +34,7 @@ LOGGER = logging.getLogger("embedding_mrl.train.gsr")
 
 
 class GSRTrainer(BaseTrainer):
-    """Alternating corpus-teacher refresh and minibatch U-statistic training."""
+    """Fixed global kernel teacher plus minibatch U-statistic training."""
 
     method = "gsr"
 
@@ -77,13 +78,22 @@ class GSRTrainer(BaseTrainer):
     def geometry_dims(self) -> list[int]:
         return list(self.cfg.gsr.geometry_dims or self.cfg.matryoshka.ascending)
 
+    @property
+    def objective_name(self) -> str:
+        geometry = self.cfg.gsr.teacher_geometry
+        return f"{geometry}_prefix_risk_majorizer_v1"
+
     def on_train_start(self) -> None:
         # A stale JSONL from an interrupted run must not be mixed with this run.
         self.steps_path = self.diagnostics_dir / "steps.jsonl"
         self.steps_path.write_text("", encoding="utf-8")
         save_json(
             {
-                "objective": "prefix_risk_majorizer_v1",
+                "objective": self.objective_name,
+                "teacher_geometry": self.cfg.gsr.teacher_geometry,
+                "kernel_temperature": self.cfg.gsr.kernel_temperature,
+                "kernel_ridge": self.cfg.gsr.kernel_ridge,
+                "kernel_chunk_size": self.cfg.gsr.kernel_chunk_size,
                 "geometry_dims": self.geometry_dims,
                 "warmup_epochs": self.cfg.gsr.warmup_epochs,
                 "refresh_every_epochs": self.cfg.gsr.refresh_every_epochs,
@@ -105,9 +115,9 @@ class GSRTrainer(BaseTrainer):
                 cfg.weight,
             )
             return
-        due = (
-            self.teacher_cache is None
-            or (epoch_index - cfg.warmup_epochs) % cfg.refresh_every_epochs == 0
+        due = self.teacher_cache is None or (
+            cfg.refresh_every_epochs > 0
+            and (epoch_index - cfg.warmup_epochs) % cfg.refresh_every_epochs == 0
         )
         if due:
             self._refresh_teacher(epoch_index)
@@ -128,15 +138,30 @@ class GSRTrainer(BaseTrainer):
                 device=self.device,
                 fp16=self.cfg.train.fp16,
             )
-            new_cache = build_spectral_teacher_cache(
-                embeddings,
-                self.geometry_dims,
-                eigengap_tolerance=cfg.eigengap_tolerance,
-                eps=cfg.eps,
-                refresh_index=self.teacher_refresh_count,
-                source_epoch=epoch_index,
-                merge_ties=cfg.merge_tied_shells,
-            )
+            common = {
+                "eigengap_tolerance": cfg.eigengap_tolerance,
+                "eps": cfg.eps,
+                "refresh_index": self.teacher_refresh_count,
+                "source_epoch": epoch_index,
+                "merge_ties": cfg.merge_tied_shells,
+            }
+            if cfg.teacher_geometry == "semantic_kernel":
+                new_cache = build_semantic_kernel_teacher_cache(
+                    embeddings,
+                    self.geometry_dims,
+                    temperature=cfg.kernel_temperature,
+                    ridge=cfg.kernel_ridge,
+                    chunk_size=cfg.kernel_chunk_size,
+                    landmark_seed=self.cfg.train.seed,
+                    compute_device=self.device,
+                    **common,
+                )
+            else:
+                new_cache = build_spectral_teacher_cache(
+                    embeddings,
+                    self.geometry_dims,
+                    **common,
+                )
         except Exception as exc:
             self._save_failure(
                 f"teacher_refresh:{type(exc).__name__}:{exc}",
@@ -146,7 +171,7 @@ class GSRTrainer(BaseTrainer):
             raise
 
         diagnostics = dict(new_cache.diagnostics)
-        diagnostics["objective"] = "prefix_risk_majorizer_v1"
+        diagnostics["objective"] = self.objective_name
         diagnostics["majorizer_weights"] = prefix_risk_majorizer_weights(
             len(new_cache.shells)
         )
@@ -656,7 +681,7 @@ class GSRTrainer(BaseTrainer):
         summary: dict[str, Any] = {
             "active": cache is not None,
             "refresh_count": self.teacher_refresh_count,
-            "objective": "prefix_risk_majorizer_v1",
+            "objective": self.objective_name,
         }
         if cache is not None:
             summary.update(
@@ -751,7 +776,7 @@ class GSRTrainer(BaseTrainer):
         return {
             "epoch": epoch_index + 1,
             "stage": stage,
-            "objective": "prefix_risk_majorizer_v1",
+            "objective": self.objective_name,
             "sample_count": embeddings.size(0),
             "teacher_refresh_index": self.teacher_cache.refresh_index,
             "total_loss": float(output.total_loss),
@@ -800,7 +825,11 @@ class GSRTrainer(BaseTrainer):
     def method_report_metadata(self) -> Dict[str, Any]:
         cache = self.teacher_cache
         geometry: dict[str, Any] = {
-            "objective": "prefix_risk_majorizer_v1",
+            "objective": self.objective_name,
+            "teacher_geometry": self.cfg.gsr.teacher_geometry,
+            "kernel_temperature": self.cfg.gsr.kernel_temperature,
+            "kernel_ridge": self.cfg.gsr.kernel_ridge,
+            "kernel_chunk_size": self.cfg.gsr.kernel_chunk_size,
             "geometry_dims": self.geometry_dims,
             "weight": self.cfg.gsr.weight,
             "warmup_epochs": self.cfg.gsr.warmup_epochs,

@@ -154,6 +154,13 @@ def test_gsr_writes_teacher_and_debug_artifacts(tmp_path, offline_backbone):
     assert (diagnostics / "teacher_epoch1.json").exists()
     assert (diagnostics / "teacher_epoch1.pt").exists()
     assert (diagnostics / "geometry_epoch1.json").exists()
+    teacher_record = json.loads(
+        (diagnostics / "teacher_epoch1.json").read_text()
+    )
+    assert teacher_record["geometry_type"] == "semantic_exponential_kernel"
+    assert teacher_record["kernel"]["landmark_count"] == 16
+    assert "regularized_condition_number" in teacher_record["kernel"]
+    assert "approximation_panel" in teacher_record["kernel"]
     records = [
         json.loads(line)
         for line in (diagnostics / "steps.jsonl").read_text().splitlines()
@@ -182,6 +189,23 @@ def test_gsr_warmup_and_refresh_schedule(tmp_path, offline_backbone):
     assert outcome["history"][-1]["gsr"]["refresh_count"] == 1
     assert (tmp_path / "diagnostics" / "teacher_epoch2.json").exists()
     assert not (tmp_path / "diagnostics" / "teacher_epoch3.json").exists()
+
+
+def test_gsr_default_teacher_stays_fixed_after_warmup(
+    tmp_path, offline_backbone
+):
+    cfg = make_config(
+        "gsr",
+        tmp_path,
+        train={"epochs": 3},
+        gsr={"warmup_epochs": 1},
+    )
+    outcome = build_trainer(cfg).train()
+
+    assert outcome["history"][-1]["gsr"]["refresh_count"] == 1
+    diagnostics = tmp_path / "diagnostics"
+    assert (diagnostics / "teacher_epoch2.json").exists()
+    assert not (diagnostics / "teacher_epoch3.json").exists()
 
 
 def test_gsr_nonfinite_teacher_target_writes_failure_dump(
