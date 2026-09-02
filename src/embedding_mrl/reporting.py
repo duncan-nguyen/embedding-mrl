@@ -65,6 +65,7 @@ def build_report(
     results: Dict[str, Any],
     history: Optional[List[Dict[str, Any]]] = None,
     duration_seconds: Optional[float] = None,
+    method_metadata: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     """Assemble the final report dict written to ``results.json``."""
     history = history or []
@@ -102,6 +103,7 @@ def build_report(
         "summary": results.get("summary", {}),
         "table": build_dimension_table(results),
     }
+    report.update(method_metadata or {})
     return report
 
 

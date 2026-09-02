@@ -13,7 +13,7 @@ CONFIGS = sorted(p for p in (REPO_ROOT / "configs").rglob("*.yaml") if p.name !=
 @pytest.mark.parametrize("path", CONFIGS, ids=lambda p: f"{p.parent.name}/{p.stem}")
 def test_shipped_configs_load(path):
     cfg = ExperimentConfig.load(path)
-    assert cfg.method in ("mrl", "ese", "mipic")
+    assert cfg.method in ("mrl", "ese", "mipic", "gsr")
     assert max(cfg.matryoshka.dims) == cfg.model.hidden_dim
     assert Path(cfg.data.train_path).exists()
 
@@ -62,7 +62,7 @@ def test_mipic_layers_and_checkpoints_match_appendix_a5(name, layers, checkpoint
 
 
 def test_there_is_one_config_per_method_and_model():
-    assert len(CONFIGS) == 12  # 3 methods x 4 backbones
+    assert len(CONFIGS) == 16  # 4 methods x 4 backbones
 
 
 def test_base_inheritance_and_override(tmp_path):
@@ -125,6 +125,33 @@ def test_gamma_schedule_must_match_the_truncated_prefixes():
         ExperimentConfig.from_dict(
             {"method": "mipic", "mipic": {"gamma_schedule": [0.2, 0.3]}}
         )
+
+
+def test_gsr_requires_an_active_epoch_and_full_geometry_endpoint():
+    with pytest.raises(ValueError, match="warmup_epochs must be smaller"):
+        ExperimentConfig.from_dict(
+            {"method": "gsr", "train": {"epochs": 1}, "gsr": {"warmup_epochs": 1}}
+        )
+    with pytest.raises(ValueError, match="largest GSR geometry dimension"):
+        ExperimentConfig.from_dict(
+            {
+                "method": "gsr",
+                "model": {"hidden_dim": 768},
+                "matryoshka": {"dims": [16, 32, 768]},
+                "gsr": {"geometry_dims": [16, 32], "warmup_epochs": 0},
+            }
+        )
+
+
+def test_gsr_can_be_intentionally_disabled_during_all_epochs():
+    cfg = ExperimentConfig.from_dict(
+        {
+            "method": "gsr",
+            "train": {"epochs": 1},
+            "gsr": {"weight": 0.0, "warmup_epochs": 1},
+        }
+    )
+    assert cfg.gsr.weight == 0.0
 
 
 # --------------------------------------------------------------------------- #

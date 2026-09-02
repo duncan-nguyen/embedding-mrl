@@ -3,6 +3,7 @@
 from ..config import ExperimentConfig
 from .base import BaseTrainer
 from .ese import ESETrainer
+from .gsr import GSRTrainer
 from .mipic import MIPICTrainer
 from .mrl import MRLTrainer
 
@@ -10,6 +11,7 @@ TRAINERS = {
     "mrl": MRLTrainer,
     "ese": ESETrainer,
     "mipic": MIPICTrainer,
+    "gsr": GSRTrainer,
 }
 
 
@@ -26,6 +28,7 @@ __all__ = [
     "MRLTrainer",
     "ESETrainer",
     "MIPICTrainer",
+    "GSRTrainer",
     "TRAINERS",
     "build_trainer",
 ]

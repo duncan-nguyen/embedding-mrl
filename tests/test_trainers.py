@@ -10,7 +10,7 @@ from embedding_mrl.config import ExperimentConfig
 from embedding_mrl.trainers import TRAINERS, build_trainer
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-METHODS = ["mrl", "ese", "mipic"]
+METHODS = ["mrl", "ese", "mipic", "gsr"]
 
 
 def make_config(method: str, output_dir: Path, **extra) -> ExperimentConfig:
@@ -43,6 +43,13 @@ def make_config(method: str, output_dir: Path, **extra) -> ExperimentConfig:
             "checkpoints": [[8, 1], [16, 3], [32, 4]],
             "gamma_schedule": [0.3, 0.5],
             "k_min": 2,
+        },
+        "gsr": {
+            "warmup_epochs": 0,
+            "teacher_batch_size": 8,
+            "diagnostics_every_steps": 1,
+            "diagnostic_samples": 8,
+            "diagnostic_pairs": 32,
         },
     }
     for key, value in extra.items():
@@ -133,6 +140,65 @@ def test_scheduler_covers_exactly_one_pass_over_the_data(tmp_path, offline_backb
 
 def test_every_method_has_a_trainer():
     assert sorted(TRAINERS) == sorted(METHODS)
+
+
+def test_gsr_writes_teacher_and_debug_artifacts(tmp_path, offline_backbone):
+    trainer = build_trainer(make_config("gsr", tmp_path))
+    outcome = trainer.train()
+
+    assert outcome["history"][0]["gsr"]["active"] is True
+    diagnostics = tmp_path / "diagnostics"
+    assert (diagnostics / "teacher_epoch1.json").exists()
+    assert (diagnostics / "teacher_epoch1.pt").exists()
+    assert (diagnostics / "geometry_epoch1.json").exists()
+    records = [
+        json.loads(line)
+        for line in (diagnostics / "steps.jsonl").read_text().splitlines()
+    ]
+    assert records
+    assert records[0]["metrics"]["gsr/active"] == 1.0
+    assert "gradient_conflict" in records[0]
+    assert "step_seconds" in records[0]
+    assert "gradient" in records[0]
+
+
+def test_gsr_warmup_and_refresh_schedule(tmp_path, offline_backbone):
+    cfg = make_config(
+        "gsr",
+        tmp_path,
+        train={"epochs": 3},
+        gsr={"warmup_epochs": 1, "refresh_every_epochs": 2},
+    )
+    outcome = build_trainer(cfg).train()
+
+    assert [record["gsr"]["active"] for record in outcome["history"]] == [
+        False,
+        True,
+        True,
+    ]
+    assert outcome["history"][-1]["gsr"]["refresh_count"] == 1
+    assert (tmp_path / "diagnostics" / "teacher_epoch2.json").exists()
+    assert not (tmp_path / "diagnostics" / "teacher_epoch3.json").exists()
+
+
+def test_gsr_nonfinite_teacher_target_writes_failure_dump(
+    tmp_path, offline_backbone
+):
+    trainer = build_trainer(make_config("gsr", tmp_path))
+    trainer.on_train_start()
+    trainer.on_epoch_start(0)
+    assert trainer.teacher_cache is not None
+    trainer.teacher_cache.scores.fill_(float("nan"))
+    batch = trainer._to_device(next(iter(trainer.train_loader)))
+
+    with pytest.raises(FloatingPointError, match="non-finite GSR training loss"):
+        trainer.compute_loss(batch)
+
+    dump = tmp_path / "diagnostics" / "failure_step0.pt"
+    assert dump.exists()
+    payload = torch.load(dump, weights_only=False)
+    assert payload["reason"] == "nonfinite_loss"
+    assert payload["context"]["sample_ids"].numel() == 8
 
 
 def _write_tiny_eval_corpus(root: Path) -> None:
@@ -277,6 +343,9 @@ def test_training_ends_with_an_evaluation_report_on_disk(method, tmp_path, offli
     assert report["training"]["final_loss"] == pytest.approx(outcome["history"][0]["train_loss"])
     assert set(report["table"]) == {f"dim_{d}" for d in cfg.matryoshka.dims}
     assert report["table"]["dim_32"]["mean/sts"] == report["summary"]["sts"]["dim_32"]
+    if method == "gsr":
+        assert report["geometry"]["teacher_refreshes"] == 1
+        assert report["geometry"]["steps_path"] == "diagnostics/steps.jsonl"
 
 
 def test_eval_only_writes_the_same_report(tmp_path, offline_backbone):

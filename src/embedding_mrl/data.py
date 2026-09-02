@@ -141,21 +141,20 @@ def _require(paths: Sequence[Path]) -> None:
 # Training data (unsupervised SimCSE: the same sentence forms both views)
 # --------------------------------------------------------------------------- #
 class SimCSEPairDataset(Dataset):
-    """Yields ``(sentence, sentence)`` - dropout inside the encoder makes the views differ."""
+    """Yields a stable row id plus one sentence used for both SimCSE views."""
 
     def __init__(self, frame: pd.DataFrame, text_column: str = "text"):
         if text_column not in frame.columns:
             raise KeyError(
                 f"train file needs a {text_column!r} column, found {list(frame.columns)}"
             )
-        texts = frame[text_column].astype(str).tolist()
-        self.samples: list[tuple[str, str]] = [(t, t) for t in texts]
+        self.samples = frame[text_column].astype(str).tolist()
 
     def __len__(self) -> int:
         return len(self.samples)
 
-    def __getitem__(self, idx: int) -> tuple[str, str]:
-        return self.samples[idx]
+    def __getitem__(self, idx: int) -> dict[str, object]:
+        return {"sample_id": idx, "text": self.samples[idx]}
 
 
 class SimCSECollator:
@@ -165,12 +164,15 @@ class SimCSECollator:
         self.tokenizer = tokenizer
         self.max_length = max_length
 
-    def __call__(self, batch: Sequence[tuple[str, str]]) -> dict[str, torch.Tensor]:
-        view1, view2 = zip(*batch)
-        enc1 = self._encode(list(view1))
-        enc2 = self._encode(list(view2))
+    def __call__(self, batch: Sequence[dict[str, object]]) -> dict[str, torch.Tensor]:
+        texts = [str(item["text"]) for item in batch]
+        enc1 = self._encode(texts)
+        enc2 = self._encode(texts)
 
         out = {
+            "sample_ids": torch.tensor(
+                [int(item["sample_id"]) for item in batch], dtype=torch.long
+            ),
             "input_ids1": enc1["input_ids"],
             "attention_mask1": enc1["attention_mask"],
             "input_ids2": enc2["input_ids"],
@@ -193,6 +195,33 @@ class SimCSECollator:
         )
 
 
+class TeacherCollator:
+    """Tokenise one deterministic corpus view while preserving stable row ids."""
+
+    def __init__(self, tokenizer, max_length: int):
+        self.tokenizer = tokenizer
+        self.max_length = max_length
+
+    def __call__(self, batch: Sequence[dict[str, object]]) -> dict[str, torch.Tensor]:
+        encoded = self.tokenizer(
+            [str(item["text"]) for item in batch],
+            max_length=self.max_length,
+            truncation=True,
+            padding=True,
+            return_tensors="pt",
+        )
+        out = {
+            "sample_ids": torch.tensor(
+                [int(item["sample_id"]) for item in batch], dtype=torch.long
+            ),
+            "input_ids": encoded["input_ids"],
+            "attention_mask": encoded["attention_mask"],
+        }
+        if "token_type_ids" in encoded:
+            out["token_type_ids"] = encoded["token_type_ids"]
+        return out
+
+
 def build_train_loader(
     tokenizer, data_cfg: DataConfig, batch_size: int, shuffle: bool = True
 ) -> DataLoader:
@@ -210,6 +239,30 @@ def build_train_loader(
         batch_size=batch_size,
         shuffle=shuffle,
         collate_fn=collator,
+        pin_memory=torch.cuda.is_available(),
+        num_workers=data_cfg.num_workers,
+        persistent_workers=data_cfg.num_workers > 0,
+        drop_last=False,
+    )
+
+
+def build_teacher_loader(
+    tokenizer, data_cfg: DataConfig, batch_size: int
+) -> DataLoader:
+    """Deterministic, non-shuffled pass over the exact configured train corpus."""
+    path = data_cfg.train_path
+    if not path.exists():
+        raise FileNotFoundError(f"training file not found: {path}")
+    frame = pd.read_csv(path)
+    if data_cfg.max_train_samples is not None:
+        frame = frame.head(data_cfg.max_train_samples)
+
+    dataset = SimCSEPairDataset(frame, data_cfg.text_column)
+    return DataLoader(
+        dataset,
+        batch_size=batch_size,
+        shuffle=False,
+        collate_fn=TeacherCollator(tokenizer, data_cfg.max_length),
         pin_memory=torch.cuda.is_available(),
         num_workers=data_cfg.num_workers,
         persistent_workers=data_cfg.num_workers > 0,

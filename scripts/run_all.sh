@@ -2,7 +2,7 @@
 #
 # Run every experiment in sequence. Works on the host and inside the container.
 #
-#   ./scripts/run_all.sh                 # all 12
+#   ./scripts/run_all.sh                 # all 16
 #   ./scripts/run_all.sh mipic           # one method
 #   ./scripts/run_all.sh mipic/bgem3     # one experiment
 #

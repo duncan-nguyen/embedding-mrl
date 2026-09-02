@@ -1,0 +1,24 @@
+_base_: ../base.yaml
+name: gsr_bgem3
+method: gsr
+model:
+  name_or_path: BAAI/bge-m3
+  hidden_dim: 1024
+  pooling: cls
+  trust_remote_code: false
+matryoshka:
+  dims: [16, 32, 64, 128, 256, 512, 1024]
+gsr:
+  weight: 1.0
+  warmup_epochs: 1
+  refresh_every_epochs: 1
+  teacher_batch_size: 64
+  geometry_dims: [16, 32, 64, 128, 256, 512, 1024]
+  eigengap_tolerance: 1.0e-6
+  merge_tied_shells: true
+  diagnostics_every_steps: 100
+  diagnostic_samples: 512
+  diagnostic_pairs: 8192
+  save_teacher_tensors: true
+train:
+  output_dir: outputs/gsr_bgem3

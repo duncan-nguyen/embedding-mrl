@@ -1,11 +1,11 @@
 # Matryoshka Representation Learning: ACL Conference Experiments
 
-Experimental code for an ACL submission comparing three ways to train Matryoshka
+Experimental code comparing four ways to train Matryoshka
 embedding models — representations that stay useful when truncated to
 `[16, 32, 64, 128, 256, 512, 1024]` (or `768`), so inference cost can be traded
 against quality at serving time.
 
-Three methods × four backbones = twelve experiments, all driven by one CLI and
+Four methods × four backbones = sixteen experiments, all driven by one CLI and
 one YAML file each.
 
 ## Layout
@@ -19,7 +19,7 @@ src/embedding_mrl/
   config.py         dataclass config, YAML inheritance, CLI overrides
   data.py           datasets, collators, task→CSV registry
   pooling.py        cls / mean / last-token pooling
-  losses/           infonce.py, cka.py, ese.py, mipic.py
+  losses/           infonce.py, cka.py, ese.py, mipic.py, gsr.py
   evaluation.py     the Matryoshka evaluation suite
   reporting.py      results.json / results.csv
   trainers/         base.py + one trainer per method
@@ -29,7 +29,7 @@ scripts/run_all.sh  run every experiment in sequence
 notebooks/colab/     run_experiment.ipynb — one experiment on Colab, GPU included
 Dockerfile          self-contained training image (code + data + models)
 docker/             build/push scripts, model baking, docker docs
-tests/              135 tests, fully offline (no model downloads)
+tests/              fully offline tests (no model downloads)
 notebooks/          the original notebooks, kept for reference
 ```
 
@@ -86,6 +86,8 @@ disk. Artifacts land in `train.output_dir`:
 | `results_epoch{N}.json` | raw scores after epoch N (only when `eval.every_epoch` is true) |
 | `history.json` | per-epoch train loss + summary metrics |
 | `config.yaml` | the resolved config the run actually used |
+| `train.log` | persistent training log |
+| `diagnostics/` | GSR teacher summaries/caches, fixed-panel geometry, periodic step JSONL, and failure dumps |
 | `encoder/` | trained weights + tokenizer |
 
 `results.json` looks like this:
@@ -128,19 +130,20 @@ To evaluate only at the end instead of after every epoch (much faster), set
 `eval.every_epoch: false`. To score an already-trained checkpoint, use
 `--eval-only`; it writes the same `results.json` / `results.csv`.
 
-## The twelve configs
+## The sixteen configs
 
 | | BERT (768) | TinyBERT-6L (768) | BGE-M3 (1024) | Qwen3-0.6B (1024) |
 | --- | --- | --- | --- | --- |
 | **MRL** | `configs/mrl/bert.yaml` | `configs/mrl/tinybert_6l.yaml` | `configs/mrl/bgem3.yaml` | `configs/mrl/qwen3_0.6b.yaml` |
 | **ESE** | `configs/ese/bert.yaml` | `configs/ese/tinybert_6l.yaml` | `configs/ese/bgem3.yaml` | `configs/ese/qwen3_0.6b.yaml` |
 | **MIPIC** | `configs/mipic/bert.yaml` | `configs/mipic/tinybert_6l.yaml` | `configs/mipic/bgem3.yaml` | `configs/mipic/qwen3_0.6b.yaml` |
+| **GSR** | `configs/gsr/bert.yaml` | `configs/gsr/tinybert_6l.yaml` | `configs/gsr/bgem3.yaml` | `configs/gsr/qwen3_0.6b.yaml` |
 
 Each inherits `configs/base.yaml` via `_base_` and overrides only what differs.
 
 ## Methods
 
-All three train a bi-encoder with unsupervised SimCSE: the same sentence is
+All four train a bi-encoder with unsupervised SimCSE: the same sentence is
 encoded twice, and dropout makes the two views differ.
 
 ### MRL (baseline) — `losses/infonce.py`
@@ -207,6 +210,24 @@ L_PIC = Σ_i L_chain^(i)
 L_MIPIC = α·L_MRL + (1 − α)·(L_SIA + L_PIC)
 ```
 
+### GSR (our method) — `losses/gsr.py`
+
+Geometric Successive Refinement builds a frozen spectral teacher from one
+deterministic pass of the current encoder over the whole training corpus. It
+assigns successive PCA residual-distance shells to successive native coordinate
+bands, then estimates each shell loss from all unordered pairs in the current
+mini-batch:
+
+```text
+L_GSR = mean_k mean_{i<j} (s_ij^k - r_ij^k)^2 / c_teacher
+L = L_MRL + λ L_GSR
+```
+
+The PCA is global rather than batch-local, so batch size controls estimator
+variance but does not cap the available spectral rank. The same encoder is used
+to refresh the teacher between epochs; no teacher model is needed at inference.
+See [docs/method.md](docs/method.md) for the complete formulation.
+
 ## Evaluation
 
 Every task is scored at all seven Matryoshka dimensions.
@@ -246,7 +267,7 @@ Values follow Table 7 and Appendix A.5 of the paper.
 | Temperature τ | 0.05 |
 | Matryoshka dims | 16, 32, 64, 128, 256, 512, 768 / 1024 |
 | Precision | FP16 autocast |
-| Pooling | CLS for MRL/MIPIC, mean for ESE |
+| Pooling | CLS for MRL/MIPIC/GSR, mean for ESE |
 
 MIPIC's per-backbone settings (Table 7 for `α`, Appendix A.5 for `L` and `C`):
 
@@ -318,10 +339,10 @@ including image size and how to bake fewer models, are in
 pytest
 ```
 
-135 tests covering config inheritance and validation, the task registry against
+The tests cover config inheritance and validation, the task registry against
 the real `data/` files, loss maths (gradient flow, masking, CKA invariances,
 top-`k` selection), pooling, evaluation metrics, and one-epoch training runs for
-all three methods. They use a locally built stub encoder, so nothing is
+all four methods. They use a locally built stub encoder, so nothing is
 downloaded and the suite finishes in seconds.
 
 ## Notes on the refactor

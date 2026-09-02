@@ -12,10 +12,15 @@ from embedding_mrl.losses import (
     PerExampleCKALoss,
     PipelineInfoNCELoss,
     TopKCKAAlignment,
+    build_shell_slices,
+    condensed_squared_distances,
     epresso_simcse,
     epresso_simcse_from_hidden_states,
     info_nce,
+    full_normalize,
+    gsr_shell_loss,
     matryoshka_info_nce,
+    merge_tied_shells,
 )
 
 DIMS = [4, 8, 16, 32]
@@ -63,6 +68,73 @@ def test_matryoshka_info_nce_backpropagates():
     b = torch.randn(B, D, requires_grad=True)
     matryoshka_info_nce(a, b, nested_dims=DIMS)[0].backward()
     assert a.grad is not None and torch.isfinite(a.grad).all()
+
+
+def test_full_normalization_preserves_prefix_cosine():
+    x = torch.randn(B, D)
+    y = torch.randn(B, D)
+    qx = full_normalize(x)
+    qy = full_normalize(y)
+    for dim in DIMS:
+        expected = torch.nn.functional.cosine_similarity(x[:, :dim], y[:, :dim])
+        actual = torch.nn.functional.cosine_similarity(qx[:, :dim], qy[:, :dim])
+        assert torch.allclose(actual, expected, atol=1e-6)
+
+
+def test_shell_distances_add_to_the_full_distance():
+    points = torch.randn(B, D)
+    shells = build_shell_slices(DIMS, full_dim=D)
+    shell_distances = sum(
+        condensed_squared_distances(points[:, start:end]) for start, end in shells
+    )
+    assert torch.allclose(
+        shell_distances, condensed_squared_distances(points), atol=1e-5
+    )
+
+
+def test_gsr_is_zero_for_matching_shell_geometries_and_only_grads_student():
+    teacher = torch.randn(B, D)
+    student = teacher.clone().requires_grad_()
+    out = gsr_shell_loss(student, teacher, build_shell_slices(DIMS), c_teacher=1.0)
+    assert out.total_loss.item() == pytest.approx(0.0, abs=1e-8)
+    out.total_loss.backward()
+    assert student.grad is not None
+    assert teacher.grad is None
+
+
+def test_gsr_supports_shells_wider_than_the_batch():
+    student = torch.randn(3, D, requires_grad=True)
+    teacher = torch.randn(3, D)
+    out = gsr_shell_loss(student, teacher, [(0, 4), (4, 32)], c_teacher=1.0)
+    assert torch.isfinite(out.total_loss)
+    assert out.teacher_distances["dim_4_32"].abs().sum() > 0
+    out.total_loss.backward()
+    assert torch.isfinite(student.grad).all()
+
+
+def test_gsr_batch_loss_is_an_unbiased_pair_estimator():
+    student = torch.randn(4, 4)
+    teacher = torch.randn(4, 4)
+    shells = [(0, 2), (2, 4)]
+    corpus_loss = gsr_shell_loss(student, teacher, shells, c_teacher=1.0).total_loss
+
+    pair_losses = []
+    for left in range(4):
+        for right in range(left + 1, 4):
+            ids = torch.tensor([left, right])
+            pair_losses.append(
+                gsr_shell_loss(
+                    student[ids], teacher[ids], shells, c_teacher=1.0
+                ).total_loss
+            )
+    assert torch.allclose(torch.stack(pair_losses).mean(), corpus_loss, atol=1e-6)
+
+
+def test_tied_eigenvalue_boundary_is_merged():
+    eigenvalues = torch.tensor([3.0, 2.0, 2.0, 1.0])
+    shells, merged = merge_tied_shells([2, 4], eigenvalues, tolerance=0.0)
+    assert shells == [(0, 4)]
+    assert merged == [2]
 
 
 def test_epresso_weights_smaller_dims_more():

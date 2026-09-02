@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import math
 import time
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
@@ -44,6 +45,10 @@ class BaseTrainer(ABC):
         self.device = pick_device()
         self.output_dir = Path(cfg.train.output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
+        self._attach_file_logger()
+        self.epoch_index = -1
+        self.step_in_epoch = 0
+        self.global_step = 0
 
         LOGGER.info("Loading %s", cfg.model.name_or_path)
         self.tokenizer = AutoTokenizer.from_pretrained(
@@ -110,6 +115,42 @@ class BaseTrainer(ABC):
     def setup_modules(self) -> None:
         """Instantiate any trainable loss modules (MIPIC alignment heads)."""
 
+    def on_train_start(self) -> None:
+        """Hook called once after config persistence and before the first epoch."""
+
+    def on_epoch_start(self, epoch_index: int) -> None:
+        """Hook called before modules are switched back to training mode."""
+
+    def on_after_backward(
+        self,
+        epoch_index: int,
+        step: int,
+        loss: torch.Tensor,
+        logs: Dict[str, float],
+    ) -> None:
+        """Hook called with unscaled gradients before clipping and optimiser step."""
+
+    def on_after_step(
+        self,
+        epoch_index: int,
+        step: int,
+        loss: torch.Tensor,
+        logs: Dict[str, float],
+        step_seconds: float,
+    ) -> None:
+        """Hook called after the optimiser and scheduler have completed a step."""
+
+    def on_epoch_end(self, epoch_index: int, record: Dict[str, Any]) -> None:
+        """Hook allowed to append method-specific values to the epoch record."""
+
+    def method_report_metadata(self) -> Dict[str, Any]:
+        """Small method-specific summary included in the final report."""
+        return {}
+
+    def progress_metrics(self, logs: Dict[str, float]) -> Dict[str, float]:
+        """Metrics shown by tqdm; subclasses may keep a large log dict compact."""
+        return logs
+
     @abstractmethod
     def compute_loss(
         self, batch: Dict[str, torch.Tensor]
@@ -139,10 +180,32 @@ class BaseTrainer(ABC):
 
     def _to_device(self, batch: Dict[str, torch.Tensor]) -> Dict[str, torch.Tensor]:
         return {
-            key: value.to(self.device, non_blocking=True)
+            key: value
+            if key == "sample_ids"
+            else value.to(self.device, non_blocking=True)
             for key, value in batch.items()
             if torch.is_tensor(value)
         }
+
+    def _attach_file_logger(self) -> None:
+        """Persist the package log without adding duplicate handlers in tests."""
+        path = (self.output_dir / "train.log").resolve()
+        package_logger = logging.getLogger("embedding_mrl")
+        for handler in list(package_logger.handlers):
+            if not getattr(handler, "_embedding_mrl_run_file", False):
+                continue
+            if Path(handler.baseFilename).resolve() == path:
+                return
+            package_logger.removeHandler(handler)
+            handler.close()
+        handler = logging.FileHandler(path, encoding="utf-8")
+        handler._embedding_mrl_run_file = True  # type: ignore[attr-defined]
+        handler.setFormatter(
+            logging.Formatter(
+                "%(asctime)s | %(levelname)-7s | %(message)s", datefmt="%H:%M:%S"
+            )
+        )
+        package_logger.addHandler(handler)
 
     def _set_train_mode(self) -> None:
         for module in self.trainable_modules():
@@ -152,7 +215,6 @@ class BaseTrainer(ABC):
         max_norm = self.cfg.train.max_grad_norm
         if not max_norm:
             return
-        self.scaler.unscale_(self.optimizer)
         for module in self.trainable_modules():
             torch.nn.utils.clip_grad_norm_(module.parameters(), max_norm=max_norm)
 
@@ -162,14 +224,22 @@ class BaseTrainer(ABC):
         self.cfg.dump(self.output_dir / "config.yaml")
         last_results: Optional[Dict[str, Any]] = None
         run_started = time.time()
+        self.on_train_start()
 
         for epoch in range(cfg.train.epochs):
+            self.epoch_index = epoch
+            self.on_epoch_start(epoch)
             self._set_train_mode()
             running_loss, seen = 0.0, 0
+            running_metrics: Dict[str, float] = {}
+            running_metric_weights: Dict[str, int] = {}
             started = time.time()
             pbar = tqdm(self.train_loader, desc=f"Epoch {epoch + 1}/{cfg.train.epochs}")
 
             for step, raw_batch in enumerate(pbar, start=1):
+                step_started = time.time()
+                self.step_in_epoch = step
+                self.global_step += 1
                 batch = self._to_device(raw_batch)
                 self.optimizer.zero_grad(set_to_none=True)
 
@@ -178,19 +248,40 @@ class BaseTrainer(ABC):
                     loss = loss.float()
 
                 self.scaler.scale(loss).backward()
+                self.scaler.unscale_(self.optimizer)
+                self.on_after_backward(epoch, step, loss, logs)
                 self._clip_gradients()
                 self.scaler.step(self.optimizer)
                 self.scaler.update()
                 self.scheduler.step()
+                self.on_after_step(
+                    epoch,
+                    step,
+                    loss,
+                    logs,
+                    time.time() - step_started,
+                )
 
                 batch_size = batch["input_ids1"].size(0)
                 running_loss += loss.item() * batch_size
                 seen += batch_size
+                for key, value in logs.items():
+                    numeric = float(value)
+                    if math.isfinite(numeric):
+                        running_metrics[key] = (
+                            running_metrics.get(key, 0.0) + numeric * batch_size
+                        )
+                        running_metric_weights[key] = (
+                            running_metric_weights.get(key, 0) + batch_size
+                        )
 
                 pbar.set_postfix(
                     {
                         "avg_loss": f"{running_loss / max(1, seen):.4f}",
-                        **{k: f"{v:.4f}" for k, v in logs.items()},
+                        **{
+                            k: f"{v:.4f}"
+                            for k, v in self.progress_metrics(logs).items()
+                        },
                         **cuda_memory_info(),
                     }
                 )
@@ -210,6 +301,11 @@ class BaseTrainer(ABC):
                 time.time() - started,
             )
             record: Dict[str, Any] = {"epoch": epoch + 1, "train_loss": epoch_loss}
+            if running_metrics:
+                record["train_metrics"] = {
+                    key: value / running_metric_weights[key]
+                    for key, value in sorted(running_metrics.items())
+                }
 
             is_last = epoch == cfg.train.epochs - 1
             if self.evaluator and (cfg.eval.every_epoch or is_last):
@@ -224,6 +320,7 @@ class BaseTrainer(ABC):
                 )
                 record["eval"] = last_results["summary"]
 
+            self.on_epoch_end(epoch, record)
             self.history.append(record)
             save_json(self.history, self.output_dir / "history.json")
 
@@ -244,7 +341,13 @@ class BaseTrainer(ABC):
         self, results: Dict[str, Any], duration_seconds: Optional[float] = None
     ) -> Dict[str, Any]:
         """Assemble and persist ``results.json`` / ``results.csv``, then log the table."""
-        report = build_report(self.cfg, results, self.history, duration_seconds)
+        report = build_report(
+            self.cfg,
+            results,
+            self.history,
+            duration_seconds,
+            method_metadata=self.method_report_metadata(),
+        )
         path = write_report(report, self.output_dir)
         LOGGER.info(
             "Final results for %s on the %s split (mean over tasks):\n%s",

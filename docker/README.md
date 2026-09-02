@@ -37,7 +37,7 @@ DOCKERHUB_USER=yourname \
 `PUSH=0` builds without pushing. `make build` / `make push` wrap the same script.
 
 The build **fails fast** if anything is wrong: every baked checkpoint must load
-offline (`docker/verify_models.py`), the test suite must pass, and all twelve
+offline (`docker/verify_models.py`), the test suite must pass, and all sixteen
 configs must resolve. Pass `VERIFY_MODELS=0` to skip the model check while
 iterating.
 

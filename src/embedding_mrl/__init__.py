@@ -1,4 +1,4 @@
-"""Matryoshka embedding experiments (MRL / ESE / MIPIC) as an importable package."""
+"""Matryoshka embedding experiments (MRL / ESE / MIPIC / GSR)."""
 
 from .config import ExperimentConfig
 

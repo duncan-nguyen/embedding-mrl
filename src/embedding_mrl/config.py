@@ -15,7 +15,7 @@ from typing import Any
 
 import yaml
 
-METHODS = ("mrl", "ese", "mipic")
+METHODS = ("mrl", "ese", "mipic", "gsr")
 POOLING_MODES = ("cls", "mean", "last")
 
 
@@ -127,6 +127,14 @@ class MatryoshkaConfig:
 
     dims: list[int] = field(default_factory=lambda: [16, 32, 64, 128, 256, 512, 768])
     temperature: float = 0.07
+
+    def __post_init__(self) -> None:
+        if not self.dims or self.dims != sorted(set(self.dims)):
+            raise ValueError(
+                f"matryoshka.dims must be non-empty and strictly increasing, got {self.dims}"
+            )
+        if any(dim <= 0 for dim in self.dims):
+            raise ValueError(f"matryoshka.dims must be positive, got {self.dims}")
 
     @property
     def descending(self) -> list[int]:
@@ -265,6 +273,79 @@ class MIPICConfig:
         return self.alpha
 
 
+@dataclass
+class GSRConfig:
+    """Geometric Successive Refinement on corpus-level spectral shells."""
+
+    weight: float = 1.0
+    warmup_epochs: int = 1
+    refresh_every_epochs: int = 1
+    teacher_batch_size: int = 64
+    #: ``None`` reuses every Matryoshka endpoint.
+    geometry_dims: list[int] | None = None
+    #: Only merges numerical ties; near-gap sensitivity remains a diagnostic.
+    eigengap_tolerance: float = 1e-6
+    merge_tied_shells: bool = True
+    eps: float = 1e-8
+    cache_dtype: str = "float32"
+    save_teacher_tensors: bool = True
+    diagnostics_every_steps: int = 100
+    diagnostic_samples: int = 512
+    diagnostic_pairs: int = 8192
+    fail_on_nonfinite: bool = True
+
+    def __post_init__(self) -> None:
+        numeric_positive = {
+            "weight": self.weight,
+            "eigengap_tolerance": self.eigengap_tolerance,
+            "eps": self.eps,
+        }
+        for name, value in numeric_positive.items():
+            if not isinstance(value, (int, float)) or isinstance(value, bool):
+                raise TypeError(f"gsr.{name} must be a number, got {value!r}")
+        if self.weight < 0:
+            raise ValueError(f"gsr.weight must be non-negative, got {self.weight}")
+        if self.eigengap_tolerance < 0:
+            raise ValueError(
+                "gsr.eigengap_tolerance must be non-negative, "
+                f"got {self.eigengap_tolerance}"
+            )
+        if self.eps <= 0:
+            raise ValueError(f"gsr.eps must be positive, got {self.eps}")
+        integer_fields = {
+            "warmup_epochs": self.warmup_epochs,
+            "refresh_every_epochs": self.refresh_every_epochs,
+            "teacher_batch_size": self.teacher_batch_size,
+            "diagnostics_every_steps": self.diagnostics_every_steps,
+            "diagnostic_samples": self.diagnostic_samples,
+            "diagnostic_pairs": self.diagnostic_pairs,
+        }
+        for name, value in integer_fields.items():
+            if not isinstance(value, int) or isinstance(value, bool):
+                raise TypeError(f"gsr.{name} must be an integer, got {value!r}")
+        if self.warmup_epochs < 0:
+            raise ValueError("gsr.warmup_epochs must be non-negative")
+        for name in (
+            "refresh_every_epochs",
+            "teacher_batch_size",
+            "diagnostics_every_steps",
+            "diagnostic_pairs",
+        ):
+            if getattr(self, name) <= 0:
+                raise ValueError(f"gsr.{name} must be positive")
+        if self.diagnostic_samples < 2:
+            raise ValueError("gsr.diagnostic_samples must be at least two")
+        if self.cache_dtype != "float32":
+            raise ValueError("gsr.cache_dtype currently supports only 'float32'")
+        if self.geometry_dims is not None:
+            dims = self.geometry_dims
+            if not dims or dims != sorted(set(dims)) or any(dim <= 0 for dim in dims):
+                raise ValueError(
+                    "gsr.geometry_dims must be null or strictly increasing positive "
+                    f"dimensions, got {dims}"
+                )
+
+
 # --------------------------------------------------------------------------- #
 # Root config
 # --------------------------------------------------------------------------- #
@@ -280,6 +361,7 @@ class ExperimentConfig:
     mrl: MRLConfig = field(default_factory=MRLConfig)
     ese: ESEConfig = field(default_factory=ESEConfig)
     mipic: MIPICConfig = field(default_factory=MIPICConfig)
+    gsr: GSRConfig = field(default_factory=GSRConfig)
 
     def __post_init__(self) -> None:
         if self.method not in METHODS:
@@ -304,6 +386,24 @@ class ExperimentConfig:
                 raise ValueError(
                     f"mipic.gamma_schedule has {len(self.mipic.gamma_schedule)} entries "
                     f"but there are {len(truncated)} truncated prefixes {sorted(truncated)}"
+                )
+        if self.method == "gsr":
+            if self.gsr.weight > 0 and self.gsr.warmup_epochs >= self.train.epochs:
+                raise ValueError(
+                    "gsr.warmup_epochs must be smaller than train.epochs when "
+                    "gsr.weight is positive"
+                )
+            geometry_dims = self.gsr.geometry_dims or self.matryoshka.dims
+            missing = [dim for dim in geometry_dims if dim not in self.matryoshka.dims]
+            if missing:
+                raise ValueError(
+                    f"gsr.geometry_dims {missing} are not Matryoshka endpoints "
+                    f"{self.matryoshka.dims}"
+                )
+            if geometry_dims[-1] != self.model.hidden_dim:
+                raise ValueError(
+                    "the largest GSR geometry dimension must equal "
+                    f"model.hidden_dim={self.model.hidden_dim}"
                 )
 
     # -- (de)serialisation -------------------------------------------------- #
