@@ -8,3 +8,4 @@ ckpt*/
 .ipynb_checkpoints/
 .pytest_cache/
 *.egg-info/
+runs/

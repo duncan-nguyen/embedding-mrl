@@ -88,8 +88,9 @@ class TrainConfig:
     seed: int = 42
     fp16: bool = True
     output_dir: str = "outputs/run"
-    #: Save the encoder + tokenizer after the final epoch.
-    save_model: bool = True
+    #: Save the encoder + tokenizer after the final epoch. Off by default:
+    #: runs are scored by the report, and the weights are large artifacts.
+    save_model: bool = False
     #: Free the CUDA cache every N steps. 0 disables (the notebooks did it every
     #: step, which is very slow; 0 or a large value is usually better).
     empty_cache_every: int = 0
@@ -288,7 +289,9 @@ class GSRConfig:
     merge_tied_shells: bool = True
     eps: float = 1e-8
     cache_dtype: str = "float32"
-    save_teacher_tensors: bool = True
+    #: Dump the per-epoch teacher embedding cache to ``teacher_epoch{N}.pt``.
+    #: Off by default: the JSON diagnostics already cover the analysis.
+    save_teacher_tensors: bool = False
     diagnostics_every_steps: int = 100
     diagnostic_samples: int = 512
     diagnostic_pairs: int = 8192

@@ -19,6 +19,6 @@ gsr:
   diagnostics_every_steps: 100
   diagnostic_samples: 512
   diagnostic_pairs: 8192
-  save_teacher_tensors: true
+  save_teacher_tensors: false
 train:
   output_dir: outputs/gsr_bert

@@ -88,7 +88,7 @@ disk. Artifacts land in `train.output_dir`:
 | `config.yaml` | the resolved config the run actually used |
 | `train.log` | persistent training log |
 | `diagnostics/` | GSR teacher summaries/caches, fixed-panel geometry, periodic step JSONL, and failure dumps |
-| `encoder/` | trained weights + tokenizer |
+| `encoder/` | trained weights + tokenizer (only when `train.save_model` is true; off by default) |
 
 `results.json` looks like this:
 

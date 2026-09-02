@@ -143,7 +143,10 @@ def test_every_method_has_a_trainer():
 
 
 def test_gsr_writes_teacher_and_debug_artifacts(tmp_path, offline_backbone):
-    trainer = build_trainer(make_config("gsr", tmp_path))
+    # save_teacher_tensors is off by default; switch it on to cover the dump.
+    trainer = build_trainer(
+        make_config("gsr", tmp_path, gsr={"save_teacher_tensors": True})
+    )
     outcome = trainer.train()
 
     assert outcome["history"][0]["gsr"]["active"] is True

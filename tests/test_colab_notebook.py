@@ -35,5 +35,7 @@ def test_colab_runner_locks_the_requested_protocol():
     assert "data.max_train_samples=null" in source
     assert "eval.split=test" in source
     assert "eval.every_epoch=false" in source
-    assert "git\", \"fetch" in source
+    assert "codeload.github.com" in source
+    assert "git_commit.txt" in source
+    assert "train.save_model" not in source
     assert "merged_all.csv" not in source

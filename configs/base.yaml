@@ -28,7 +28,7 @@ train:
   max_grad_norm: null
   seed: 42
   fp16: true
-  save_model: true
+  save_model: false
   empty_cache_every: 0
 
 matryoshka:
